@@ -101,12 +101,9 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
 
     override fun onStart() {
         super.onStart()
-
         if(rcvSelectedProduct.adapter!= null) {
             rcvSelectedProduct.adapter!!.notifyDataSetChanged()
         }
-
-        boolChangeOrder = false
     }
 
     private fun requestNewInterstitial() {
@@ -419,7 +416,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         if (lstSelectedProduct.count() > 2) {
             rcvSelectedProduct.layoutParams.height = 0
         }
-
         return super.onCreateView(name, context, attrs)
     }
 
@@ -528,11 +524,12 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         when (requestCode) {
             ACTION_ADDPRODUCT_CODE -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    boolChangeOrder  = true
+
                     val selectProduct = data?.extras?.get("SelectItem") as MENU_PRODUCT
                     if ((lstSelectedProduct.count() + 1) < 6) {
                         lstSelectedProduct.add(selectProduct)
                         rcvSelectedProduct.adapter!!.notifyDataSetChanged()
+                        boolChangeOrder  = true
                     } else {
                         val notifyAlert = AlertDialog.Builder(this).create()
                         notifyAlert.setTitle("通知")
@@ -549,7 +546,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
 
             ACTION_ADDREFERENCE_CODE -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    boolChangeOrder  = true
                     val referenceProduct =
                         data?.getParcelableArrayListExtra<MENU_PRODUCT>("referenceProducts")
                     val afterrefProductCount = referenceProduct?.count() ?: 0
@@ -559,6 +555,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                             lstSelectedProduct.add(it.copy())
                         }
                         rcvSelectedProduct.adapter!!.notifyDataSetChanged()
+                        boolChangeOrder  = true
                     } else {
                         val notifyAlert = AlertDialog.Builder(this).create()
                         notifyAlert.setTitle("通知")

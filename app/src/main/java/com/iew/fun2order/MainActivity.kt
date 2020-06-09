@@ -358,6 +358,34 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+
+    private fun downloadFriendListafterAddFriend( context:Context) {
+        val uuid =  FirebaseAuth.getInstance().currentUser!!.uid.toString()
+        val dbContext: MemoryDatabase = MemoryDatabase(context)
+        val friendDB: friendDAO = dbContext.frienddao()
+        val queryPath = "USER_PROFILE/$uuid/friendList"
+        val myRef = Firebase.database.getReference(queryPath)
+        friendDB.deleteall()
+        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                for (snapshot in dataSnapshot.children) {
+                    val friendUUID = snapshot.getValue(String::class.java)
+                    try {
+                        val friend: entityFriend = entityFriend(null, friendUUID!!)
+                        friendDB.insertRow(friend)
+                    } catch (e: Exception) {
+                    }
+                }
+
+                //---- 通知Friend Fragment
+                val broadcast = LocalBroadcastManager.getInstance(this@MainActivity)
+                val intent = Intent("UpdateFriendList")
+                broadcast.sendBroadcast(intent)
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
     private fun downloadSelfProfile( userID:String) {
         val queryPath = "USER_PROFILE/$userID"
         val myRef = Firebase.database.getReference(queryPath)
@@ -528,7 +556,8 @@ class MainActivity : AppCompatActivity() {
                 dataSnapshot.ref.setValue(userProfile)
 
                 //---- 加入好友以後要再重新更新一次好友清單
-                downloadFriendList(context)
+                downloadFriendListafterAddFriend(context)
+
             }
 
             override fun onCancelled(error: DatabaseError) {

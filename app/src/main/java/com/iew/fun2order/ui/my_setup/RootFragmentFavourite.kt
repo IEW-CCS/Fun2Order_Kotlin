@@ -3,9 +3,7 @@ package com.iew.fun2order.ui.my_setup
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
@@ -15,10 +13,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -40,6 +40,7 @@ import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.db.entity.entityFriend
 import com.iew.fun2order.db.entity.entityFriendImage
 import com.iew.fun2order.db.firebase.ORDER_MEMBER
+import com.iew.fun2order.db.firebase.USER_MENU_ORDER
 import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.ui.my_setup.decodeQR.DecodeImgCallback
 import com.iew.fun2order.ui.my_setup.decodeQR.DecodeImgThread
@@ -72,10 +73,28 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
         return inflater!!.inflate(R.layout.fragment_favourite, container, false)
     }
 
+
     override fun onStart() {
         super.onStart()
         prepareFriendListShow()
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(messageReceiver, IntentFilter("UpdateFriendList"))
+
     }
+
+    override fun onStop() {
+        super.onStop()
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(messageReceiver)
+
+    }
+
+
+    private var messageReceiver = object: BroadcastReceiver(){
+        override fun onReceive(p0: Context?, p1: Intent?) {
+            prepareFriendListShow()
+        }
+    }
+
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
