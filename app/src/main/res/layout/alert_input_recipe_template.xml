@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/textViewInputMenuType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+
+        android:text="請選擇範本"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="18dp" />
+
+    <info.hoang8f.android.segmented.SegmentedGroup
+        android:id="@+id/segmentedGroupRecipeTemplate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        ads:sc_border_width="2dp"
+        ads:sc_corner_radius="5dp">
+        <RadioButton
+            android:id="@+id/btnUserCustTemplate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="自訂範本"
+            style="@style/RadioButton" />
+
+        <RadioButton
+            android:id="@+id/btnRecipeTemplate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="官方範本"
+            style="@style/RadioButton" />
+    </info.hoang8f.android.segmented.SegmentedGroup>
+
+    <ListView
+        android:id="@+id/listViewRecipeTemplateListItems"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center" />
+
+</LinearLayout>

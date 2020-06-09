@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "497838222896",
+    "firebase_url": "https://fun2order-e8fe9.firebaseio.com",
+    "project_id": "fun2order-e8fe9",
+    "storage_bucket": "fun2order-e8fe9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497838222896:android:0ac3bc5556c5f7d37847f5",
+        "android_client_info": {
+          "package_name": "com.iew.afun2order"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497838222896-8aijdiobt0tlg4krdukkl8emk0ol4leb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.iew.afun2order",
+            "certificate_hash": "17752ab02ae7b65ec6ffbd372b2607b49823314d"
+          }
+        },
+        {
+          "client_id": "497838222896-vlvuqagp677823rf3vu2fuv1493pp3rf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA58wXV2YrawDaDPO_lirn2OnnLaV2SiJQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497838222896-vlvuqagp677823rf3vu2fuv1493pp3rf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "497838222896-100vfcum8655olm5sqsr8usmabjdhdgf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "TeamPlus.Fun2Order"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497838222896:android:1050c923612601f47847f5",
+        "android_client_info": {
+          "package_name": "com.iew.fun2order"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497838222896-csc4u2tl1ct90llqj0vrff8r60h6uv97.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.iew.fun2order",
+            "certificate_hash": "17752ab02ae7b65ec6ffbd372b2607b49823314d"
+          }
+        },
+        {
+          "client_id": "497838222896-vlvuqagp677823rf3vu2fuv1493pp3rf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA58wXV2YrawDaDPO_lirn2OnnLaV2SiJQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497838222896-vlvuqagp677823rf3vu2fuv1493pp3rf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "497838222896-100vfcum8655olm5sqsr8usmabjdhdgf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "TeamPlus.Fun2Order"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

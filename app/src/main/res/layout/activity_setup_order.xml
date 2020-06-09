@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.home.ActivitySetupOrder">
+    <LinearLayout
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/textViewMenuName"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_gravity="clip_horizontal|center|center_horizontal"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="50dp"
+            android:background="#4DB6AC"
+            android:gravity="center|clip_vertical|center_horizontal"
+            android:text="百分百好喝"
+            android:textSize="20dp"
+            android:textColor="#000000" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="108dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/corners_rect_blue"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewGroupList"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_margin="5dp"
+                android:layout_weight="1.0" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:orientation="vertical"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/corners_rect_blue">
+            <TextView
+                android:id="@+id/textViewMemberGroupName"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginLeft="2dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginRight="2dp"
+                android:textSize="24dp"
+                android:layout_gravity="clip_horizontal|center|center_horizontal"
+                android:gravity="center|clip_vertical|center_horizontal"
+                android:background="@drawable/corners_rect_null"
+                android:text="test 會員列表"
+                android:textColor="#000000" />
+
+            <androidx.recyclerview.widget.RecyclerView  xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/recyclerViewGroupMemberList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"
+
+                />
+            <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/recyclerViewMenuItems"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/editTextChuGroupDetailMsg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:textSize="18dp"
+                android:background="@drawable/corners_rect_gray"
+                android:ems="10"
+                android:gravity="start|top"
+                android:inputType="textMultiLine" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="20dp"
+            android:orientation="horizontal"
+            android:background="@drawable/corners_rect_blue">
+            <TextView
+                android:id="@+id/textViewSetupDueDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16dp"
+                android:layout_gravity="clip_horizontal|center|center_horizontal"
+                android:gravity="center|clip_vertical|center_horizontal"
+                android:text="設定採購截止時間"
+                android:textColor="#0051FF" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutDueDate"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/corners_rect_real_red"
+            android:orientation="horizontal"
+            android:visibility="invisible">
+
+            <TextView
+                android:id="@+id/textViewChuGroupDueDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="clip_horizontal|center|center_horizontal"
+                android:gravity="center|clip_vertical|center_horizontal"
+                android:text=""
+                android:textColor="#FF0000"
+                android:textSize="16dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center">
+
+            <CheckBox
+                android:id="@+id/checkBoxJoinGroupBuy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="#0051FF"
+
+                android:textSize="16dp"
+                android:gravity="center"
+                android:text="參與此次採購" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="80dp"
+            android:background="@drawable/corners_rect_blue"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textViewSendVite"
+                android:layout_width="match_parent"
+                android:layout_height="26dp"
+                android:layout_gravity="clip_horizontal|center|center_horizontal"
+                android:gravity="center|clip_vertical|center_horizontal"
+                android:text="送出採購邀請"
+                android:textColor="#0051FF"
+                android:textSize="16dp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

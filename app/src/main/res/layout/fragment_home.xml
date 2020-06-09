@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/adView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginBottom="0dp"
+            android:background="#FFFFFF"
+            android:gravity="center_vertical"
+            ads:adSize="LARGE_BANNER"
+            ads:adUnitId="@string/banner_ad_unit_id"
+            ads:layout_constraintBottom_toBottomOf="parent"
+            ads:layout_constraintEnd_toEndOf="parent"
+            ads:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textViewMenuBasicInfo"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginTop="10dp"
+            android:background="#E0E0E0"
+            android:foregroundGravity="center_vertical|clip_horizontal"
+            android:gravity="center_vertical"
+            android:text="Fun2Order主要功能"
+            android:textAlignment="center"
+            android:textColor="#1976D2"
+            android:textSize="24dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="5dp"
+            android:foregroundGravity="center_vertical|clip_horizontal"
+            android:background="@drawable/corners_rect_red"
+            android:padding="7dp">
+
+            <ImageView
+                android:id="@+id/imageMenuList"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/icon_menu_list" />
+
+            <TextView
+                android:id="@+id/textViewMenuList"
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/imageMenuList"
+
+                android:gravity="center_vertical"
+                android:text="菜單列表"
+                android:textAlignment="center"
+                android:textColor="#B71C1C"
+                android:textSize="20dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="5dp"
+            android:foregroundGravity="center_vertical|clip_horizontal"
+            android:background="@drawable/corners_rect_red"
+            android:padding="7dp">
+
+            <ImageView
+                android:id="@+id/imageMakeMenu"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/icon_menu_item" />
+
+            <TextView
+                android:id="@+id/textViewMakeMenu"
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/imageMenuList"
+
+                android:gravity="center_vertical"
+                android:text="菜單列表"
+                android:textAlignment="center"
+                android:textColor="#B71C1C"
+                android:textSize="20dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="5dp"
+            android:foregroundGravity="center_vertical|clip_horizontal"
+            android:background="@drawable/corners_rect_red"
+            android:padding="7dp">
+
+            <ImageView
+                android:id="@+id/imageAboutUS"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/icon_about" />
+
+            <TextView
+                android:id="@+id/textViewAboutUS"
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/imageAboutUS"
+
+                android:gravity="center_vertical"
+                android:text="關於我們"
+                android:textAlignment="center"
+                android:textColor="#B71C1C"
+                android:textSize="20dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

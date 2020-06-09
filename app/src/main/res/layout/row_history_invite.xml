@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp"
+    >
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="120dp"
+        android:orientation="vertical"
+        android:background="@drawable/shape_row_historyinvite"
+        android:layout_margin="5dp"
+        android:elevation="8dp"
+        android:weightSum="1.0"
+        >
+
+        <TextView
+            android:id="@+id/invitetitle"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="2dp"
+            android:layout_weight="0.18"
+            android:gravity="center"
+            android:scaleType="centerInside"
+            android:text="XXX 團購單"
+            android:textColor="@android:color/primary_text_light"
+            android:textSize="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.82"
+            android:layout_margin="2dp"
+            android:weightSum="1.0"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="0.8"
+                android:weightSum="1.0"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_marginLeft="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.325"
+                    android:weightSum="1.0"
+                    android:gravity="left|center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+
+                        android:text="發起人: "
+                        android:textColor="@android:color/primary_text_light"
+                        android:textSize="16dp" />
+
+                    <TextView
+                        android:id="@+id/inviteUser"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.7"
+                        android:text="郭儀昌"
+                        android:textColor="@android:color/primary_text_light"
+                        android:textSize="16dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.325"
+                    android:weightSum="1.0"
+                    android:gravity="left|center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:text="發起時間: "
+                        android:textColor="@android:color/primary_text_light"
+                        android:textSize="16dp" />
+
+                    <TextView
+                        android:id="@+id/inviteStartTime"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.7"
+                        android:text="2020/04/07 10:54:30"
+                        android:textColor="@android:color/primary_text_light"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.35"
+                    android:orientation="horizontal"
+                    android:gravity="left|center_vertical">
+
+                    <TextView
+                        android:id="@+id/inviteNote"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="尚未回覆"
+                        android:textSize="12dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="0.25"
+                android:layout_height="match_parent"
+                android:weightSum="1.0"
+                android:orientation="vertical"
+                android:gravity="right|center_vertical"
+                android:layout_marginRight="10dp">
+
+                <android.widget.Button
+                    android:id="@+id/invite_Join"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.5"
+                    android:background="@android:color/transparent"
+                    android:text="參加"
+                    android:textColor="@drawable/text_color_selector_ok"
+                    android:textSize="18dp" />
+
+                <android.widget.Button
+                    android:id="@+id/invite_Reject"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.5"
+                    android:background="@android:color/transparent"
+                    android:text="不參加"
+                    android:textColor="@drawable/text_color_selector_ng"
+                    android:textSize="18dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</RelativeLayout>

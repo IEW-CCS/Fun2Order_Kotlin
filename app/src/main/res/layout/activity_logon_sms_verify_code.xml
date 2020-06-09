@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textViewVerifyPhoneCode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="200dp"
+        android:text="手機號碼認證"
+        android:textAlignment="center"
+        android:textSize="30dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textViewSelectLogonWay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="請輸入OTP認證碼"
+        android:textAlignment="center"
+        android:textColor="#9FA8DA"
+        android:textSize="18dp" />
+
+    <EditText
+        android:id="@+id/editTextVerifyCode"
+        style="@style/Widget.AppCompat.Light.AutoCompleteTextView"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="100dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginRight="100dp"
+        android:inputType="phone|textWebPassword"
+        android:maxLines="6"
+        android:textAlignment="center"
+        android:textSize="24dp" />
+    <android.widget.Button
+        android:id="@+id/btnSendCode"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="100dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="100dp"
+        android:background="#EC407A"
+        android:text="送出"
+        android:layout_gravity="center"
+        android:textColor="#FFFFFF"
+        android:textSize="18dp" />
+
+    <TextView
+        android:id="@+id/textViewPhone1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:text="沒收到OTP認證碼嗎？"
+        android:textAlignment="center"
+        android:textColor="#9FA8DA"
+        android:textSize="18dp" />
+
+    <TextView
+        android:id="@+id/txtReSendCode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="重送認證碼"
+        android:textAlignment="center"
+        android:textColor="#FF0000"
+        android:textSize="18dp" />
+
+</LinearLayout>

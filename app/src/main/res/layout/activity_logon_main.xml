@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textViewWelcome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="200dp"
+        android:text="歡迎來到  Fun2Order"
+        android:textAlignment="center"
+        android:textSize="30dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textViewSelectLogonWay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="請選擇登入方式"
+        android:textAlignment="center"
+        android:textColor="#9FA8DA"
+        android:textSize="18dp" />
+
+    <android.widget.Button
+        android:id="@+id/btnVerifyPhone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginRight="20dp"
+        android:background="#EC407A"
+        android:text="加入手機會員認證"
+        android:textColor="#FFFFFF"
+        android:textSize="18dp" />
+
+    <android.widget.Button
+        android:id="@+id/btnGuest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#EC407A"
+        android:text="以訪客身份登入"
+        android:textColor="#FFFFFF"
+        android:textSize="18dp" />
+</LinearLayout>

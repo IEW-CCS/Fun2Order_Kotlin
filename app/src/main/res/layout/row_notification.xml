@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp"
+    >
+    <LinearLayout
+        android:id="@+id/notifylayout"
+        android:layout_width="fill_parent"
+        android:layout_height="150dp"
+        android:orientation="vertical"
+        android:background="@drawable/shape_row_notification"
+        android:layout_margin="5dp"
+        android:weightSum="1.0">
+
+        <TextView
+            android:id="@+id/notifytitle"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+
+            android:layout_margin="2dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="0.25"
+            android:gravity="center"
+            android:scaleType="centerInside"
+            android:text="來自 XXX 的團購訊息"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+
+        <LinearLayout
+            android:id="@+id/notifyItem01"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            android:weightSum="1.0"
+            android:layout_weight="0.2"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp">
+
+            <TextView
+                android:id="@+id/messageTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:gravity="center_vertical|left"
+                android:scaleType="centerInside"
+                android:text="團購邀請"
+                android:textColor="@color/Black"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/notifycategory"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="0.4"
+                android:gravity="center"
+                android:scaleType="centerInside"
+                android:text="JProject"
+                android:textColor="#26A69A"
+                android:textSize="18dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/acknowledge"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="0.3"
+                android:gravity="center_vertical|right"
+                android:scaleType="centerInside"
+                android:text="尚未回覆"
+                android:textColor="#007AFF"
+                android:textSize="16dp" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/notifyItem02"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            android:weightSum="1.0"
+            android:layout_weight="0.2"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp">
+
+
+
+            <TextView
+                android:id="@+id/notifydatetime"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.7"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical|left"
+                android:scaleType="centerInside"
+                android:text="2020/03/04 19:51:26"
+                android:textSize="14dp" />
+
+
+            <TextView
+                android:id="@+id/joinstatus"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="0.3"
+                android:gravity="center_vertical|right"
+                android:scaleType="centerInside"
+                android:text="參加"
+                android:textColor="#007AFF"
+                android:textSize="16dp" />
+
+
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/notifdesc"
+            style="@style/Widget.AppCompat.EditText"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+
+            android:layout_weight="0.35"
+
+            android:background="@android:color/background_light"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:gravity="start|top"
+            android:inputType="textMultiLine"
+            android:padding="6dp"
+            android:textColor="@android:color/secondary_text_light"
+            android:textSize="12dp" />
+
+
+    </LinearLayout>
+
+</RelativeLayout>

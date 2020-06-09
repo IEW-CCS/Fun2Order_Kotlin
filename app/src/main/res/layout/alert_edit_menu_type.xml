@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/textViewInputMenuType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+
+        android:text="菜單分類管理"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="18dp" />
+
+
+    <EditText
+        android:id="@+id/editTextMenuType"
+        android:inputType="text|textAutoComplete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:hint="輸入分類" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:orientation="horizontal">
+
+        <android.widget.Button
+            android:id="@+id/btnDeleteMenuType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:layout_weight="0.5"
+            android:background="@android:color/transparent"
+            android:text="刪除"
+            android:textColor="@android:color/holo_blue_dark"
+            android:textSize="18sp" />
+
+        <android.widget.Button
+            android:id="@+id/btnAddMenuType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:layout_weight="0.5"
+            android:background="@android:color/transparent"
+            android:text="新增"
+            android:textColor="@android:color/holo_blue_dark"
+            android:textSize="18sp" />
+        />
+    </LinearLayout>
+    <ListView
+        android:id="@+id/listViewMenuTypeListItems"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center" />
+
+</LinearLayout>

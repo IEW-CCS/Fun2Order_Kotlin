@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" android:opacity="opaque">
+    <item>
+        <color android:color="@color/background_material_light"/>
+    </item>
+    <item>
+        <bitmap
+            android:src="@drawable/fun2order_appstore_icon_without_alpha"
+            android:tileMode="disabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"/>
+    </item>
+</layer-list>
