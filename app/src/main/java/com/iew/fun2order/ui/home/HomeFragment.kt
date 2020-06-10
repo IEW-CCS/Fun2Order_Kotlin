@@ -34,6 +34,7 @@ import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.MenuTypeDAO
 import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.firebase.USER_MENU
+import com.iew.fun2order.db.firebase.USER_MENU_INFORMATION
 import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.nativead.TemplateView
 import com.iew.fun2order.ui.home.adapter.MenuItemAdapter
@@ -123,7 +124,7 @@ class HomeFragment : Fragment() {
         btnDeleteMenuType.setOnClickListener {
             var editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
 
-            if (TextUtils.isEmpty(editTextMenuType.text))
+            if (TextUtils.isEmpty(editTextMenuType.text.trim()))
             {
                 editTextMenuType.requestFocus()
                 editTextMenuType.error = "類別不能為空白!"
@@ -145,7 +146,21 @@ class HomeFragment : Fragment() {
                  */
 
                 if(mUserProfile!!.brandCategoryList!!.size>0){
-                    deleteUserMenuFromFireBase(editTextMenuType.getText().toString(),item)
+
+                    //super.onBackPressed()
+                    androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle("確認動作")
+                        .setMessage("確定刪除此類別[" + editTextMenuType.getText().toString() + "]?")
+                        .setPositiveButton(
+                            "確定"
+                        ) { dialog, which ->
+                            deleteUserMenuFromFireBase(editTextMenuType.getText().toString(),item)
+                            resetUserMenuFromFireBase(editTextMenuType.getText().toString())
+                             }
+                        .setNegativeButton("取消", null)
+                        .show()
+
 
                 }else{
                     editTextMenuType.requestFocus()
@@ -158,7 +173,7 @@ class HomeFragment : Fragment() {
             var editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
 
 
-            if (TextUtils.isEmpty(editTextMenuType.text))
+            if (TextUtils.isEmpty(editTextMenuType.text.trim()))
             {
                 editTextMenuType.requestFocus()
                 editTextMenuType.error = "類別不能為空白!"
@@ -544,7 +559,7 @@ mMenuType=""
 
                    var test =  it.getValue(USER_MENU::class.java)
                     //if(menuType!=""){
-                        if(test!!.brandCategory==menuType){
+                        if(test!!.brandCategory.equals(menuType)){
 
                             mItemList.add(MenuItemListData(test!!.brandName, test!!.menuDescription, BitmapFactory.decodeResource(getResources(),R.drawable.image_default_member), test!!.menuImageURL ,test, mUserProfile))
                         }
@@ -708,6 +723,34 @@ mMenuType=""
 
     }
 
+    private fun resetUserMenuFromFireBase(menutype: String)
+    {
+        val context = this
+        val uuid =  FirebaseAuth.getInstance().currentUser!!.uid.toString()
+        var queryPath = "USER_MENU_INFORMATION/${uuid}/"
+        val myRef = Firebase.database.getReference(queryPath)
+        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                dataSnapshot.children.forEach()
+                {
+
+                    var test = it.getValue(USER_MENU::class.java)
+                    if(test!!.brandCategory.equals(menutype)){
+                        test!!.brandCategory=""
+                        //it.set (test)
+                        it.getRef().setValue(test)
+                    }
+                }
+
+            }
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+        })
+
+    }
+
     private fun createMenuTypeButton(userProfile:USER_PROFILE)
     {
         mSegmentedGroupMenuType!!.removeAllViews()
@@ -722,7 +765,7 @@ mMenuType=""
             FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT
         )
 
-        if(mSegmentedGroupMenuType!!.childCount < 5) {
+        if(mSegmentedGroupMenuType!!.childCount < 4) {
             params.gravity = Gravity.CENTER
             mSegmentedGroupMenuType!!.layoutParams = params
         }else{

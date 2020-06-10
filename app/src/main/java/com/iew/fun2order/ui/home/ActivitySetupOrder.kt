@@ -214,6 +214,7 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
 
                     val sDueTimeStamp: String = sYear + sMonth + sDay + sHour + sMin
 
+
                     if(sDueTimeStamp<sCrTimeStamp){
                         Toast.makeText(
                             applicationContext,
@@ -306,6 +307,11 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
         var textViewChuGroupDueDate = this.findViewById(R.id.textViewChuGroupDueDate) as TextView
         if(!textViewChuGroupDueDate.getText().trim().equals("")){
             userMenuOrder.dueTime=textViewChuGroupDueDate.tag.toString()
+        }else{
+            textViewChuGroupDueDate.requestFocus()
+            textViewChuGroupDueDate.error ="未指定團購截止日期!"
+            Toast.makeText(this, "未指定團購截止日期!", Toast.LENGTH_SHORT).show()
+            return
         }
 
         var editTextChuGroupDetailMsg = this.findViewById(R.id.editTextChuGroupDetailMsg) as EditText
@@ -376,6 +382,8 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
             Toast.makeText(this, "未勾選參與團購人!", Toast.LENGTH_SHORT).show()
             return
         }
+
+
         mDatabase.child("USER_MENU_ORDER").child(mAuth.currentUser!!.uid).child(userMenuOrder.orderNumber.toString()).setValue(userMenuOrder)
             .addOnSuccessListener {
                 sendFcmMessage(userMenuOrder)

@@ -105,7 +105,7 @@ class ActivityAddRecipe: AppCompatActivity() {
                     var editTextInputRecipeType = item.findViewById(com.iew.fun2order.R.id.editTextInputRecipeType) as EditText
                     var checkBoxAllowMultiChoose = item.findViewById(com.iew.fun2order.R.id.checkBoxAllowMultiChoose) as CheckBox
 
-                    if (TextUtils.isEmpty(editTextInputRecipeType.text))
+                    if (TextUtils.isEmpty(editTextInputRecipeType.text.trim()))
                     {
                         editTextInputRecipeType.requestFocus()
                         editTextInputRecipeType.error = "配方類別不能為空白!"
@@ -187,7 +187,7 @@ class ActivityAddRecipe: AppCompatActivity() {
             alertDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener {
                     var textViewSaveNewTemplate = item.findViewById(R.id.editTextTemplateName) as EditText
-                    if (TextUtils.isEmpty(textViewSaveNewTemplate.text))
+                    if (TextUtils.isEmpty(textViewSaveNewTemplate.text.trim()))
                     {
                         textViewSaveNewTemplate.requestFocus()
                         textViewSaveNewTemplate.error = "範本名稱不能為空白!"

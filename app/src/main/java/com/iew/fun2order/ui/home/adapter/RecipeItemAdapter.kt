@@ -75,7 +75,7 @@ class RecipeItemAdapter(listdata: MutableList<RecipeItemListData>, orderMode : B
                 .setOnClickListener {
                     var editTextRecipe = item.findViewById(R.id.editTextRecipe) as EditText
 
-                    if (TextUtils.isEmpty(editTextRecipe.text))
+                    if (TextUtils.isEmpty(editTextRecipe.text.trim()))
                     {
                         editTextRecipe.requestFocus()
                         editTextRecipe.error = "配方項目不能為空白!"

@@ -13,7 +13,6 @@ import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +20,6 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -31,23 +29,16 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
-import com.iew.fun2order.db.dao.LocationDAO
 import com.iew.fun2order.db.dao.MenuTypeDAO
-import com.iew.fun2order.db.dao.ProductDAO
-import com.iew.fun2order.db.dao.UserMenuDAO
 import com.iew.fun2order.db.database.AppDatabase
-import com.iew.fun2order.db.entity.Location
-import com.iew.fun2order.db.entity.MenuType
-import com.iew.fun2order.db.entity.Product
-import com.iew.fun2order.db.entity.UserMenu
-import com.iew.fun2order.db.firebase.*
+import com.iew.fun2order.db.firebase.PRODUCT
+import com.iew.fun2order.db.firebase.STORE_INFO
+import com.iew.fun2order.db.firebase.USER_MENU
+import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
-import kotlinx.android.synthetic.main.activity_logon_sms_verify_code.*
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.OutputStream
-import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -318,7 +309,7 @@ class ActivityAddMenu : AppCompatActivity() {
                     val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
                     val textViewLocationItemCount = findViewById(R.id.textViewLocationItemCount) as TextView
 
-                    if (TextUtils.isEmpty(editTextLocation.text))
+                    if (TextUtils.isEmpty(editTextLocation.text.trim()))
                     {
                         editTextLocation.requestFocus()
                         editTextLocation.error = "地點不能為空白!"
@@ -362,7 +353,7 @@ class ActivityAddMenu : AppCompatActivity() {
                     val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
                     val textViewProductPriceItemCount = findViewById(R.id.textViewProductPriceItemCount) as TextView
 
-                    if (TextUtils.isEmpty(editTextProduct.text))
+                    if (TextUtils.isEmpty(editTextProduct.text.trim()))
                     {
                         editTextProduct.requestFocus()
                         editTextProduct.error = "產品名稱不能為空白!"
@@ -469,7 +460,7 @@ class ActivityAddMenu : AppCompatActivity() {
                     val textViewCrMenuType = findViewById(R.id.textViewCrMenuType) as TextView
 
 
-                    if (TextUtils.isEmpty(editTextMenuType.text))
+                    if (TextUtils.isEmpty(editTextMenuType.text.toString().trim()))
                     {
                         editTextMenuType.requestFocus()
                         editTextMenuType.error = "類別不能為空白!"
@@ -537,7 +528,7 @@ class ActivityAddMenu : AppCompatActivity() {
             }
 */
             val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
-            if (TextUtils.isEmpty(editTextMenuID.text))
+            if (TextUtils.isEmpty(editTextMenuID.text.toString().trim()))
             {
                 editTextMenuID.requestFocus()
                 editTextMenuID.error = "品牌名不能為空白!"
@@ -912,6 +903,19 @@ class ActivityAddMenu : AppCompatActivity() {
             }
         })
 
+    }
+
+    override fun onBackPressed() {
+        //super.onBackPressed()
+        AlertDialog.Builder(this)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle("確認動作")
+            .setMessage("放棄修改內容?")
+            .setPositiveButton(
+                "確定"
+            ) { dialog, which -> finish() }
+            .setNegativeButton("取消", null)
+            .show()
     }
 
 
