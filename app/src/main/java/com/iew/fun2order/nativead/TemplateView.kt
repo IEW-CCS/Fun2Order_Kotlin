@@ -190,16 +190,17 @@ class TemplateView : FrameLayout {
         callToActionView!!.text = cta
 
         //  Set the secondary view to be the star rating if available.
-        if (starRating != null && starRating > 0) {
+        /*if (starRating != null && starRating > 0) {
             secondaryView!!.visibility = View.GONE
             ratingBar!!.visibility = View.VISIBLE
             ratingBar!!.max = 5
             nativeAdView!!.starRatingView = ratingBar
-        } else {
-            secondaryView!!.text = secondaryText
-            secondaryView!!.visibility = View.VISIBLE
-            ratingBar!!.visibility = View.GONE
-        }
+        } else { } */
+
+        secondaryView!!.text = secondaryText
+        secondaryView!!.visibility = View.VISIBLE
+        ratingBar!!.visibility = View.GONE
+
         if (icon != null) {
             iconView!!.visibility = View.VISIBLE
             iconView!!.setImageDrawable(icon.drawable)
