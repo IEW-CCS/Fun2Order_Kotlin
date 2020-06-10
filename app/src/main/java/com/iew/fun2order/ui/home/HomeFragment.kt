@@ -3,6 +3,7 @@ package com.iew.fun2order.ui.home
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
@@ -12,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -568,9 +570,10 @@ mMenuType=""
                     //}
 
                 }
-
                 RecycleViewRefresh()
-                showToolTips_CreateMenu()
+                if(mItemList.count() == 0) {
+                    showToolTips_CreateMenu()
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -583,7 +586,12 @@ mMenuType=""
 
     private fun showToolTips_CreateMenu()
     {
-        if(mItemList.count() ==0) {
+
+        val sharedPreferences : SharedPreferences = requireContext().getSharedPreferences("share", AppCompatActivity.MODE_PRIVATE);
+        val editor= sharedPreferences.edit();
+        val tooltipCreateMenu: Boolean = sharedPreferences.getBoolean("tooltipCreateMenu", true);
+
+        if(mItemList.count() ==0 && tooltipCreateMenu) {
             val tooltip: Tooltip = Tooltip.Builder(imageAddMenu)
                 .setText("歡迎你使用Fun2Order\n重這裡開始\n製作你第一張菜單")
                 .setDismissOnClick(true)
@@ -591,6 +599,10 @@ mMenuType=""
                 .setCornerRadius(20f)
                 .setBackgroundColor(resources.getColor(R.color.blue))
                 .setTextColor(resources.getColor(R.color.white))
+                .setOnDismissListener {
+                    editor.putBoolean("tooltipCreateMenu", false);
+                    editor.apply();
+                }
                 .show()
         }
     }
@@ -598,10 +610,20 @@ mMenuType=""
 
     private fun showToolTips_NEXT()
     {
-        val notifyAlert = androidx.appcompat.app.AlertDialog.Builder(requireContext()).create()
-        notifyAlert.setMessage("恭喜你設定完成第一張訂單!!\n接下來移至我的設定\n完成新增好友與群組資訊")
-        notifyAlert.setButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE, "確定") { _, i -> }
-        notifyAlert.show()
+        val sharedPreferences : SharedPreferences = requireContext().getSharedPreferences("share", AppCompatActivity.MODE_PRIVATE);
+        val editor= sharedPreferences.edit();
+        val tooltipAfterCreateMenu: Boolean = sharedPreferences.getBoolean("tooltipAfterCreateMenu", true);
+        if(tooltipAfterCreateMenu ) {
+
+            val notifyAlert = androidx.appcompat.app.AlertDialog.Builder(requireContext()).create()
+            notifyAlert.setMessage("恭喜你設定完成第一張訂單!!\n接下來移至我的設定\n完成新增好友與群組資訊")
+            notifyAlert.setButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE, "確定")
+            { _, i ->
+                editor.putBoolean("tooltipAfterCreateMenu", false);
+                editor.apply();
+            }
+            notifyAlert.show()
+        }
     }
 
     override fun onPause() {

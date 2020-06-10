@@ -21,11 +21,14 @@ import com.iew.fun2order.db.firebase.USER_PROFILE
 import kotlinx.android.synthetic.main.row_setup_canditate.view.*
 import kotlinx.android.synthetic.main.row_setup_memberinfobody.view.*
 
-class AdapterRC_Candidate(var context: Context, private var lstItemCandidate: List<ItemsLV_Canditate>, val adapterCheckBox: IAdapterCheckBOXChanged) : RecyclerView.Adapter<AdapterRC_Candidate.ViewHolder>()
-{
+class AdapterRC_Candidate(
+    var context: Context,
+    private var lstItemCandidate: List<ItemsLV_Canditate>,
+    val adapterCheckBox: IAdapterCheckBOXChanged
+) : RecyclerView.Adapter<AdapterRC_Candidate.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(context).inflate(R.layout.row_setup_canditate,  null)
+        val view = LayoutInflater.from(context).inflate(R.layout.row_setup_canditate, null)
         return ViewHolder(view)
     }
 
@@ -34,7 +37,7 @@ class AdapterRC_Candidate(var context: Context, private var lstItemCandidate: Li
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindModel( lstItemCandidate[position] , position)
+        holder.bindModel(lstItemCandidate[position], position)
     }
 
     // view
@@ -42,27 +45,36 @@ class AdapterRC_Candidate(var context: Context, private var lstItemCandidate: Li
         val dbContext: MemoryDatabase = MemoryDatabase(context)
         val friendImageDB: friendImageDAO = dbContext.friendImagedao()
         fun bindModel(ItemsLV_AddMember: ItemsLV_Canditate, Position: Int) {
+
             val friendInfo = friendImageDB.getFriendImageByName(ItemsLV_AddMember.Name.toString())
-            if (friendInfo != null) {
-                itemView.SelectFriendName.text = friendInfo.displayname ?: friendInfo.name
-                val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
-                itemView.SelectFriendView.setImageBitmap(bmp)
-            } else {
-                val queryPath = "USER_PROFILE/" + ItemsLV_AddMember.Name.toString()
-                val database = Firebase.database
-                val myRef = database.getReference(queryPath)
-                myRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                        itemView.SelectFriendName.text = value?.userName
+
+            val queryPath = "USER_PROFILE/" + ItemsLV_AddMember.Name.toString()
+            val database = Firebase.database
+            val myRef = database.getReference(queryPath)
+            myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val value = dataSnapshot.getValue(USER_PROFILE::class.java)
+                    itemView.SelectFriendName.text = value?.userName
+                    ItemsLV_AddMember.tokenid = value?.tokenID.toString()
+
+                    if (friendInfo != null) {
+                        val bmp = BitmapFactory.decodeByteArray(
+                            friendInfo.image,
+                            0,
+                            friendInfo.image.size
+                        )
+                        itemView.SelectFriendView.setImageBitmap(bmp)
+                    } else {
+
                         val photoURL = value?.photoURL
                         if (photoURL != null) {
                             val islandRef = Firebase.storage.reference.child(photoURL)
-                            ItemsLV_AddMember.tokenid = value?.tokenID.toString()
+
                             val ONE_MEGABYTE = 1024 * 1024.toLong()
                             islandRef.getBytes(ONE_MEGABYTE)
                                 .addOnSuccessListener { bytesPrm: ByteArray ->
-                                    val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+                                    val bmp =
+                                        BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
                                     itemView.SelectFriendView.setImageBitmap(bmp)
                                 }
                                 .addOnFailureListener {
@@ -79,10 +91,13 @@ class AdapterRC_Candidate(var context: Context, private var lstItemCandidate: Li
                                 )
                             )
                         }
+
                     }
-                    override fun onCancelled(error: DatabaseError) {}
-                })
-            }
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {}
+            })
 
             itemView.SelectCheckBox.tag = Position
             itemView.SelectCheckBox.isChecked = ItemsLV_AddMember.checked
@@ -94,8 +109,10 @@ class AdapterRC_Candidate(var context: Context, private var lstItemCandidate: Li
         }
 
         private fun getImageDrawable(imageName: String): Drawable {
-            val id = context.resources.getIdentifier(imageName, "drawable",
-                context.packageName)
+            val id = context.resources.getIdentifier(
+                imageName, "drawable",
+                context.packageName
+            )
             return context.resources.getDrawable(id)
         }
     }

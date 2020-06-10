@@ -7,12 +7,14 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -40,11 +42,13 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
 
     //------  20200511 chris 移動到全域半數去
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private val datetimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
 
     private var  rcvGroupDetail : RecyclerView? = null
     private var  rcvGroup       : RecyclerView? = null
     private var  txtGroupLabel   : TextView? = null
+    private var  btnAffFriendtoGroup : android.widget.Button? =  null
 
     private var  lstGroup: MutableList<ItemsLV_Group> = mutableListOf()
     private val  lstGroupDetail: MutableList<Any> = mutableListOf()
@@ -88,6 +92,7 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
             txtGroupLabel   = it.findViewById<TextView>(R.id.groupLabelInfo)   // 20200511 Chris 修改Layout
             rcvGroup       = it.findViewById<RecyclerView>(R.id.RecycleViewGroupList)
             rcvGroupDetail = it.findViewById<RecyclerView>(R.id.RecycleViewMemberList)
+            btnAffFriendtoGroup = it.findViewById<android.widget.Button>(R.id.groupAddFriend)
         }
 
         rcvGroup!!.layoutManager =  LinearLayoutManager(context!!,LinearLayoutManager.HORIZONTAL ,false)
@@ -117,7 +122,6 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
 
                 val getFriendList =  groupDetailDB.getMemberByGroupID(selectedGroupID)
                 lstGroupDetail.clear()
-                lstGroupDetail.add(ItemsLV_GroupAddMembersItem("新增好友", "icon_add_group"))
                 getFriendList.forEach(){ it->
                     lstGroupDetail.add(ItemsLV_Favourite(it, "icon_cup",""))
                 }
@@ -131,6 +135,34 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
             }
             recycleViewRefresh()
         })
+
+
+        btnAffFriendtoGroup!!.setOnClickListener()
+        {
+
+            if(selectedGroupID != "") {
+                val groupMemberList = groupDetailDB.getMemberByGroupID(selectedGroupID)
+                val friendList = friendDB.getFriendslist()
+                val candidateList = (friendList - groupMemberList)
+
+                if (candidateList.count() > 0) {
+                    val array =  ArrayList(candidateList)
+                    val bundle = Bundle()
+                    bundle.putStringArrayList("Candidate", array)
+                    val intent = Intent(context, ActivityAddMember::class.java)
+                    intent.putExtras(bundle)
+                    startActivityForResult(intent, ACTION_ADD_MEMBER_REQUEST_CODE)
+                } else {
+                    Toast.makeText(activity, "沒有可加入好友的清單", Toast.LENGTH_SHORT).show()
+                }
+            }
+            else
+            {
+                Toast.makeText(activity, "請先選擇Group", Toast.LENGTH_SHORT).show()
+            }
+
+
+        }
     }
 
     private fun recycleViewRefresh() {
@@ -155,7 +187,6 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
                         txtGroupLabel!!.text = "$selectedGroupName : 好友列表"
 
                         lstGroupDetail.clear()
-                        lstGroupDetail.add(ItemsLV_GroupAddMembersItem("新增好友", "icon_add_group"))
 
                         val groupMemberList = groupDetailDB.getMemberByGroupID(selectedGroupID)
                         groupMemberList.forEach() {
@@ -263,7 +294,6 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
                         groupDetailDB.deleteGruopMember(GroupID, FriendID)
                         val getfriend = groupDetailDB.getMemberByGroupID(GroupID)
                         lstGroupDetail.clear()
-                        lstGroupDetail.add(ItemsLV_GroupAddMembersItem("新增好友", "icon_add_group"))
                         getfriend.forEach()
                         {
                             lstGroupDetail.add(ItemsLV_Favourite(it, "icon_cup",""))
@@ -346,7 +376,6 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
             selectedGroupID   = group.groupid
             txtGroupLabel!!.text = "$selectedGroupName : 好友列表"
             lstGroupDetail.clear()
-            lstGroupDetail.add(ItemsLV_GroupAddMembersItem("新增好友", "icon_add_group"))
             recycleViewRefresh()
         } catch (e: Exception) {
             val errorMsg = e.localizedMessage
@@ -376,7 +405,6 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
             selectedGroupID = modifyedGroup.groupid
             txtGroupLabel!!.text = "$selectedGroupName : 好友列表"
             lstGroupDetail.clear()
-            lstGroupDetail.add(ItemsLV_GroupAddMembersItem("新增好友", "icon_add_group"))
             recycleViewRefresh()
         } catch (e: Exception) {
             val errorMsg = e.localizedMessage
@@ -397,7 +425,6 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
             groupDetailDB.inserAll(array)
             var getfriend =  groupDetailDB.getMemberByGroupID(selectedGroupID)
             lstGroupDetail.clear()
-            lstGroupDetail.add(ItemsLV_GroupAddMembersItem("新增好友", "icon_add_group"))
             getfriend.forEach()
             {
                 lstGroupDetail.add(ItemsLV_Favourite(it, "icon_cup",""))

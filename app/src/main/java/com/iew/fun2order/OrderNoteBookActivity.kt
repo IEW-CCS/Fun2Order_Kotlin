@@ -79,12 +79,18 @@ class OrderNoteBookActivity : AppCompatActivity() {
             val values = it.getParcelable("USER_MENU_ORDER") as USER_MENU_ORDER
 
             addRadioButton(mInflater!!, mSegmentedGroupLocation, "合併顯示項目")
-            values?.locations?.forEach { location ->
-                addRadioButton(mInflater!!, mSegmentedGroupLocation, location.toString())
+
+            if(values?.locations?.count()==0)
+            {
+                addRadioButton(mInflater!!, mSegmentedGroupLocation, "全部項目")
+            }
+            else {
+                values?.locations?.forEach { location ->
+                    addRadioButton(mInflater!!, mSegmentedGroupLocation, location.toString())
+                }
             }
 
-            lstAccept =
-                values.contentItems!!.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT }
+            lstAccept = values.contentItems!!.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT }
             statisticsSummyReport()
 
             if (mSegmentedGroupLocation.childCount > 0) {
@@ -132,7 +138,9 @@ class OrderNoteBookActivity : AppCompatActivity() {
                 "合併顯示項目" -> {
                     summaryReport()
                 }
-
+                "全部項目" -> {
+                    respectivelyReport("")
+                }
                 else -> {
                     respectivelyReport(radioButton.text.toString())
                 }
@@ -173,7 +181,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
         {
             it.orderContent.menuProductItems?.forEach()
             { menuProducts ->
-                location = it.orderContent.location?.toString() ?: "$"
+                location = it.orderContent.location?.toString() ?: ""
                 selectkey = ""
                 selectkey = location
                 selectkey += "_"
@@ -227,6 +235,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
         tableheader.removeAllViews()
         shareContext = ""
 
+
         summyLocation.forEach()
         { it ->
             //-----  Location ------
@@ -270,7 +279,9 @@ class OrderNoteBookActivity : AppCompatActivity() {
             tablemain.addView(tableLocationMain)
 
             //----- TO Share -----
-            shareContext = shareContext + "---" + it.key.toString() + "\n"
+            if(it.key!="") {
+                shareContext = shareContext + "---" + it.key.toString() + "\n"
+            }
 
             //--------------------------------------
             //--------- Title ---------------------
@@ -317,9 +328,8 @@ class OrderNoteBookActivity : AppCompatActivity() {
             tbrow0.addView(tv2)
             tablemain.addView(tbrow0)
 
-            it.value.forEach()
-            {
-                val data = summyReport[it] ?: null
+            it.value.forEachIndexed { index, s ->
+                val data = summyReport[s] ?: null
                 if (data != null) {
                     val groupbyRecipe = data.groupBy { it -> it.uniquetKey }
                     val header = TableRow(this)
@@ -371,11 +381,12 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
 
                         //------- To Share ------
+                        shareContext += "${index+1}. "
                         shareContext += "${data[0].itemName}"
                         if (group.value[0].itemRecipe != "") {
                             shareContext += " ( ${group.value[0].itemRecipe} )"
                         }
-                        shareContext += " X ${quantity.toString()}"
+                        shareContext += " * ${quantity.toString()}"
 
                         if (group.value[0].itemComments != "") {
                             shareContext += " [${group.value[0].itemComments}]"
@@ -389,11 +400,15 @@ class OrderNoteBookActivity : AppCompatActivity() {
         }
     }
 
-
     private fun respectivelyReport(location: String) {
 
         tablemain.removeAllViews()
         tableheader.removeAllViews()
+        shareContext = ""
+
+        if(location !="") {
+            shareContext = "$shareContext---$location\n"
+        }
 
         val reportItemLocation = summyLocation.get(location)
         if (reportItemLocation != null) {
@@ -467,6 +482,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
 
             val groupbyRecipe = totalData.groupBy { it -> it.itemOwner }
+            var loopIndex = 0
             groupbyRecipe.forEach()
             { data ->
                 val header = TableRow(this)
@@ -475,7 +491,6 @@ class OrderNoteBookActivity : AppCompatActivity() {
                 hd0.gravity = Gravity.CENTER
                 hd0.height = CELLHEIGHT * data?.value.count()
                 hd0.width = RESPECT_TITLEWIDTH
-                hd0.height = CELLHEIGHT
                 hd0.textSize = TEXTSIZE
                 hd0.setTextColor(Color.BLACK)
                 hd0.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
@@ -491,6 +506,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
                     val t1v = TextView(this)
                     t1v.text = item.itemName
                     t1v.setTextColor(Color.BLACK)
+                    t1v.setPadding(10,0,0,0)
                     t1v.width = RESPECT_COLOMNWIDTH0
                     t1v.height = CELLHEIGHT
                     t1v.textSize = TEXTSIZE
@@ -501,6 +517,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
                     val t2v = TextView(this)
                     t2v.text = item.itemRecipe
                     t2v.setTextColor(Color.BLACK)
+                    t2v.setPadding(10,0,0,0)
                     t2v.width = RESPECT_COLOMNWIDTH1
                     t2v.height = CELLHEIGHT
                     t2v.textSize = TEXTSIZE
@@ -521,6 +538,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
                     val t4v = TextView(this)
                     t4v.text = item.itemComments
                     t4v.setTextColor(Color.BLACK)
+                    t4v.setPadding(10,0,0,0)
                     t4v.width = RESPECT_COLOMNWIDTH3
                     t4v.height = CELLHEIGHT
                     t4v.textSize = TEXTSIZE
@@ -529,6 +547,18 @@ class OrderNoteBookActivity : AppCompatActivity() {
                     tbrow.addView(t4v)
 
                     tablemain.addView(tbrow)
+
+
+                    //------- To Share ------
+                    loopIndex++
+                    shareContext += "${loopIndex}. "
+                    shareContext += "${data?.value[0].itemOwner}  "
+                    shareContext += "${item.itemName} ${item.itemRecipe} * ${item.itemQuantity}"
+                    if (item.itemComments != "") {
+                        shareContext += " [${item.itemComments}]"
+                    }
+                    shareContext += "\n"
+                    //------- To Share ------
 
                 }
             }

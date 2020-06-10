@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.core.view.children
@@ -93,7 +94,9 @@ class MySetupFragment : Fragment() {
 
         tabitem_friend = root.findViewById(R.id.view_friend)
         tabitem_group = root.findViewById(R.id.view_group)
+
         setUpToolTips()
+
         return root
     }
 
@@ -106,27 +109,49 @@ class MySetupFragment : Fragment() {
         val friendDB      = memoryContext.frienddao()
         val friendlist = friendDB.getFriendslist()
         if(friendlist.count() == 0) {
-            val tooltip: Tooltip = Tooltip.Builder(tabitem_friend)
-                .setText("按此加入好友")
-                .setDismissOnClick(true)
-                .setCancelable(true)
-                .setCornerRadius(20f)
-                .setBackgroundColor(resources.getColor(R.color.blue))
-                .setTextColor(resources.getColor(R.color.white))
-                .show()
-        }
 
-        groupDB.getAllGroup().observe(viewLifecycleOwner, Observer {
-            var list = it as ArrayList<entityGroup>
-            if(friendlist.count() > 0 && list.count()==0) {
-                val tooltip2: Tooltip = Tooltip.Builder(tabitem_group)
-                    .setText("按此加入群組")
+            val sharedPreferences : SharedPreferences = requireContext().getSharedPreferences("share", AppCompatActivity.MODE_PRIVATE);
+            val editor= sharedPreferences.edit();
+            val tooltipAddFriend: Boolean = sharedPreferences.getBoolean("tooltipAddFriend", true);
+
+            if(tooltipAddFriend) {
+                val tooltip: Tooltip = Tooltip.Builder(tabitem_friend)
+                    .setText("按此加入好友")
                     .setDismissOnClick(true)
                     .setCancelable(true)
                     .setCornerRadius(20f)
                     .setBackgroundColor(resources.getColor(R.color.blue))
                     .setTextColor(resources.getColor(R.color.white))
+                    .setOnDismissListener {
+                        editor.putBoolean("tooltipAddFriend", false);
+                        editor.apply();
+                    }
                     .show()
+            }
+        }
+
+        groupDB.getAllGroup().observe(viewLifecycleOwner, Observer {
+            var list = it as ArrayList<entityGroup>
+            if(friendlist.count() > 0 && list.count()==0) {
+
+                val sharedPreferences : SharedPreferences = requireContext().getSharedPreferences("share", AppCompatActivity.MODE_PRIVATE);
+                val editor= sharedPreferences.edit();
+                val tooltipAddGroup: Boolean = sharedPreferences.getBoolean("tooltipAddGroup", true);
+
+                if(tooltipAddGroup) {
+                    val tooltip2: Tooltip = Tooltip.Builder(tabitem_group)
+                        .setText("按此加入群組")
+                        .setDismissOnClick(true)
+                        .setCancelable(true)
+                        .setCornerRadius(20f)
+                        .setBackgroundColor(resources.getColor(R.color.blue))
+                        .setTextColor(resources.getColor(R.color.white))
+                        .setOnDismissListener {
+                            editor.putBoolean("tooltipAddGroup", false);
+                            editor.apply();
+                        }
+                        .show()
+                }
             }
         })
     }

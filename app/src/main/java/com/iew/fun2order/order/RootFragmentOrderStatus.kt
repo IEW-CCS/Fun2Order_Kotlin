@@ -317,7 +317,6 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
             val body = "來自團購主的訂單訊息，請點擊通知以查看詳細資訊。"
 
-
             notificationHeader.put("title", "團購訊息")
             notificationHeader.put("body", body ?: "")   //Enter your notification message
 
@@ -331,10 +330,8 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
             notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
 
-
             notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
             notificationBody.put("dueTime", userMenuOrder.dueTime)   //Enter
-
 
             notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
             notificationBody.put(
@@ -347,21 +344,19 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             notificationBody.put("replyStatus", "N")   //Enter
             notificationBody.put("replyTime", "N")   //Enter
 
-
             // your notification message
             notification.put("to", topic)
             notification.put("notification", notificationHeader)
             notification.put("data", notificationBody)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
-
         }
     }
 
     private fun sendCallableFcmMessage(userMenuOrder: USER_MENU_ORDER) {
 
-
         val callableList = userMenuOrder.contentItems?.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT }?.toMutableList()
         callableList?.forEach {it->
+
             val orderMember = it as ORDER_MEMBER
             val topic = orderMember.memberTokenID
             val notification = JSONObject()
@@ -369,7 +364,6 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             val notificationBody = JSONObject()
 
             val body = "團購訂單的訂購時間即將截止，請儘速決定是否參與團購，謝謝"
-
 
             notificationHeader.put("title", "團購催定")
             notificationHeader.put("body", body ?: "")   //Enter your notification message
@@ -384,10 +378,8 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
             notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
 
-
             notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
             notificationBody.put("dueTime", userMenuOrder.dueTime)   //Enter
-
 
             notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
             notificationBody.put(
@@ -399,7 +391,6 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             notificationBody.put("isRead", "N")   //Enter
             notificationBody.put("replyStatus", "N")   //Enter
             notificationBody.put("replyTime", "N")   //Enter
-
 
             // your notification message
             notification.put("to", topic)
