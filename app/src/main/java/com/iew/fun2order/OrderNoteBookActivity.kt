@@ -53,6 +53,8 @@ class OrderNoteBookActivity : AppCompatActivity() {
         mutableMapOf<String, MutableList<ORDER_STATSTUCS>>()
     private val summyLocation: MutableMap<String, MutableList<String>> =
         mutableMapOf<String, MutableList<String>>()
+    private var mLocationList : MutableList<String> = mutableListOf()
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,6 +89,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
             else {
                 values?.locations?.forEach { location ->
                     addRadioButton(mInflater!!, mSegmentedGroupLocation, location.toString())
+                    mLocationList.add(location.toString())
                 }
             }
 
@@ -231,169 +234,185 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
 
     private fun summaryReport() {
+
         tablemain.removeAllViews()
         tableheader.removeAllViews()
         shareContext = ""
+        var reportIndex: Int = 0
 
 
-        summyLocation.forEach()
+        if(mLocationList.count() == 0)
+        {
+            mLocationList.add("")
+        }
+
+        mLocationList.forEach()
         { it ->
-            //-----  Location ------
-            val tableLocationHeader = TableRow(this)
-            val textLocationHeader = TextView(this)
-            textLocationHeader.text = it.key
-            textLocationHeader.gravity = Gravity.CENTER
-            textLocationHeader.setTextColor(Color.BLACK)
-            textLocationHeader.width = SUMMARY_TITLEWIDTH
-            textLocationHeader.setBackgroundResource(R.drawable.shape_rectangle_notebook_location)
-            textLocationHeader.height = CELLHEIGHT
-            textLocationHeader.textSize = TEXTSIZE
-            tableLocationHeader.addView(textLocationHeader)
-            tableheader.addView(tableLocationHeader)
 
-            val tableLocationMain = TableRow(this)
-            val textCol1 = TextView(this)
-            textCol1.text = ""
-            textCol1.width = SUMMARY_COLOMNWIDTH1
-            textCol1.height = CELLHEIGHT
-            textCol1.textSize = TEXTSIZE
-            textCol1.setBackgroundResource(R.drawable.shape_rectangle_notebook_location)
-            tableLocationMain.addView(textCol1)
+            if (summyLocation.containsKey(it)) {
+                var data = summyLocation[it]
+                // 清空 Report Index by Location  When Summary Report
+                reportIndex = 0
+                //-----  Location ------
+                val tableLocationHeader = TableRow(this)
+                val textLocationHeader = TextView(this)
+                textLocationHeader.text = it
+                textLocationHeader.gravity = Gravity.CENTER
+                textLocationHeader.setTextColor(Color.BLACK)
+                textLocationHeader.width = SUMMARY_TITLEWIDTH
+                textLocationHeader.setBackgroundResource(R.drawable.shape_rectangle_notebook_location)
+                textLocationHeader.height = CELLHEIGHT
+                textLocationHeader.textSize = TEXTSIZE
+                tableLocationHeader.addView(textLocationHeader)
+                tableheader.addView(tableLocationHeader)
 
-            val textCol2 = TextView(this)
-            textCol2.text = ""
-            textCol2.width = SUMMARY_COLOMNWIDTH2
-            textCol2.height = CELLHEIGHT
-            textCol2.textSize = TEXTSIZE
-            textCol2.setBackgroundResource(R.drawable.shape_rectangle_notebook_location)
-            tableLocationMain.addView(textCol2)
+                val tableLocationMain = TableRow(this)
+                val textCol1 = TextView(this)
+                textCol1.text = ""
+                textCol1.width = SUMMARY_COLOMNWIDTH1
+                textCol1.height = CELLHEIGHT
+                textCol1.textSize = TEXTSIZE
+                textCol1.setBackgroundResource(R.drawable.shape_rectangle_notebook_location)
+                tableLocationMain.addView(textCol1)
 
-            val textCol3 = TextView(this)
-            textCol3.text = ""
-            textCol3.width = SUMMARY_COLOMNWIDTH3
-            textCol3.height = CELLHEIGHT
-            textCol3.textSize = TEXTSIZE
-            textCol3.setBackgroundResource(R.drawable.shape_rectangle_notebook_location)
-            tableLocationMain.addView(textCol3)
+                val textCol2 = TextView(this)
+                textCol2.text = ""
+                textCol2.width = SUMMARY_COLOMNWIDTH2
+                textCol2.height = CELLHEIGHT
+                textCol2.textSize = TEXTSIZE
+                textCol2.setBackgroundResource(R.drawable.shape_rectangle_notebook_location)
+                tableLocationMain.addView(textCol2)
 
-            tablemain.addView(tableLocationMain)
+                val textCol3 = TextView(this)
+                textCol3.text = ""
+                textCol3.width = SUMMARY_COLOMNWIDTH3
+                textCol3.height = CELLHEIGHT
+                textCol3.textSize = TEXTSIZE
+                textCol3.setBackgroundResource(R.drawable.shape_rectangle_notebook_location)
+                tableLocationMain.addView(textCol3)
 
-            //----- TO Share -----
-            if(it.key!="") {
-                shareContext = shareContext + "---" + it.key.toString() + "\n"
-            }
+                tablemain.addView(tableLocationMain)
 
-            //--------------------------------------
-            //--------- Title ---------------------
-            val header = TableRow(this)
-            val hd0 = TextView(this)
-            hd0.text = "產品"
-            hd0.gravity = Gravity.CENTER
-            hd0.setBackgroundResource(R.drawable.shape_rectangle_notebook_title)
-            hd0.setTextColor(Color.BLACK)
-            hd0.width = SUMMARY_TITLEWIDTH
-            hd0.height = CELLHEIGHT
-            hd0.textSize = TEXTSIZE
-            hd0.setTypeface(null, Typeface.BOLD)
-            header.addView(hd0)
-            tableheader.addView(header)
+                //----- TO Share -----
+                if (it != "") {
+                    shareContext = shareContext + "---" + it.toString() + "\n"
+                }
 
-            val tbrow0 = TableRow(this)
-            val tv0 = TextView(this)
-            tv0.text = " 配方內容 "
-            tv0.gravity = Gravity.CENTER_VERTICAL + Gravity.LEFT
-            tv0.width = SUMMARY_COLOMNWIDTH1
-            tv0.height = CELLHEIGHT
-            tv0.textSize = TEXTSIZE
-            tv0.setTextColor(Color.BLACK)
-            tv0.setBackgroundResource(R.drawable.shape_rectangle_notebook_title)
-            tbrow0.addView(tv0)
-            val tv1 = TextView(this)
-            tv1.text = " 數量 "
-            tv1.gravity = Gravity.CENTER
-            tv1.setTextColor(Color.BLACK)
-            tv1.width = SUMMARY_COLOMNWIDTH2
-            tv1.height = CELLHEIGHT
-            tv1.textSize = TEXTSIZE
-            tv1.setBackgroundResource(R.drawable.shape_rectangle_notebook_title)
-            tbrow0.addView(tv1)
-            val tv2 = TextView(this)
-            tv2.text = " 備註 "
-            tv2.setTextColor(Color.BLACK)
-            tv2.gravity = Gravity.CENTER
-            tv2.width = SUMMARY_COLOMNWIDTH3
-            tv2.height = CELLHEIGHT
-            tv2.textSize = TEXTSIZE
-            tv2.setBackgroundResource(R.drawable.shape_rectangle_notebook_title)
-            tbrow0.addView(tv2)
-            tablemain.addView(tbrow0)
+                //--------------------------------------
+                //--------- Title ---------------------
+                val header = TableRow(this)
+                val hd0 = TextView(this)
+                hd0.text = "產品"
+                hd0.gravity = Gravity.CENTER
+                hd0.setBackgroundResource(R.drawable.shape_rectangle_notebook_title)
+                hd0.setTextColor(Color.BLACK)
+                hd0.width = SUMMARY_TITLEWIDTH
+                hd0.height = CELLHEIGHT
+                hd0.textSize = TEXTSIZE
+                hd0.setTypeface(null, Typeface.BOLD)
+                header.addView(hd0)
+                tableheader.addView(header)
 
-            it.value.forEachIndexed { index, s ->
-                val data = summyReport[s] ?: null
-                if (data != null) {
-                    val groupbyRecipe = data.groupBy { it -> it.uniquetKey }
-                    val header = TableRow(this)
-                    val hd0 = TextView(this)
-                    hd0.text = data?.get(0)!!.itemName
-                    hd0.gravity = Gravity.CENTER
-                    hd0.height = CELLHEIGHT * groupbyRecipe.count()
-                    hd0.width = SUMMARY_TITLEWIDTH
-                    hd0.height = CELLHEIGHT
-                    hd0.textSize = TEXTSIZE
-                    hd0.setTextColor(Color.BLACK)
-                    hd0.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
-                    header.addView(hd0)
-                    tableheader.addView(header)
+                val tbrow0 = TableRow(this)
+                val tv0 = TextView(this)
+                tv0.text = " 配方內容 "
+                tv0.gravity = Gravity.CENTER_VERTICAL + Gravity.LEFT
+                tv0.width = SUMMARY_COLOMNWIDTH1
+                tv0.height = CELLHEIGHT
+                tv0.textSize = TEXTSIZE
+                tv0.setTextColor(Color.BLACK)
+                tv0.setBackgroundResource(R.drawable.shape_rectangle_notebook_title)
+                tbrow0.addView(tv0)
+                val tv1 = TextView(this)
+                tv1.text = " 數量 "
+                tv1.gravity = Gravity.CENTER
+                tv1.setTextColor(Color.BLACK)
+                tv1.width = SUMMARY_COLOMNWIDTH2
+                tv1.height = CELLHEIGHT
+                tv1.textSize = TEXTSIZE
+                tv1.setBackgroundResource(R.drawable.shape_rectangle_notebook_title)
+                tbrow0.addView(tv1)
+                val tv2 = TextView(this)
+                tv2.text = " 備註 "
+                tv2.setTextColor(Color.BLACK)
+                tv2.gravity = Gravity.CENTER
+                tv2.width = SUMMARY_COLOMNWIDTH3
+                tv2.height = CELLHEIGHT
+                tv2.textSize = TEXTSIZE
+                tv2.setBackgroundResource(R.drawable.shape_rectangle_notebook_title)
+                tbrow0.addView(tv2)
+                tablemain.addView(tbrow0)
 
-                    groupbyRecipe.forEach()
-                    { group ->
-                        val quantity = group.value.sumBy { it.itemQuantity!! }.toInt()
-                        val tbrow = TableRow(this)
-                        val t1v = TextView(this)
-                        t1v.text = group.value[0].itemRecipe
-                        t1v.setTextColor(Color.BLACK)
-                        t1v.gravity =  Gravity.CENTER_VERTICAL + Gravity.LEFT
-                        t1v.width = SUMMARY_COLOMNWIDTH1
-                        t1v.height = CELLHEIGHT
-                        t1v.textSize = TEXTSIZE
-                        t1v.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
-                        tbrow.addView(t1v)
-                        val t2v = TextView(this)
-                        t2v.text = quantity.toString()
-                        t2v.setTextColor(Color.BLACK)
-                        t2v.gravity = Gravity.CENTER
-                        t2v.width = SUMMARY_COLOMNWIDTH2
-                        t2v.height = CELLHEIGHT
-                        t2v.textSize = TEXTSIZE
-                        t2v.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
-                        tbrow.addView(t2v)
-                        val t3v = TextView(this)
-                        t3v.text = group.value[0].itemComments
-                        t3v.setTextColor(Color.BLACK)
-                        t3v.width = SUMMARY_COLOMNWIDTH3
-                        t3v.gravity =  Gravity.CENTER_VERTICAL + Gravity.LEFT
-                        t3v.height = CELLHEIGHT
-                        t3v.textSize = TEXTSIZE
-                        t3v.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
-                        tbrow.addView(t3v)
+                data!!.forEach()
+                {
+                    val data = summyReport[it] ?: null
+                    if (data != null) {
+                        val groupbyRecipe = data.groupBy { it -> it.uniquetKey }
+                        val header = TableRow(this)
+                        val hd0 = TextView(this)
+                        hd0.text = data?.get(0)!!.itemName
+                        hd0.gravity = Gravity.CENTER
+                        hd0.height = CELLHEIGHT * groupbyRecipe.count()
+                        hd0.width = SUMMARY_TITLEWIDTH
+                        hd0.textSize = TEXTSIZE
+                        hd0.setTextColor(Color.BLACK)
+                        hd0.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
+                        header.addView(hd0)
+                        tableheader.addView(header)
 
-                        tablemain.addView(tbrow)
+                        groupbyRecipe.forEach()
+                        { group ->
+                            val quantity = group.value.sumBy { it.itemQuantity!! }.toInt()
+                            val tbrow = TableRow(this)
+                            val t1v = TextView(this)
+                            t1v.text = group.value[0].itemRecipe
+                            t1v.setTextColor(Color.BLACK)
+                            t1v.setPadding(10, 0, 0, 0)
+                            t1v.gravity = Gravity.CENTER_VERTICAL + Gravity.LEFT
+                            t1v.width = SUMMARY_COLOMNWIDTH1
+                            t1v.height = CELLHEIGHT
+                            t1v.textSize = TEXTSIZE
+                            t1v.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
+                            tbrow.addView(t1v)
+                            val t2v = TextView(this)
+                            t2v.text = quantity.toString()
+                            t2v.setTextColor(Color.BLACK)
+                            t2v.gravity = Gravity.CENTER
+                            t2v.width = SUMMARY_COLOMNWIDTH2
+                            t2v.height = CELLHEIGHT
+                            t2v.textSize = TEXTSIZE
+                            t2v.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
+                            tbrow.addView(t2v)
+                            val t3v = TextView(this)
+                            t3v.text = group.value[0].itemComments
+                            t3v.setTextColor(Color.BLACK)
+                            t3v.setPadding(10, 0, 0, 0)
+                            t3v.width = SUMMARY_COLOMNWIDTH3
+                            t3v.gravity = Gravity.CENTER_VERTICAL + Gravity.LEFT
+                            t3v.height = CELLHEIGHT
+                            t3v.textSize = TEXTSIZE
+                            t3v.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
+                            tbrow.addView(t3v)
+
+                            tablemain.addView(tbrow)
 
 
-                        //------- To Share ------
-                        shareContext += "${index+1}. "
-                        shareContext += "${data[0].itemName}"
-                        if (group.value[0].itemRecipe != "") {
-                            shareContext += " ( ${group.value[0].itemRecipe} )"
+                            //------- To Share ------
+                            reportIndex++
+                            shareContext += "${reportIndex}. "
+                            shareContext += "${data[0].itemName}"
+                            if (group.value[0].itemRecipe != "") {
+                                shareContext += " ( ${group.value[0].itemRecipe} )"
+                            }
+                            shareContext += " * ${quantity.toString()}"
+
+                            if (group.value[0].itemComments != "") {
+                                shareContext += " [${group.value[0].itemComments}]"
+                            }
+                            shareContext += "\n"
+                            //------- To Share ------
+
                         }
-                        shareContext += " * ${quantity.toString()}"
-
-                        if (group.value[0].itemComments != "") {
-                            shareContext += " [${group.value[0].itemComments}]"
-                        }
-                        shareContext += "\n"
-                        //------- To Share ------
-
                     }
                 }
             }
@@ -405,6 +424,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
         tablemain.removeAllViews()
         tableheader.removeAllViews()
         shareContext = ""
+        var reportIndex = 0
 
         if(location !="") {
             shareContext = "$shareContext---$location\n"
@@ -482,9 +502,9 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
 
             val groupbyRecipe = totalData.groupBy { it -> it.itemOwner }
-            var loopIndex = 0
             groupbyRecipe.forEach()
             { data ->
+
                 val header = TableRow(this)
                 val hd0 = TextView(this)
                 hd0.text = data?.value[0].itemOwner
@@ -498,7 +518,6 @@ class OrderNoteBookActivity : AppCompatActivity() {
                 tableheader.addView(header)
 
                 val items = data.value.sortedBy { it -> it.itemName }
-
                 items.forEach()
                 { item ->
 
@@ -550,8 +569,8 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
 
                     //------- To Share ------
-                    loopIndex++
-                    shareContext += "${loopIndex}. "
+                    reportIndex++
+                    shareContext += "${reportIndex}. "
                     shareContext += "${data?.value[0].itemOwner}  "
                     shareContext += "${item.itemName} ${item.itemRecipe} * ${item.itemQuantity}"
                     if (item.itemComments != "") {

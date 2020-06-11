@@ -19,6 +19,7 @@ import com.iew.fun2order.db.dao.friendImageDAO
 import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
+import com.iew.fun2order.ui.my_setup.listen
 import kotlinx.android.synthetic.main.row_orderdetail_others.view.*
 import kotlinx.android.synthetic.main.row_ordermaintain.view.*
 import java.text.SimpleDateFormat
@@ -33,7 +34,11 @@ class AdapterRC_OrderMaintain(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         // 指定了 layout
         val view = LayoutInflater.from(context).inflate(R.layout.row_ordermaintain, null)
-        return ViewHolder(view)
+
+        return ViewHolder(view).listen()
+        { pos, type ->
+            IAdapterOnClick.onClick("detail", pos, type)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -80,16 +85,20 @@ class AdapterRC_OrderMaintain(
                 }
             })
 
-            var userContentItemData: String = ""
-            orderMaintain.userContentProduct.forEach {
-                val referenceItems = "${it.itemName}*${it.itemQuantity}"
-                userContentItemData += "$referenceItems"
+            var userContentItemData: String = "請點擊查看訂單詳細內容"
+            if(orderMaintain.userContentProduct.count()<5) {
+                userContentItemData = ""
+                orderMaintain.userContentProduct.forEach {
+                    val referenceItems = "${it.itemName}*${it.itemQuantity} "
+                    userContentItemData += "$referenceItems"
+                }
             }
 
             itemView.orderMaintain_UserContent.text = userContentItemData
             itemView.orderMaintain_Edit.setOnClickListener(View.OnClickListener {
                 IAdapterOnClick.onClick("edit", it.tag as Int, 0)
             })
+
 
             if (orderMaintain.payCheckFlag) {
                 itemView.orderMaintain_PayStatusTitle.text = "付款日"

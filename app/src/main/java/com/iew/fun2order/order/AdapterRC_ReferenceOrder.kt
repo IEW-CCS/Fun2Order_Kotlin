@@ -59,7 +59,11 @@ class AdapterRC_ReferenceOrder(var context: Context, var lstItemsReferenceOrder:
                             }
                         }
                     }
-                    val referenceItems = "${it.itemName}: ${recipeItems} * ${it.itemQuantity}"
+                    var referenceItems = "${it.itemName}: ${recipeItems} * ${it.itemQuantity}"
+                    if(it.itemComments != "")
+                    {
+                        referenceItems +=  " [ ${it.itemComments} ]"
+                    }
                     referenceItemData += "${referenceItems}\n"
                 }
             }

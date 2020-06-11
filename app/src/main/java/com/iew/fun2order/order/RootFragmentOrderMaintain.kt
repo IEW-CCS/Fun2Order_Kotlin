@@ -53,7 +53,6 @@ class RootFragmentOrderMaintain(var _menuorder: USER_MENU_ORDER) : Fragment() , 
         menuOrder = _menuorder.copy()
         menuOrderOwnerID = menuOrder.orderOwnerID!!
         menuOrderNumber = menuOrder.orderNumber!!
-        checkMaintainStatus()
 
     }
 
@@ -64,6 +63,8 @@ class RootFragmentOrderMaintain(var _menuorder: USER_MENU_ORDER) : Fragment() , 
             rcvMaintain = it.findViewById<RecyclerView>(R.id.RecycleViewMaintain)
         }
 
+
+        checkMaintainStatus()
         rcvMaintain.layoutManager = LinearLayoutManager(requireActivity())
         rcvMaintain.adapter = AdapterRC_OrderMaintain(requireContext(), lstMaintainStatus, this)
 
@@ -114,6 +115,25 @@ class RootFragmentOrderMaintain(var _menuorder: USER_MENU_ORDER) : Fragment() , 
 
     override fun onClick(sender: String, pos: Int, type: Int) {
 
+        when(sender)
+        {
+            "edit" -> {
+                editOrder(sender,pos,type)
+            }
+
+            "detail"->
+            {
+                showOrderDetail(sender,pos,type)
+            }
+
+
+        }
+    }
+
+
+
+    private fun editOrder(sender: String, pos: Int, type: Int)
+    {
         val alert = AlertDialog.Builder(requireContext())
         var editTextName: EditText? = null
 
@@ -164,6 +184,39 @@ class RootFragmentOrderMaintain(var _menuorder: USER_MENU_ORDER) : Fragment() , 
         val dialog = alert.create()
         dialog.setView(editTextName,  50 ,10, 50 , 10)
         dialog.show()
+
+    }
+
+
+    private fun showOrderDetail(sender: String, pos: Int, type: Int)
+    {
+        val userproduct = lstMaintainStatus[pos]
+        var referenceItemData = ""
+        var recipeItems = ""
+        userproduct.userContentProduct.forEach {
+            recipeItems = ""
+            it.menuRecipes?.forEach {recipe->
+                recipe.recipeItems?.forEach{recipeItem->
+                    if(recipeItem.checkedFlag == true)
+                    {
+                        recipeItems = recipeItems + recipeItem.recipeName + " "
+                    }
+                }
+            }
+            var referenceItems = "${it.itemName}: ${recipeItems} * ${it.itemQuantity}"
+            if(it.itemComments != "")
+            {
+                referenceItems +=  " [ ${it.itemComments} ]"
+            }
+            referenceItemData += "${referenceItems}\n"
+        }
+
+        val notifyAlert = AlertDialog.Builder(requireContext()).create()
+        notifyAlert.setTitle("訂單內容")
+        notifyAlert.setMessage(referenceItemData)
+        notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _, i ->
+        }
+        notifyAlert.show()
     }
 }
 

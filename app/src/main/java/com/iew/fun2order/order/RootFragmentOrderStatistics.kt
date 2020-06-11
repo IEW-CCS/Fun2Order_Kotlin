@@ -140,7 +140,11 @@ class RootFragmentOrderStatistics(var _menuorder: USER_MENU_ORDER) : Fragment(),
                         }
                     }
                 }
-                val referenceItems = "${it.itemName}: ${recipeItems} * ${it.itemQuantity}"
+                var referenceItems = "${it.itemName}: ${recipeItems} * ${it.itemQuantity}"
+                if(it.itemComments != "")
+                {
+                    referenceItems +=  " [ ${it.itemComments} ]"
+                }
                 referenceItemData += "${referenceItems}\n"
             }
 

@@ -31,6 +31,7 @@ class AddProductActivity : AppCompatActivity(), IAdapterOnClick {
     private lateinit var btnSetRecipe: Button
     private lateinit var txtProducList: TextView
     private lateinit var npkSelectCount: HorizontalNumberPicker
+    private lateinit var txtSetRecipe: TextView
 
     private var selectProduct: ItemsLV_OrderProduct? = null
     private val lstProductList: MutableList<ItemsLV_OrderProduct> = mutableListOf()
@@ -51,6 +52,7 @@ class AddProductActivity : AppCompatActivity(), IAdapterOnClick {
         npkSelectCount = findViewById(R.id.addproductCount)
         btnSetRecipe = findViewById(R.id.addproductSetRecipe)
         txtProducList = findViewById(R.id.productList)
+        txtSetRecipe = findViewById(R.id.setRecipeContent)
 
 
         intent?.extras?.let {
@@ -60,8 +62,6 @@ class AddProductActivity : AppCompatActivity(), IAdapterOnClick {
 
             lstProductList.clear()
             arraylistRecipes.clear()
-
-
 
 
             if (productList?.count() == 0) {
@@ -86,6 +86,8 @@ class AddProductActivity : AppCompatActivity(), IAdapterOnClick {
                 arraylistRecipes.addAll(recipeList.filterNotNull())
             }
         }
+
+        txtSetRecipe.text = ""
 
         rcvAddProduct.layoutManager = LinearLayoutManager(this)
         rcvAddProduct.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
@@ -148,6 +150,18 @@ class AddProductActivity : AppCompatActivity(), IAdapterOnClick {
                     if (selectMenuRecipe != null) {
                         lstmenuRecipes.clear()
                         lstmenuRecipes = selectMenuRecipe.toMutableList()
+
+                        txtSetRecipe.text = ""
+                        var setRecipe : String = ""
+                        lstmenuRecipes?.forEach {recipe->
+                            recipe.recipeItems?.forEach{recipeItem->
+                                if(recipeItem.checkedFlag == true)
+                                {
+                                    setRecipe += recipeItem.recipeName + " "
+                                }
+                            }
+                        }
+                        txtSetRecipe.text = setRecipe
                     }
                 }
             }

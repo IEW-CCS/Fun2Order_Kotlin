@@ -53,6 +53,7 @@
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:text="登出"
+                android:visibility="gone"
                 android:textColor="@android:color/holo_red_dark" />
         </LinearLayout>
 

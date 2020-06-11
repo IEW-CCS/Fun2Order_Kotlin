@@ -137,7 +137,11 @@ class AdapterRC_OrderDetailStatus(
                             }
                         }
                     }
-                    val referenceItems = "${it.itemName}: ${recipeItems} * ${it.itemQuantity}"
+                    var referenceItems = "${it.itemName}: ${recipeItems} * ${it.itemQuantity}"
+                    if(it.itemComments != "")
+                    {
+                        referenceItems += " [ ${it.itemComments} ]"
+                    }
                     userContentItemData += "${referenceItems}\n"
                 }
             }

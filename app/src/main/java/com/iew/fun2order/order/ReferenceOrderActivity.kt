@@ -118,8 +118,6 @@ class ReferenceOrderActivity : AppCompatActivity(), IAdapterOnClick {
                     }
                 }
             }
-
-
         }
 
         rcvOrderReference.layoutManager = LinearLayoutManager(this)
@@ -182,7 +180,11 @@ class ReferenceOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                 }
                             }
 
-                            val referenceItems = "${it.itemName}: ${recipeItems} * ${it.itemQuantity}"
+                            var referenceItems = "${it.itemName}: ${recipeItems} * ${it.itemQuantity}"
+                            if(it.itemComments != "")
+                            {
+                                referenceItems +=  " [ ${it.itemComments} ]"
+                            }
                             referenceItemData += "${referenceItems}\n"
                         }
 

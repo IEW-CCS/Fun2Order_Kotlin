@@ -106,9 +106,10 @@
 
     </LinearLayout>
 
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="33dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:layout_marginBottom="2dp"
         android:orientation="horizontal"
@@ -117,15 +118,25 @@
         <android.widget.Button
             android:id="@+id/addproductSetRecipe"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="33dp"
             android:layout_gravity="left|center_vertical"
             android:layout_weight="0.3"
+            android:layout_marginLeft="20dp"
             android:background="@android:color/transparent"
             android:gravity="left|center_vertical"
-            android:paddingLeft="20dp"
             android:text="設定配方"
             android:textColor="@android:color/holo_blue_light"
             android:textSize="18dp" />
+
+        <TextView
+            android:id="@+id/setRecipeContent"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="left|center_vertical"
+            android:gravity="left|center_vertical"
+            android:layout_marginRight="20dp"
+            android:layout_weight="0.7"
+            />
     </LinearLayout>
 
     <LinearLayout
