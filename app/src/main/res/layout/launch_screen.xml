@@ -3,7 +3,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:foregroundTint="#000000"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:gravity="center">
 
     <ImageView
         android:id="@+id/splashscreen"
@@ -11,7 +12,6 @@
         android:layout_height="100dp"
         android:layout_gravity="center"
         android:gravity="center"
-        android:layout_marginTop="100dp"
         android:src="@drawable/fun2order_appstore_icon_without_alpha" />
 
     <TextView

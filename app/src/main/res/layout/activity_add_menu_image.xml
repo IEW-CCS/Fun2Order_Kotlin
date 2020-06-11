@@ -101,6 +101,7 @@
                 android:ems="10"
                 android:gravity="start|top"
                 android:inputType="textMultiLine"
+                android:padding="4dp"
                 android:textSize="18dp" />
         </LinearLayout>
 

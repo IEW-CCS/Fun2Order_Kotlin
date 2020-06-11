@@ -61,7 +61,7 @@ class ActivityAddMenu : AppCompatActivity() {
     //private lateinit var mProductDB: ProductDAO
     private lateinit var mDBContext: AppDatabase
 
-    private lateinit var mMenuImage: ImageButton
+    //private lateinit var mMenuImage: ImageButton
     private lateinit var mMenuBitmap : Bitmap
     var mMenuImages: MutableList<Bitmap> = mutableListOf()
     private lateinit var mTextViewMenuPic: TextView
@@ -95,8 +95,8 @@ class ActivityAddMenu : AppCompatActivity() {
         //mUserMenuDB = mDBContext.usermenudao()
         //mLocationDB = mDBContext.locationdao()
         //mProductDB = mDBContext.productdao()
-        mMenuImage  = findViewById(R.id.imageBtnMenuImage) as ImageButton
-        mMenuImage.requestFocus()
+        //mMenuImage  = findViewById(R.id.imageBtnMenuImage) as ImageButton
+        //mMenuImage.requestFocus()
         mTextViewMenuPic = findViewById(R.id.textViewMenuPic) as TextView
         var mAuth = FirebaseAuth.getInstance()
         if (mAuth.currentUser != null) {
@@ -759,13 +759,15 @@ class ActivityAddMenu : AppCompatActivity() {
 
     private fun displayImage(bitmap: Bitmap) {
 
-
+/*
         val resizedBitmap = bitmap.resizeByWidth(mMenuImage.layoutParams.height)
         //val roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, resizedBitmap)
         val roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, bitmap)
         //roundedBitmapDrawable.cornerRadius =  (resizedBitmap.width / 2.0).toFloat()
         mMenuBitmap =resizedBitmap
         mMenuImage.setImageDrawable(roundedBitmapDrawable)
+
+ */
     }
 
     private fun createNewMenu() {
@@ -969,7 +971,8 @@ class ActivityAddMenu : AppCompatActivity() {
                     val bm: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
                     mMenuImages.add(bm)
                     val b1 = ImageButton(this)
-                    //b1.setText((mBtnList.size+1).toString())
+                    b1.setBackgroundResource(R.drawable.corners_rect_gray)
+                    b1.setPadding(10, 10, 10, 10)
                     b1.setMinimumWidth(width)
                     //b1.setMinWidth(width)
                     b1.setImageBitmap(bm)
@@ -989,7 +992,8 @@ class ActivityAddMenu : AppCompatActivity() {
                             val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
                             mMenuImages.add(bmp)
                             val b1 = ImageButton(this)
-                            //b1.setText((mBtnList.size+1).toString())
+                            b1.setBackgroundResource(R.drawable.corners_rect_gray)
+                            b1.setPadding(10, 10, 10, 10)
                             b1.setMinimumWidth(width)
                             //b1.setMinWidth(width)
                             b1.setImageBitmap(bmp)
