@@ -387,7 +387,7 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
         mDatabase.child("USER_MENU_ORDER").child(mAuth.currentUser!!.uid).child(userMenuOrder.orderNumber.toString()).setValue(userMenuOrder)
             .addOnSuccessListener {
                 sendFcmMessage(userMenuOrder)
-                Toast.makeText(this, "團購單建立成功!", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, "團購單建立成功!", Toast.LENGTH_SHORT).show()
                 // Write was successful!
                 val bundle = Bundle()
                 bundle.putString("Result", "OK")

@@ -13,6 +13,7 @@ import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -39,6 +40,8 @@ import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -60,8 +63,10 @@ class ActivityAddMenu : AppCompatActivity() {
 
     private lateinit var mMenuImage: ImageButton
     private lateinit var mMenuBitmap : Bitmap
+    var mMenuImages: MutableList<Bitmap> = mutableListOf()
     private lateinit var mTextViewMenuPic: TextView
     private lateinit var  mDialog : AlertDialog
+    var mMediaStorageDir: File? = null
     var mMediaStorageReadDir: File? = null
     private var mbEdit = false
     //private lateinit var mUserMenu:UserMenu
@@ -71,6 +76,7 @@ class ActivityAddMenu : AppCompatActivity() {
     private lateinit var mDatabase: DatabaseReference
     private var mFirebaseUserMenu: USER_MENU = USER_MENU()
     private var mFirebaseUserProfile: USER_PROFILE = USER_PROFILE()
+    private var mbImageModified: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,13 +84,6 @@ class ActivityAddMenu : AppCompatActivity() {
         supportActionBar?.hide()
 
         val context: Context = this@ActivityAddMenu
-
-        mMediaStorageReadDir = File(
-            Environment.getExternalStorageDirectory()
-                .toString() + "/Android/data/"
-                    + applicationContext.packageName
-                    + "/Files/"
-        )
 
         // [START initialize_database_ref]
         mDatabase = Firebase.database.reference
@@ -118,8 +117,22 @@ class ActivityAddMenu : AppCompatActivity() {
             mFirebaseUserMenu.userID=mAuth.currentUser!!.uid.toString()
             mFirebaseUserMenu.menuNumber=mAuth.currentUser!!.uid.toString() + "-MENU-" + timeStamp
         }
+        mMediaStorageDir = File(
+            Environment.getExternalStorageDirectory()
+                .toString() + "/Android/data/"
+                    + applicationContext.packageName
+                    + "/Files"
+                    + "/Menu_Image"
+                    + "/" + mFirebaseUserMenu.userID
+                    + "/" + mFirebaseUserMenu.menuNumber
+        )
 
-        setImageButton()
+        mMediaStorageReadDir = File(
+            Environment.getExternalStorageDirectory()
+                .toString() + "/Android/data/"
+                    + applicationContext.packageName
+                    + "/Files/"
+        )
 
         if(mbEdit){
             val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
@@ -131,6 +144,8 @@ class ActivityAddMenu : AppCompatActivity() {
             textViewCrMenuType.setText(mFirebaseUserMenu.brandCategory)
             editTextMenuDesc.setText(mFirebaseUserMenu.menuDescription)
 
+            setImageButton()
+            /*
             if(mFirebaseUserMenu.menuImageURL != ""){
                 var islandRef = Firebase.storage.reference.child(mFirebaseUserMenu.menuImageURL!!)
                 val ONE_MEGABYTE = 1024 * 1024.toLong()
@@ -139,6 +154,8 @@ class ActivityAddMenu : AppCompatActivity() {
                     displayImage(bmp)
                 }
             }
+
+             */
 
             //displayImage(BitmapFactory.decodeByteArray(mUserMenu.image, 0, mUserMenu.image.size))
             textViewLocationItemCount.setText(mFirebaseUserMenu.locations!!.size.toString() + " 項");
@@ -154,8 +171,11 @@ class ActivityAddMenu : AppCompatActivity() {
              */
 
         }else{
+            /*
             val bitmap  = BitmapFactory.decodeResource(getResources(),R.drawable.image_default_member);
             displayImage(bitmap)
+
+             */
         }
         val ImageButtonAction = arrayOf("相機/相簿","取消")
 
@@ -189,7 +209,7 @@ class ActivityAddMenu : AppCompatActivity() {
                     when (which) {
                         0 -> { takeImageFromAlbumWithCropImageLib()}
                         else -> { // Note the block
-                            Toast.makeText(this, "選取到取消", Toast.LENGTH_SHORT).show()
+                          //  Toast.makeText(this, "選取到取消", Toast.LENGTH_SHORT).show()
                         }
                     }
                 })
@@ -326,12 +346,26 @@ class ActivityAddMenu : AppCompatActivity() {
                         //mLocationDB.insertRow(location)
                         //var fdlocation:LOCATION = LOCATION()
                         //fdlocation.location =  editTextLocation.getText().toString()
-                        mFirebaseUserMenu.locations?.add(editTextLocation.getText().toString())
-                        //mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString())
 
-                        //textViewLocationItemCount.setText(mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString()).count().toString() + " 項");
-                        textViewLocationItemCount.setText(mFirebaseUserMenu.locations!!.size.toString() + " 項");
-                        alertDialog.dismiss()
+                        var bFOund = false
+                        mFirebaseUserMenu.locations!!.forEach {
+                            if(it.equals(editTextLocation.getText().toString().trim())){
+                                bFOund = true
+                            }
+                        }
+
+                        if(bFOund){
+                            editTextLocation.requestFocus()
+                            editTextLocation.error = "地點不能重覆!"
+                        }else{
+                            mFirebaseUserMenu.locations?.add(editTextLocation.getText().toString().toString())
+                            //mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString())
+
+                            //textViewLocationItemCount.setText(mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString()).count().toString() + " 項");
+                            textViewLocationItemCount.setText(mFirebaseUserMenu.locations!!.size.toString() + " 項");
+                            alertDialog.dismiss()
+                        }
+
                     }
                 }
         }
@@ -365,25 +399,40 @@ class ActivityAddMenu : AppCompatActivity() {
                         //val product: Product = Product(null, editTextMenuID.getText().toString(), editTextProduct.getText().toString(), editTextProductPrice.getText().toString())
                         //mProductDB.insertRow(product)
 
-                        //Firebase
-                        var fdproduct : PRODUCT = PRODUCT()
-                        fdproduct.itemName =editTextProduct.getText().toString()
-
-                        try {
-                            val parsedInt = editTextProductPrice.getText().toString().toInt()
-                            fdproduct.itemPrice=parsedInt
-
-                        } catch (nfe: NumberFormatException) {
-                            // not a valid int
-                            fdproduct.itemPrice=0
+                        var bFOund = false
+                        mFirebaseUserMenu.menuItems!!.forEach {
+                            if(it.itemName.equals(editTextProduct.getText().toString().trim())){
+                                bFOund = true
+                            }
                         }
 
-                        fdproduct.sequenceNumber = mFirebaseUserMenu.menuItems!!.size+1
-                        //mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString())
-                        mFirebaseUserMenu.menuItems!!.add(fdproduct)
-                        //textViewProductPriceItemCount.setText(mProductDB.getProductByMenuID(editTextMenuID.getText().toString()).count().toString() + " 項");
-                        textViewProductPriceItemCount.setText(mFirebaseUserMenu.menuItems!!.size.toString() + " 項");
-                        alertDialog.dismiss()
+                        if(bFOund){
+                            editTextProduct.requestFocus()
+                            editTextProduct.error = "產品名稱不能重覆!"
+                        }else{
+                            //Firebase
+                            var fdproduct : PRODUCT = PRODUCT()
+                            fdproduct.itemName =editTextProduct.getText().toString().trim()
+
+                            try {
+                                val parsedInt = editTextProductPrice.getText().toString().toInt()
+                                fdproduct.itemPrice=parsedInt
+
+                            } catch (nfe: NumberFormatException) {
+                                // not a valid int
+                                fdproduct.itemPrice=0
+                            }
+
+                            fdproduct.sequenceNumber = mFirebaseUserMenu.menuItems!!.size+1
+                            //mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString())
+                            mFirebaseUserMenu.menuItems!!.add(fdproduct)
+                            //textViewProductPriceItemCount.setText(mProductDB.getProductByMenuID(editTextMenuID.getText().toString()).count().toString() + " 項");
+                            textViewProductPriceItemCount.setText(mFirebaseUserMenu.menuItems!!.size.toString() + " 項");
+                            alertDialog.dismiss()
+                        }
+
+
+
                     }
                 }
         }
@@ -502,6 +551,18 @@ class ActivityAddMenu : AppCompatActivity() {
             startActivityForResult(I, ACTION_ADD_MENU_IMAGE_REQUEST_CODE)
         }
 
+        val gridLayoutImageBtnList = findViewById(R.id.gridLayoutImageBtnList) as GridLayout
+        // set on-click listener for textViewMakeMenu
+        gridLayoutImageBtnList.setOnClickListener {
+
+            val bundle = Bundle()
+            //bundle.putString("EDIT", "N")
+            var I = Intent(context, ActivityAddMenuImage::class.java)
+            bundle.putParcelable("USER_MENU", mFirebaseUserMenu)
+            I.putExtras(bundle)
+            startActivityForResult(I, ACTION_ADD_MENU_IMAGE_REQUEST_CODE)
+        }
+
 
         val textViewMakeMenu = findViewById(R.id.textViewMakeMenu) as TextView
         // set on-click listener for textViewMakeMenu
@@ -533,6 +594,7 @@ class ActivityAddMenu : AppCompatActivity() {
                 editTextMenuID.requestFocus()
                 editTextMenuID.error = "品牌名不能為空白!"
             }else {
+
                 createNewMenu()
             }
             //val bundle = Bundle()
@@ -620,9 +682,14 @@ class ActivityAddMenu : AppCompatActivity() {
                 if(resultCode == Activity.RESULT_OK && data != null){
 
                     mFirebaseUserMenu = data.extras.get("USER_MENU") as USER_MENU
+                    mbImageModified = data.extras.get("IMAGE_CHG") as Boolean
+                    //mMenuImages = data.extras.get("MENU_IMAGES") as MutableList<Bitmap>
                     val editTextMenuDesc = findViewById(R.id.editTextMenuDesc) as EditText
                     editTextMenuDesc.setText( mFirebaseUserMenu.menuDescription)
+                    if(mbImageModified){
                         setImageButton()
+                    }
+
                 }
             }
 
@@ -647,7 +714,8 @@ class ActivityAddMenu : AppCompatActivity() {
 
     private fun Bitmap.resizeToFireBaseStorage_MenuInfo(): Bitmap {
 
-
+        var new_width = 1
+        var new_heithg = 1
         val maxWitdh_Height = this.width.coerceAtLeast(this.height)
 
         if(maxWitdh_Height < 1440)
@@ -656,18 +724,34 @@ class ActivityAddMenu : AppCompatActivity() {
             return this
         }
         else {
+
+            if (maxWitdh_Height == this.width)
+            {
+
+                var ratio:Float = (this.height.toFloat() / this.width.toFloat()).toFloat() ;
+                new_width = 1440;
+                new_heithg = (1440  * ratio).roundToInt();
+
+            }
+            else
+            {
+                var ratio: Float =  (this.width.toFloat() / this.height.toFloat()).toFloat()  ;
+                new_width = (1440  * ratio).roundToInt();
+                new_heithg = 1440;
+
+            }
             //val ratio:Float = this.width.toFloat() / this.height.toFloat()
             //val height:Int = Math.round(width / ratio)
 
             //val width : Int = (this.width.toFloat() / 1440f).roundToInt()
             //val height: Int = (this.height.toFloat() / 1440f).roundToInt()
-            val width : Int = (this.width.toFloat() / 1440f).roundToInt()
-            val height: Int = (this.height.toFloat() / 1440f).roundToInt()
+            // val width : Int = (this.width.toFloat() / 1440f).roundToInt()
+            // val height: Int = (this.height.toFloat() / 1440f).roundToInt()
 
             return Bitmap.createScaledBitmap(
                 this,
-                width,
-                height,
+                new_width,
+                new_heithg,
                 false
             )
         }
@@ -739,12 +823,31 @@ class ActivityAddMenu : AppCompatActivity() {
         userMenu.userID=mAuth.currentUser!!.uid
         userMenu.userName=mAuth.currentUser!!.displayName
         //Create
-
+        //Copy Image to Local
+        if(mbImageModified) {
+            mFirebaseUserMenu.multiMenuImageURL!!.clear()
+            var index = 0
+            mMenuImages.forEach() {
+                var filename = saveImageToLocal(it, index)
+                if (filename != "") {
+                    mFirebaseUserMenu.multiMenuImageURL!!.add(filename)
+                    index++
+                }
+            }
+        }
+        userMenu.multiMenuImageURL = mFirebaseUserMenu.multiMenuImageURL
 
         mDatabase.child("USER_MENU_INFORMATION").child(mAuth.currentUser!!.uid).child(userMenuID).setValue(userMenu)
             .addOnSuccessListener {
-                Toast.makeText(this, "建立菜單成功!", Toast.LENGTH_SHORT).show()
-                uploadImage(mMenuBitmap, userMenuID )
+                //Toast.makeText(this, "建立菜單成功!", Toast.LENGTH_SHORT).show()
+                if(mbImageModified) {
+                    var index = 0
+                    mMenuImages.forEach() {
+                        uploadImage(it, userMenuID, index.toString())
+                        index++
+                    }
+                }
+
                 // Write was successful!
                 val bundle = Bundle()
                 bundle.putString("Result", "OK")
@@ -755,32 +858,32 @@ class ActivityAddMenu : AppCompatActivity() {
             }
             .addOnFailureListener {
                 // Write failed
-                Toast.makeText(this, "採購建立菜單失敗!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "建立菜單失敗!", Toast.LENGTH_SHORT).show()
             }
     }
 
-    private fun uploadImage(bitmap: Bitmap, image_name: String) {
+    private fun uploadImage(bitmap: Bitmap, menu_number:String,  image_name: String) {
 
         var mAuth = FirebaseAuth.getInstance()
         if (mAuth.currentUser != null) {
 
             val resizedBitmap = bitmap.resizeToFireBaseStorage_MenuInfo()
             //val resizedBitmap = bitmap
-            val photoURL : String = "Menu_Image/${mAuth.currentUser!!.uid}/${image_name}.png"
+            val photoURL : String = "Menu_Image/${mAuth.currentUser!!.uid}/${menu_number}/${image_name}.jpg"
 
             var islandRef = Firebase.storage.reference.child(photoURL!!)
             val baos = ByteArrayOutputStream()
-            resizedBitmap.compress(Bitmap.CompressFormat.PNG, 20, baos)
+            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 85, baos)
             val data: ByteArray = baos.toByteArray()
             val uploadTask: UploadTask = islandRef.putBytes(data)
             uploadTask.addOnFailureListener(object : OnFailureListener {
                 override fun onFailure(p0: Exception) {
-                    Toast.makeText(this@ActivityAddMenu, "Upload Image Faild", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ActivityAddMenu, "Upload Image Faild" + image_name, Toast.LENGTH_SHORT).show()
                 }
 
             }).addOnSuccessListener(object : OnSuccessListener<UploadTask.TaskSnapshot?> {
                 override fun onSuccess(p0: UploadTask.TaskSnapshot?) {
-                    Toast.makeText(this@ActivityAddMenu, "Upload Image Success", Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this@ActivityAddMenu, "Upload Image Success" + image_name, Toast.LENGTH_SHORT).show()
                     /*
                     var querypath = "USER_PROFILE/" +  mAuth.currentUser!!.uid.toString()
                     val database = Firebase.database
@@ -846,6 +949,7 @@ class ActivityAddMenu : AppCompatActivity() {
         if(mFirebaseUserMenu.multiMenuImageURL!!.size>1){
             width = (metrics.widthPixels-120)/mFirebaseUserMenu.multiMenuImageURL!!.size ;        // 螢幕的寬度/4放近with
             iCnt = mFirebaseUserMenu.multiMenuImageURL!!.size
+
         }else{
             width = (metrics.widthPixels-120)/1 ;        // 螢幕的寬度/4放近with
         }
@@ -854,28 +958,87 @@ class ActivityAddMenu : AppCompatActivity() {
         gridLayoutBtnList.setRowCount(1);              // 設定GridLayout有幾列
         //var  lp2:GridLayout.LayoutParams = GridLayout.LayoutParams(GridLayout.LayoutParams.WRAP_CONTENT, 100);
         // 將 Button 1 加入到 LinearLayout 中
+        mMenuImages.clear()
         mFirebaseUserMenu.multiMenuImageURL!!.forEach {
-            val file = File(mMediaStorageReadDir.toString() + "/" + it.toString())
-            if (file.exists()) {
-                //val option = BitmapFactory.Options()
-                //option.inJustDecodeBounds = true
-                //option.inPurgeable = true
-                val bm: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                val b1 = ImageButton(this)
-                //b1.setText((mBtnList.size+1).toString())
-                b1.setMinimumWidth(width)
-                //b1.setMinWidth(width)
-                b1.setImageBitmap(bm)
-                //this.getResources(),R.drawable.icon_add_group
-                //b1.setBackgroundResource(com.iew.fun2order.R.drawable.button_bg)
-                //mBtnList.add(b1)
-                //button = new Button[9] ;
-                //GridLayout gridLayout = (GridLayout)findViewById(R.id.root) ;
-                b1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                gridLayoutBtnList.addView(b1,width,350);
+            if(it != null){
+                val file = File(mMediaStorageReadDir.toString() + "/" + it.toString())
+                if (file.exists()) {
+                    //val option = BitmapFactory.Options()
+                    //option.inJustDecodeBounds = true
+                    //option.inPurgeable = true
+                    val bm: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                    mMenuImages.add(bm)
+                    val b1 = ImageButton(this)
+                    //b1.setText((mBtnList.size+1).toString())
+                    b1.setMinimumWidth(width)
+                    //b1.setMinWidth(width)
+                    b1.setImageBitmap(bm)
+                    //this.getResources(),R.drawable.icon_add_group
+                    //b1.setBackgroundResource(com.iew.fun2order.R.drawable.button_bg)
+                    //mBtnList.add(b1)
+                    //button = new Button[9] ;
+                    //GridLayout gridLayout = (GridLayout)findViewById(R.id.root) ;
+                    b1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                    gridLayoutBtnList.addView(b1,width,350);
+                }else{
+                    val bitmap  = BitmapFactory.decodeResource(getResources(),R.drawable.image_default_member);
+                    if(it != ""){
+                        var islandRef = Firebase.storage.reference.child(it)
+                        val ONE_MEGABYTE = 1024 * 1024.toLong()
+                        islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener { bytesPrm: ByteArray ->
+                            val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+                            mMenuImages.add(bmp)
+                            val b1 = ImageButton(this)
+                            //b1.setText((mBtnList.size+1).toString())
+                            b1.setMinimumWidth(width)
+                            //b1.setMinWidth(width)
+                            b1.setImageBitmap(bmp)
+                            //this.getResources(),R.drawable.icon_add_group
+                            //b1.setBackgroundResource(com.iew.fun2order.R.drawable.button_bg)
+                            //mBtnList.add(b1)
+                            //button = new Button[9] ;
+                            //GridLayout gridLayout = (GridLayout)findViewById(R.id.root) ;
+                            b1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                            gridLayoutBtnList.addView(b1,width,350);
+                        }
+
+                        islandRef.getBytes(ONE_MEGABYTE).addOnCanceledListener {
+                            val bitmap  = BitmapFactory.decodeResource(getResources(),R.drawable.image_default_member);
+                            mMenuImages.add(bitmap)
+                            val b1 = ImageButton(this)
+                            //b1.setText((mBtnList.size+1).toString())
+                            b1.setMinimumWidth(width)
+                            //b1.setMinWidth(width)
+                            b1.setImageBitmap(bitmap)
+                            //this.getResources(),R.drawable.icon_add_group
+                            //b1.setBackgroundResource(com.iew.fun2order.R.drawable.button_bg)
+                            //mBtnList.add(b1)
+                            //button = new Button[9] ;
+                            //GridLayout gridLayout = (GridLayout)findViewById(R.id.root) ;
+                            b1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                            gridLayoutBtnList.addView(b1,width,350);
+                        }
+                    }
+                }
             }
 
 
+
+        }
+
+        val childCount: Int = gridLayoutBtnList.getChildCount()
+
+        for (i in 0 until childCount) {
+            val container = gridLayoutBtnList.getChildAt(i) as ImageButton
+            container.setOnClickListener {
+                // your click code here
+                val bundle = Bundle()
+                //bundle.putString("EDIT", "N")
+                var I = Intent(this, ActivityAddMenuImage::class.java)
+                bundle.putParcelable("USER_MENU", mFirebaseUserMenu)
+                I.putExtras(bundle)
+                startActivityForResult(I, ACTION_ADD_MENU_IMAGE_REQUEST_CODE)
+            }
         }
 
     }
@@ -905,6 +1068,50 @@ class ActivityAddMenu : AppCompatActivity() {
 
     }
 
+    private fun saveImageToLocal(bitmap: Bitmap, index: Int):String {
+
+        val filename:String
+        //val date = Date(0)
+        //val sdf = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+        //filename = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+        filename = index.toString()
+        var final_filename : String = ""
+        try
+        {
+            val path = Environment.getExternalStorageDirectory().toString()
+            /*
+            val mediaStorageDir = File(
+                Environment.getExternalStorageDirectory()
+                    .toString() + "/Android/data/"
+                        + applicationContext.packageName
+                        + "/Files"
+            )
+            if (! mediaStorageDir.exists()){
+                if (! mediaStorageDir.mkdirs()){
+                    return ""
+                }
+            }
+             */
+
+            var fOut: OutputStream? = null
+            var filepath =  "Menu_Image/" + mFirebaseUserMenu.userID + "/" + mFirebaseUserMenu.menuNumber
+            final_filename = filename + ".jpg"
+            val file = File(mMediaStorageDir,  final_filename)
+            fOut = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut)
+            fOut.flush()
+            fOut.close()
+            MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName())
+            final_filename = filepath + "/" + final_filename
+        }
+        catch (e:Exception) {
+            e.printStackTrace()
+            final_filename=""
+        }
+
+        return final_filename
+
+    }
     override fun onBackPressed() {
         //super.onBackPressed()
         AlertDialog.Builder(this)

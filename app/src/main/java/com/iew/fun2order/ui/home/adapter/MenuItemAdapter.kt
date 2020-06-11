@@ -3,13 +3,17 @@ package com.iew.fun2order.ui.home.adapter
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
@@ -18,6 +22,7 @@ import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.ui.home.ActivityAddMenu
 import com.iew.fun2order.ui.home.ActivitySetupOrder
 import com.iew.fun2order.ui.home.data.MenuItemListData
+import java.io.File
 
 
 class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
@@ -51,14 +56,22 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
         holder.txtItemValue.setText(sDesc)
         holder.imageViewMenu.setImageBitmap(listdata[position].getItemImage())
         holder.imagePath = listdata[position].getItemImagePath()
-
+        holder.mediaStorageDir =listdata[position].getMediaStorageDir()
+        holder.mediaStorageReadDir =listdata[position].getMediaStorageReadDir()
         if(holder.imagePath != ""){
-            var islandRef = Firebase.storage.reference.child(holder.imagePath!!)
-            val ONE_MEGABYTE = 1024 * 1024.toLong()
-            islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener { bytesPrm: ByteArray ->
-                val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
-                holder.imageViewMenu.setImageBitmap(bmp)
+            val file = File(holder.mediaStorageReadDir.toString() + "/" + holder.imagePath.toString())
+            if (file.exists()) {
+                val bm: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                holder.imageViewMenu.setImageBitmap(bm)
+            }else{
+                var islandRef = Firebase.storage.reference.child(holder.imagePath!!)
+                val ONE_MEGABYTE = 1024 * 1024.toLong()
+                islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener { bytesPrm: ByteArray ->
+                    val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+                    holder.imageViewMenu.setImageBitmap(bmp)
+                }
             }
+
         }
         holder.user_menu = listdata[position].getUserMenu()
         holder.user_profile = listdata[position].getUserProfile()
@@ -84,12 +97,29 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
         }
 
         holder.linearLayout.setOnLongClickListener() { view ->
-
-            Toast.makeText(
-                view.context,
-                "Long Click: " + myListData.getItemName(),
-                Toast.LENGTH_LONG
-            ).show()
+            val alert = AlertDialog.Builder(view.context)
+            with(alert) {
+                setTitle("確認刪除菜單")
+                setMessage(myListData.getItemName())
+                setPositiveButton("確定") { dialog, _ ->
+                    try {
+                        var menuPath = "USER_MENU_INFORMATION/${holder.user_profile!!.userID.toString()}/${holder.user_menu!!.menuNumber}"
+                        val database = Firebase.database
+                        database.getReference(menuPath).removeValue()
+                        listdata.removeAt(position)
+                        notifyDataSetChanged()
+                    }
+                    catch (e: Exception)
+                    {
+                    }
+                    dialog.dismiss()
+                }
+                setNegativeButton("取消") { dialog, _ ->
+                    dialog.dismiss()
+                }
+            }
+            val dialog = alert.create()
+            dialog.show()
 
             true
         }
@@ -122,6 +152,8 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
         var user_profile: USER_PROFILE? = null
         var btnChuGroup : Button
         var linearLayout: LinearLayout
+        var mediaStorageDir: File? = null
+        var mediaStorageReadDir: File? = null
 
         init {
 
@@ -144,6 +176,10 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
 
             user_menu = USER_MENU()
             user_profile = USER_PROFILE()
+
+            mediaStorageDir = null
+
+            mediaStorageReadDir = null
             // 點擊項目中的Button時
             /*
             btnChuGroup.setOnClickListener(View.OnClickListener {

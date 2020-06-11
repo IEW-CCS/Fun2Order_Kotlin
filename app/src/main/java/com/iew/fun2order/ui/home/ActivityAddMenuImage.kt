@@ -18,6 +18,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
 import com.iew.fun2order.ScalableImageViewActivity
 import com.iew.fun2order.db.firebase.USER_MENU
@@ -48,6 +50,7 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
     var mImgIdx: Int? = null
     var mMediaStorageDir: File? = null
     var mMediaStorageReadDir: File? = null
+    var mbImageModified : Boolean = false
     var mRollPagerViewAdapter : RollPagerViewAdapter = RollPagerViewAdapter(this)
     private lateinit var mTextViewAddMenuImage: TextView
     var mImageTitles =
@@ -73,6 +76,7 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
 
         //val projects: Array<String> = intent.extras.getStringArray("ItemListData")
         mFirebaseUserMenu = intent.extras.get("USER_MENU") as USER_MENU
+        //mMenuImages = intent.extras.get("MENU_IMAGES") as MutableList<Bitmap>
 
         mMediaStorageDir = File(
             Environment.getExternalStorageDirectory()
@@ -147,6 +151,24 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
 
                 mMenuImages.add(bm)
                 mRollPagerViewAdapter.menuImages = mMenuImages
+            }else{
+                if(it != ""){
+                    var islandRef = Firebase.storage.reference.child(it)
+                    val ONE_MEGABYTE = 1024 * 1024.toLong()
+                    islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener { bytesPrm: ByteArray ->
+                        val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+                        mMenuImages.add(bmp)
+                        mRollPagerViewAdapter.menuImages = mMenuImages
+                        mRollPagerView!!.setAdapter(mRollPagerViewAdapter)
+                    }
+
+                    islandRef.getBytes(ONE_MEGABYTE).addOnCanceledListener {
+                        val bitmap  = BitmapFactory.decodeResource(getResources(),R.drawable.image_default_member);
+                        mMenuImages.add(bitmap)
+                        mRollPagerViewAdapter.menuImages = mMenuImages
+                        mRollPagerView!!.setAdapter(mRollPagerViewAdapter)
+                    }
+                }
             }
         }
 
@@ -169,7 +191,7 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
                     when (which) {
                         0 -> { takeImageFromAlbumWithCropImageLib()}
                         else -> { // Note the block
-                            Toast.makeText(this, "選取到取消", Toast.LENGTH_SHORT).show()
+                            //Toast.makeText(this, "選取到取消", Toast.LENGTH_SHORT).show()
                         }
                     }
                 })
@@ -180,12 +202,29 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
         val btnAddImageOK = findViewById(R.id.btnAddImageOK) as Button
         // set on-click listener for ImageView
         btnAddImageOK.setOnClickListener {
+            //Save Temp Bitmap to Local
+            if(mbImageModified){
+                mFirebaseUserMenu.multiMenuImageURL!!.clear()
+                var index : Int = 0;
+                mMenuImages.forEach(){
+                    var filename = saveImageToLocal(mMenuImages.get(index),index)
+                    index++
+                    if(filename !=""){
+                        mFirebaseUserMenu.multiMenuImageURL!!.add(filename)
+                    }
+                }
+
+            }
             val editTextMenuDesc = findViewById(R.id.editTextMenuDesc) as EditText
             mFirebaseUserMenu.menuDescription = editTextMenuDesc.getText().toString()
             val bundle = Bundle()
             bundle.putString("Result", "OK")
+            //mFirebaseUserMenu.menuImages = mMenuImages
             bundle.putParcelable("USER_MENU", mFirebaseUserMenu)
+            bundle.putBoolean("IMAGE_CHG", mbImageModified)
+
             val intent = Intent().putExtras(bundle)
+            //intent.putExtra("MENU_IMAGES", mMenuImages)
             setResult(Activity.RESULT_OK, intent)
             finish()
         }
@@ -331,7 +370,12 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
     private fun displayImage(bitmap: Bitmap) {
         var filename:String=""
         val resizedBitmap = bitmap.resizeToFireBaseStorage_MenuInfo()
-        //resizedBitmap.compress(Bitmap.CompressFormat.PNG, 50)
+        val baos = ByteArrayOutputStream()
+        //resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+
+        //var Bmp = BitmapFactory.decodeByteArray(baos.toByteArray(), 0, baos.toByteArray().size)
+        //mRollPagerViewAdapter.menuImages[position].compress(Bitmap.CompressFormat.JPEG, 70, baos)
+        //resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 70)
         //val roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, resizedBitmap)
         //val roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, bitmap)
         //roundedBitmapDrawable.cornerRadius =  (resizedBitmap.width / 2.0).toFloat()
@@ -347,11 +391,14 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
             mTextViewAddMenuImage.setEnabled(true)
             mTextViewAddMenuImage.setTextColor(Color.rgb(79,195,247))
         }
-
+        mbImageModified = true
+/*
         filename = saveImageToLocal(resizedBitmap)
         if(filename !=""){
             mFirebaseUserMenu.multiMenuImageURL!!.add(filename)
         }
+
+ */
 
     }
 
@@ -361,8 +408,10 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
         with(alert) {
             setTitle("確認刪除照片")
             setPositiveButton("確定") { dialog, _ ->
-                mRollPagerViewAdapter.menuImages.removeAt(pos)
+                mMenuImages.removeAt(pos)
+                mRollPagerViewAdapter.menuImages=mMenuImages
                 mRollPagerView!!.setAdapter(mRollPagerViewAdapter)
+                mbImageModified=true
                 dialog.dismiss()
             }
             setNegativeButton("取消") { dialog, _ ->
@@ -374,12 +423,14 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
 
     }
 
-    private fun saveImageToLocal(bitmap: Bitmap):String {
+
+    private fun saveImageToLocal(bitmap: Bitmap, index: Int):String {
 
         val filename:String
         //val date = Date(0)
         //val sdf = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
-        filename = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+        //filename = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+        filename = "t-" + index.toString()
         var final_filename : String = ""
         try
         {
@@ -400,10 +451,10 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
 
             var fOut: OutputStream? = null
             var filepath =  "Menu_Image/" + mFirebaseUserMenu.userID + "/" + mFirebaseUserMenu.menuNumber
-            final_filename = "MenuImage-"+filename + ".jpg"
+            final_filename = filename + ".jpg"
             val file = File(mMediaStorageDir,  final_filename)
             fOut = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fOut)
             fOut.flush()
             fOut.close()
             MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName())
@@ -417,6 +468,8 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
         return final_filename
 
     }
+
+
 
     val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123
     fun checkPermissionREAD_EXTERNAL_STORAGE(

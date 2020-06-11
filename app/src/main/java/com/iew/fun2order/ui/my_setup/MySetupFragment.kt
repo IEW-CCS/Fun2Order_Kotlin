@@ -240,7 +240,7 @@ class MySetupFragment : Fragment() {
                 val database = Firebase.database
                 val myRef = database.getReference(querypath)
                 myRef.child("photoURL").setValue(photoURL.toString());
-                Toast.makeText(activity, "更新圖像成功", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(activity, "更新圖像成功", Toast.LENGTH_SHORT).show()
             }
         }
     }
