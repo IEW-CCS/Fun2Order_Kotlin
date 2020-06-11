@@ -36,8 +36,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="@2019-2020 Copyright Reserved"
+        android:text="TeamPlus@\n2019-2020 Copyright Reserved"
         android:textAlignment="center"
         android:textColor="#000000"
+        android:textSize="18dp" />
+
+
+    <TextView
+        android:id="@+id/textViewPrivacyPolicy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:autoLink="web"
+        android:text="@string/privacy_policy"
+        android:textAlignment="center"
         android:textSize="18dp" />
 </LinearLayout>

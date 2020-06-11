@@ -410,7 +410,10 @@ mMenuType=""
             val VersionInfo = "Version: ${BuildConfig.VERSION_CODE}.${BuildConfig.VERSION_NAME}"
             val item = LayoutInflater.from(this.context).inflate(R.layout.alert_about_us, null)
             val version = item.findViewById<TextView>(R.id.textViewVersion)
+            val welcome =  item.findViewById<TextView>(R.id.textViewWelcome)
+
             version.text = VersionInfo
+            welcome.text = "歡迎使用 ${context!!.getString(R.string.app_name)}"
             AlertDialog.Builder(this.context)
 
                 .setView(item)

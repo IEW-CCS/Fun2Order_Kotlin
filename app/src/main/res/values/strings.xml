@@ -6,6 +6,8 @@
     <string name="title_history">紀錄</string>
     <string name="title_setup">設定</string>
 
+    <string name="privacy_policy">www.iew-pro.com</string>
+
     <!-- Facebook application ID and custom URL scheme (app ID prefixed by 'fb'). -->
     <string name="facebook_application_id" translatable="false">YOUR_APP_ID</string>
     <string name="facebook_login_protocol_scheme" translatable="false">fbYOUR_APP_ID</string>
