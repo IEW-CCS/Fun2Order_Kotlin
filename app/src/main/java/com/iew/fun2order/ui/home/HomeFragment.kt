@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Environment
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -44,6 +45,7 @@ import com.iew.fun2order.ui.home.data.MenuItemListData
 import com.iew.fun2order.utility.LOCALBROADCASE_MESSAGE
 import com.tooltip.Tooltip
 import info.hoang8f.android.segmented.SegmentedGroup
+import java.io.File
 
 
 class HomeFragment : Fragment() {
@@ -562,8 +564,31 @@ mMenuType=""
                    var test =  it.getValue(USER_MENU::class.java)
                     //if(menuType!=""){
                         if(test!!.brandCategory.equals(menuType)){
+                            var imagePath =""
+                            if(test!!.multiMenuImageURL!!.size>0){
+                                imagePath=test!!.multiMenuImageURL!!.get(0)
+                            }
 
-                            mItemList.add(MenuItemListData(test!!.brandName, test!!.menuDescription, BitmapFactory.decodeResource(getResources(),R.drawable.image_default_member), test!!.menuImageURL ,test, mUserProfile))
+                            var mediaStorageDir: File? = null
+                            var mediaStorageReadDir: File? = null
+                            mediaStorageDir = File(
+                                Environment.getExternalStorageDirectory()
+                                    .toString() + "/Android/data/"
+                                        + getActivity()?.getApplicationContext()?.packageName
+                                        + "/Files"
+                                        + "/Menu_Image"
+                                        + "/" + test.userID
+                                        + "/" + test.menuNumber
+                            )
+                            mediaStorageReadDir = File(
+                                Environment.getExternalStorageDirectory()
+                                    .toString() + "/Android/data/"
+                                        + getActivity()?.getApplicationContext()?.packageName
+                                        + "/Files/"
+                            )
+
+                            mItemList.add(MenuItemListData(test!!.brandName, test!!.menuDescription, BitmapFactory.decodeResource(getResources(),
+                                R.drawable.image_default_member), imagePath ,test, mUserProfile, mediaStorageDir, mediaStorageReadDir))
                         }
                     //}else{
                     //    mItemList.add(MenuItemListData(test!!.brandName, test!!.menuDescription, BitmapFactory.decodeResource(getResources(),R.drawable.image_default_member), test!!.menuImageURL, test))

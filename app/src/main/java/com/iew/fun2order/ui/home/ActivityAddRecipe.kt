@@ -22,14 +22,10 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.iew.fun2order.R
-import com.iew.fun2order.db.entity.MenuType
 import com.iew.fun2order.db.firebase.*
 import com.iew.fun2order.ui.home.adapter.RecipeItemAdapter
-import com.iew.fun2order.ui.home.data.MenuItemListData
 import com.iew.fun2order.ui.home.data.RecipeItemListData
 import info.hoang8f.android.segmented.SegmentedGroup
-import java.text.SimpleDateFormat
-import java.util.*
 
 
 class ActivityAddRecipe: AppCompatActivity() {
@@ -363,7 +359,7 @@ class ActivityAddRecipe: AppCompatActivity() {
 
         mDatabase.child("USER_CUSTOM_RECIPE_TEMPLATE").child(mAuth.currentUser!!.uid).child(templateName).setValue(userRecipeTemplate)
             .addOnSuccessListener {
-                Toast.makeText(this, "存儲範本成功!", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, "存儲範本成功!", Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
 
             }
@@ -411,6 +407,11 @@ class ActivityAddRecipe: AppCompatActivity() {
                     getRecipeTemplate(view, selectedItem)
 
                     mDialog.dismiss()
+                }
+
+                listView.setOnItemLongClickListener { arg0, arg1, pos, id ->
+
+                    true
                 }
                 //listView.setCacheColorHint(Color.rgb(36, 33, 32));
                 /*
@@ -468,6 +469,35 @@ class ActivityAddRecipe: AppCompatActivity() {
                     //getRecipeTemplate(view, selectedItem)
                     getCustRecipeTemplate(view, selectedItem)
                     mDialog.dismiss()
+                }
+
+
+                listView.setOnItemLongClickListener { arg0, arg1, pos, id ->
+                    val selectedItem = listView.getItemAtPosition(pos) as String
+                    val alert = AlertDialog.Builder(this@ActivityAddRecipe)
+                    with(alert) {
+                        setTitle("確認刪除")
+                        setMessage(selectedItem)
+                        setPositiveButton("確定") { dialog, _ ->
+                            try {
+                                var menuPath = "USER_CUSTOM_RECIPE_TEMPLATE/${mAuth.currentUser!!.uid.toString()}/${selectedItem}"
+                                val database = Firebase.database
+                                database.getReference(menuPath).removeValue()
+                                array.remove(selectedItem)
+                                arr_aAdapter.notifyDataSetChanged()
+                            }
+                            catch (e: Exception)
+                            {
+                            }
+                            dialog.dismiss()
+                        }
+                        setNegativeButton("取消") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                    }
+                    val dialog = alert.create()
+                    dialog.show()
+                    true
                 }
                 //listView.setCacheColorHint(Color.rgb(36, 33, 32));
                 /*

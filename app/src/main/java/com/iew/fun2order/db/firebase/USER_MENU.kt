@@ -1,5 +1,6 @@
 package com.iew.fun2order.db.firebase
 
+import android.graphics.Bitmap
 import com.google.firebase.database.Exclude
 import com.google.firebase.firestore.IgnoreExtraProperties
 import android.os.Parcelable
