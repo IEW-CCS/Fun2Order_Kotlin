@@ -137,8 +137,8 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
                 //listGroupDetail.add(ItemsLV_GroupDetail("新增好友", "icon_add_group"))
                 getfriend.forEach()
                 {
-                    listGroupDetail.add(ItemsLV_Favourite(it, "icon_cup",""))
-                    List_Candidate.add(ItemsLV_Canditate(it, "icon_cup","", "",true))
+                    listGroupDetail.add(ItemsLV_Favourite(it, "image_default_member",""))
+                    List_Candidate.add(ItemsLV_Canditate(it, "image_default_member","", "",true))
                 }
             }
             else
@@ -427,8 +427,8 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
 
                         var groupmemberlist = groupdetailDB.getMemberByGroupID(SelectGroupID)
                         groupmemberlist.forEach() {
-                            listGroupDetail.add(ItemsLV_Favourite(it, "icon_cup",""))
-                            List_Candidate.add(ItemsLV_Canditate(it, "icon_cup","","",true))
+                            listGroupDetail.add(ItemsLV_Favourite(it, "image_default_member",""))
+                            List_Candidate.add(ItemsLV_Canditate(it, "image_default_member","","",true))
                         }
                         RecycleViewRefresh()
 

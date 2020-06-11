@@ -57,6 +57,8 @@ import kotlin.math.roundToInt
 class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
 
     private lateinit var friendDB: friendDAO
+    private lateinit var friendImageDB: friendImageDAO
+
     private lateinit var groupDetailDB : group_detailDAO
     private lateinit var dbContext: AppDatabase
     private lateinit var memoryContext: MemoryDatabase
@@ -103,6 +105,7 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
         memoryContext = MemoryDatabase(context!!)
 
         friendDB = memoryContext.frienddao()
+        friendImageDB = memoryContext.friendImagedao()
         groupDetailDB = dbContext.groupdetaildao()
 
         activity?.let {
@@ -153,7 +156,7 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
         val friendList = friendDB.getFriendslist()
         lstFavorite.clear()
         friendList.forEach() {it->
-           lstFavorite.add(ItemsLV_Favourite(it, "icon_cup",""))
+           lstFavorite.add(ItemsLV_Favourite(it, "image_default_member",""))
         }
          recycleViewRefresh()
 
@@ -531,6 +534,8 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
         val queryPath = "USER_PROFILE/$uuid/friendList"
         val myRef = Firebase.database.getReference(queryPath)
         friendDB.deleteall()
+        friendImageDB.deleteall()
+
         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (snapshot in dataSnapshot.children) {
@@ -545,64 +550,12 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                 }
 
                 prepareFriendListShow()
-                updateFriendImage(context)
             }
             override fun onCancelled(error: DatabaseError) {
                 // Failed to read value
                 // Log.w(TAG, "Failed to read value.", error.toException())
             }
         })
-    }
-
-
-    private fun updateFriendImage(context: Context) {
-        val dbContext: MemoryDatabase = MemoryDatabase(context)
-        val friendDB: friendDAO = dbContext.frienddao()
-        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
-
-        val friendList = friendDB.getFriendslist()
-        var friendUUID: String = ""
-        var friendDisplayName: String = ""
-        friendImageDB.deleteall()
-        friendList.forEach() { it ->
-            friendUUID = it
-            if(friendUUID != "") {
-                val queryPath = "USER_PROFILE/$friendUUID"
-                val database = Firebase.database
-                val myRef = database.getReference(queryPath)
-                myRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                        friendDisplayName = value?.userName ?: friendUUID
-                        val photoURL = value?.photoURL
-                        if (photoURL != null) {
-                            val islandRef = Firebase.storage.reference.child(photoURL)
-                            val ONE_MEGABYTE = 1024 * 1024.toLong()
-                            islandRef.getBytes(ONE_MEGABYTE)
-                                .addOnSuccessListener { bytesPrm: ByteArray ->
-                                    if (friendUUID != "") {
-                                        try {
-                                            val friendImage: entityFriendImage = entityFriendImage(
-                                                null,
-                                                friendUUID,
-                                                friendDisplayName,
-                                                bytesPrm
-                                            )
-                                            friendImageDB.insertRow(friendImage)
-                                        } catch (ex: Exception) {
-                                        }
-                                    }
-                                }
-                        }
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                        // Failed to read value
-                        // Log.w(TAG, "Failed to read value.", error.toException())
-                    }
-                })
-            }
-        }
     }
 }
 

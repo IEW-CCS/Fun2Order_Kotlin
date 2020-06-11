@@ -46,10 +46,8 @@ class AdapterRC_Favourite(var context: Context, var lstItemsFavourite: List<Item
 
         val dbContext: MemoryDatabase = MemoryDatabase(context)
         val friendImageDB: friendImageDAO = dbContext.friendImagedao()
-
         fun bindModel(ItemsLV_Favourite: ItemsLV_Favourite) {
             val friendInfo = friendImageDB.getFriendImageByName(ItemsLV_Favourite.Name.toString())
-
             val queryPath = "USER_PROFILE/" + ItemsLV_Favourite.Name.toString()
             val database = Firebase.database
             val myRef = database.getReference(queryPath)
@@ -57,15 +55,11 @@ class AdapterRC_Favourite(var context: Context, var lstItemsFavourite: List<Item
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val value = dataSnapshot.getValue(USER_PROFILE::class.java)
                     itemView.UserName.text = value?.userName
+                    itemView.UserView.setImageDrawable(getImageDrawable(ItemsLV_Favourite.imageName))
                     ItemsLV_Favourite.displayname = value?.userName ?: ItemsLV_Favourite.Name
 
                     if (friendInfo != null) {
-                        ItemsLV_Favourite.displayname = friendInfo.displayname ?: friendInfo.name
-                        val bmp = BitmapFactory.decodeByteArray(
-                            friendInfo.image,
-                            0,
-                            friendInfo.image.size
-                        )
+                        var bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
                         itemView.UserView.setImageBitmap(bmp)
                     } else {
                         val photoURL = value?.photoURL
@@ -81,17 +75,17 @@ class AdapterRC_Favourite(var context: Context, var lstItemsFavourite: List<Item
                                     )
                                     itemView.UserView.setImageBitmap(bmp)
 
-                                    //---- 只有傳統 Friend List 回寫入DB 其餘不用 -----
                                     try {
-                                        val friendImage: entityFriendImage = entityFriendImage(
-                                            null,
-                                            ItemsLV_Favourite.Name.toString(),
-                                            ItemsLV_Favourite.displayname,
-                                            bytesPrm
-                                        )
-                                        friendImageDB.insertRow(friendImage)
-                                    } catch (ex: Exception) {
-                                    }
+                                        if(value?.userID!= "") {
+                                            val friendImage: entityFriendImage = entityFriendImage(
+                                                null,
+                                                value?.userID,
+                                                value?.userName,
+                                                bytesPrm
+                                            )
+                                            friendImageDB.insertRow(friendImage)
+                                        }
+                                    } catch (ex: Exception) { }
                                 }
                                 .addOnFailureListener {
                                     itemView.UserView.setImageDrawable(

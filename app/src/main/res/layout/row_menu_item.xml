@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="10dp"
             android:layout_marginTop="0dp"
             android:focusable="false"
             android:focusableInTouchMode="false"
@@ -55,13 +55,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
             android:layout_marginTop="3dp"
-            android:layout_marginLeft="20dp"
             android:layout_marginBottom="5dp"
             android:focusable="false"
             android:focusableInTouchMode="false"
-            android:text="New Text"
             android:singleLine="false"
+            android:text="New Text"
             android:textSize="12dp" />
     </LinearLayout>
 

@@ -123,7 +123,7 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
                 val getFriendList =  groupDetailDB.getMemberByGroupID(selectedGroupID)
                 lstGroupDetail.clear()
                 getFriendList.forEach(){ it->
-                    lstGroupDetail.add(ItemsLV_Favourite(it, "icon_cup",""))
+                    lstGroupDetail.add(ItemsLV_Favourite(it, "image_default_member",""))
                 }
             }
             else
@@ -190,7 +190,7 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
 
                         val groupMemberList = groupDetailDB.getMemberByGroupID(selectedGroupID)
                         groupMemberList.forEach() {
-                            lstGroupDetail.add(ItemsLV_Favourite(it, "icon_cup",""))
+                            lstGroupDetail.add(ItemsLV_Favourite(it, "image_default_member",""))
                         }
                         recycleViewRefresh()
 
@@ -296,7 +296,7 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
                         lstGroupDetail.clear()
                         getfriend.forEach()
                         {
-                            lstGroupDetail.add(ItemsLV_Favourite(it, "icon_cup",""))
+                            lstGroupDetail.add(ItemsLV_Favourite(it, "image_default_member",""))
                         }
                         recycleViewRefresh()
                     } catch (e: Exception) {
@@ -427,7 +427,7 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
             lstGroupDetail.clear()
             getfriend.forEach()
             {
-                lstGroupDetail.add(ItemsLV_Favourite(it, "icon_cup",""))
+                lstGroupDetail.add(ItemsLV_Favourite(it, "image_default_member",""))
             }
             recycleViewRefresh()
         }

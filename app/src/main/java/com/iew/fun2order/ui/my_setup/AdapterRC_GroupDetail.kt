@@ -15,7 +15,9 @@ import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.friendImageDAO
 import com.iew.fun2order.db.database.MemoryDatabase
+import com.iew.fun2order.db.entity.entityFriendImage
 import com.iew.fun2order.db.firebase.USER_PROFILE
+import kotlinx.android.synthetic.main.row_setup_canditate.view.*
 import kotlinx.android.synthetic.main.row_setup_favouritefriend.view.*
 import kotlinx.android.synthetic.main.row_setup_favouritefriend.view.UserName
 import kotlinx.android.synthetic.main.row_setup_favouritefriend.view.UserView
@@ -78,28 +80,53 @@ class AdapterRC_GroupDetail(var context: Context, var lstItemsGroupDetail: List<
 
     inner class ItemsViewHolder(itemView: View) : BaseViewHolder<ItemsLV_Favourite>(itemView){
 
-        override fun bindModel(ItemsLV_Favourite: ItemsLV_Favourite){
+        val dbContext: MemoryDatabase = MemoryDatabase(context)
+        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
 
+        override fun bindModel(ItemsLV_Favourite: ItemsLV_Favourite) {
 
-                var queryPath = "USER_PROFILE/" + ItemsLV_Favourite.Name.toString()
-                val database = Firebase.database
-                val myRef = database.getReference(queryPath)
+            val friendInfo = friendImageDB.getFriendImageByName(ItemsLV_Favourite.Name.toString())
+            var queryPath = "USER_PROFILE/" + ItemsLV_Favourite.Name.toString()
+            val database = Firebase.database
+            val myRef = database.getReference(queryPath)
 
-                // Read from the database
-                myRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+            // Read from the database
+            myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
 
-                        val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                        itemView.UserName.text = value?.userName
+                    val value = dataSnapshot.getValue(USER_PROFILE::class.java)
+                    itemView.UserName.text = value?.userName
+                    itemView.UserView.setImageDrawable(getImageDrawable(ItemsLV_Favourite.imageName))
 
+                    if (friendInfo != null) {
+                        val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
+                        itemView.UserView.setImageBitmap(bmp)
+                    } else {
                         val photoURL = value?.photoURL
-
                         if (photoURL != null) {
                             var islandRef = Firebase.storage.reference.child(photoURL)
                             val ONE_MEGABYTE = 1024 * 1024.toLong()
-                            islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener { bytesPrm: ByteArray ->
-                                    val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+                            islandRef.getBytes(ONE_MEGABYTE)
+                                .addOnSuccessListener { bytesPrm: ByteArray ->
+                                    val bmp = BitmapFactory.decodeByteArray(
+                                        bytesPrm,
+                                        0,
+                                        bytesPrm.size
+                                    )
                                     itemView.UserView.setImageBitmap(bmp)
+
+                                    try {
+                                        if(value?.userID!= "") {
+                                            val friendImage: entityFriendImage = entityFriendImage(
+                                                null,
+                                                value?.userID,
+                                                value?.userName,
+                                                bytesPrm
+                                            )
+                                            friendImageDB.insertRow(friendImage)
+                                        }
+                                    } catch (ex: Exception) {
+                                    }
                                 }
                                 .addOnFailureListener {
                                     itemView.UserView.setImageDrawable(
@@ -109,15 +136,20 @@ class AdapterRC_GroupDetail(var context: Context, var lstItemsGroupDetail: List<
                                     )
                                 }
                         } else {
-                            itemView.UserView.setImageDrawable(getImageDrawable(ItemsLV_Favourite.imageName))
+                            itemView.UserView.setImageDrawable(
+                                getImageDrawable(
+                                    ItemsLV_Favourite.imageName
+                                )
+                            )
                         }
                     }
+                }
 
-                    override fun onCancelled(error: DatabaseError) {
-                        // Failed to read value
-                        // Log.w(TAG, "Failed to read value.", error.toException())
-                    }
-                })
+                override fun onCancelled(error: DatabaseError) {
+                    // Failed to read value
+                    // Log.w(TAG, "Failed to read value.", error.toException())
+                }
+            })
 
         }
 

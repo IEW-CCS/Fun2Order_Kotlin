@@ -17,6 +17,7 @@ import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.friendImageDAO
 import com.iew.fun2order.db.database.MemoryDatabase
+import com.iew.fun2order.db.entity.entityFriendImage
 import com.iew.fun2order.db.firebase.USER_PROFILE
 import kotlinx.android.synthetic.main.row_setup_canditate.view.*
 import kotlinx.android.synthetic.main.row_setup_memberinfobody.view.*
@@ -47,7 +48,6 @@ class AdapterRC_Candidate(
         fun bindModel(ItemsLV_AddMember: ItemsLV_Canditate, Position: Int) {
 
             val friendInfo = friendImageDB.getFriendImageByName(ItemsLV_AddMember.Name.toString())
-
             val queryPath = "USER_PROFILE/" + ItemsLV_AddMember.Name.toString()
             val database = Firebase.database
             val myRef = database.getReference(queryPath)
@@ -55,14 +55,11 @@ class AdapterRC_Candidate(
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val value = dataSnapshot.getValue(USER_PROFILE::class.java)
                     itemView.SelectFriendName.text = value?.userName
+                    itemView.SelectFriendView.setImageDrawable(getImageDrawable(ItemsLV_AddMember.imageName))
                     ItemsLV_AddMember.tokenid = value?.tokenID.toString()
 
                     if (friendInfo != null) {
-                        val bmp = BitmapFactory.decodeByteArray(
-                            friendInfo.image,
-                            0,
-                            friendInfo.image.size
-                        )
+                        val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
                         itemView.SelectFriendView.setImageBitmap(bmp)
                     } else {
 
@@ -76,6 +73,19 @@ class AdapterRC_Candidate(
                                     val bmp =
                                         BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
                                     itemView.SelectFriendView.setImageBitmap(bmp)
+
+                                    try {
+                                        if(value?.userID!= "") {
+                                            val friendImage: entityFriendImage = entityFriendImage(
+                                                null,
+                                                value?.userID,
+                                                value?.userName,
+                                                bytesPrm
+                                            )
+                                            friendImageDB.insertRow(friendImage)
+                                        }
+                                    } catch (ex: Exception) {
+                                    }
                                 }
                                 .addOnFailureListener {
                                     itemView.SelectFriendView.setImageDrawable(

@@ -16,6 +16,7 @@ import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.friendImageDAO
 import com.iew.fun2order.db.database.MemoryDatabase
+import com.iew.fun2order.db.entity.entityFriendImage
 import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.ui.my_setup.listen
@@ -90,8 +91,12 @@ class AdapterRC_OrderDetailStatus(
     inner class AcceptViewHolder(itemView: View) :
         BaseViewHolder<ItemsLV_OrderDetailStatusAccept>(itemView) {
 
+        val dbContext: MemoryDatabase = MemoryDatabase(context)
+        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
+
         override fun bindModel(OrderDetailStatusAccept: ItemsLV_OrderDetailStatusAccept) {
 
+            val friendInfo = friendImageDB.getFriendImageByName(OrderDetailStatusAccept.userUUID.toString())
             val queryPath = "USER_PROFILE/" + OrderDetailStatusAccept.userUUID.toString()
             val database = Firebase.database
             val myRef = database.getReference(queryPath)
@@ -99,19 +104,39 @@ class AdapterRC_OrderDetailStatus(
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val value = dataSnapshot.getValue(USER_PROFILE::class.java)
                     itemView.orderDetail_Accept_UserName.text = value?.userName
-                    val photoURL = value?.photoURL
-                    val islandRef = Firebase.storage.reference.child(photoURL!!)
-                    val ONE_MEGABYTE = 1024 * 1024.toLong()
-                    islandRef.getBytes(ONE_MEGABYTE)
-                        .addOnSuccessListener { bytesPrm: ByteArray ->
-                            val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
-                            itemView.orderDetail_Accept_UserView.setImageBitmap(bmp)
-                        }
-                        .addOnFailureListener {
-                            itemView.orderDetail_Accept_UserView.setImageDrawable(
-                                getImageDrawable("image_default_member")
-                            )
-                        }
+                    itemView.orderDetail_Accept_UserView.setImageDrawable(getImageDrawable("image_default_member"))
+
+                    if (friendInfo != null) {
+                        val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
+                        itemView.orderDetail_Accept_UserView.setImageBitmap(bmp)
+                    } else {
+
+                        val photoURL = value?.photoURL
+                        val islandRef = Firebase.storage.reference.child(photoURL!!)
+                        val ONE_MEGABYTE = 1024 * 1024.toLong()
+                        islandRef.getBytes(ONE_MEGABYTE)
+                            .addOnSuccessListener { bytesPrm: ByteArray ->
+                                val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+                                itemView.orderDetail_Accept_UserView.setImageBitmap(bmp)
+                                try {
+                                    if(value?.userID!= "") {
+                                        val friendImage: entityFriendImage = entityFriendImage(
+                                            null,
+                                            value?.userID,
+                                            value?.userName,
+                                            bytesPrm
+                                        )
+                                        friendImageDB.insertRow(friendImage)
+                                    }
+                                } catch (ex: Exception) {
+                                }
+                            }
+                            .addOnFailureListener {
+                                itemView.orderDetail_Accept_UserView.setImageDrawable(
+                                    getImageDrawable("image_default_member")
+                                )
+                            }
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -121,8 +146,7 @@ class AdapterRC_OrderDetailStatus(
 
             // set description
             itemView.orderDetail_Accept_Layout.setBackgroundResource(R.drawable.shape_row_orderstatus_accept)
-            itemView.orderDetail_Accept_UserLocation.text =
-                OrderDetailStatusAccept.userLocation ?: ""
+            itemView.orderDetail_Accept_UserLocation.text = OrderDetailStatusAccept.userLocation ?: ""
             itemView.orderDetail_Accept_UserQuantity.text = OrderDetailStatusAccept.quantity
             var userContentItemData: String = "請點擊查看訂單詳細內容"
             if (OrderDetailStatusAccept.userContentProduct.count() < 5) {
@@ -167,9 +191,11 @@ class AdapterRC_OrderDetailStatus(
     inner class OthersViewHolder(itemView: View) :
         BaseViewHolder<ItemsLV_OrderDetailStatusOthers>(itemView) {
 
-
+        val dbContext: MemoryDatabase = MemoryDatabase(context)
+        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
         override fun bindModel(OrderDetailStatusOthers: ItemsLV_OrderDetailStatusOthers) {
 
+            val friendInfo = friendImageDB.getFriendImageByName(OrderDetailStatusOthers.userUUID.toString())
             val querypath = "USER_PROFILE/" + OrderDetailStatusOthers.userUUID.toString()
             val database = Firebase.database
             val myRef = database.getReference(querypath)
@@ -177,19 +203,40 @@ class AdapterRC_OrderDetailStatus(
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val value = dataSnapshot.getValue(USER_PROFILE::class.java)
                     itemView.orderDetail_Others_UserName.text = value?.userName
-                    val photoURL = value?.photoURL
-                    val islandRef = Firebase.storage.reference.child(photoURL!!)
-                    val ONE_MEGABYTE = 1024 * 1024.toLong()
-                    islandRef.getBytes(ONE_MEGABYTE)
-                        .addOnSuccessListener { bytesPrm: ByteArray ->
-                            val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
-                            itemView.orderDetail_Others_UserView.setImageBitmap(bmp)
-                        }
-                        .addOnFailureListener {
-                            itemView.orderDetail_Others_UserView.setImageDrawable(
-                                getImageDrawable("image_default_member")
-                            )
-                        }
+                    itemView.orderDetail_Others_UserView.setImageDrawable(getImageDrawable("image_default_member"))
+
+                    if (friendInfo != null) {
+                        val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
+                        itemView.orderDetail_Others_UserView.setImageBitmap(bmp)
+                    } else {
+
+                        val photoURL = value?.photoURL
+                        val islandRef = Firebase.storage.reference.child(photoURL!!)
+                        val ONE_MEGABYTE = 1024 * 1024.toLong()
+                        islandRef.getBytes(ONE_MEGABYTE)
+                            .addOnSuccessListener { bytesPrm: ByteArray ->
+                                val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+                                itemView.orderDetail_Others_UserView.setImageBitmap(bmp)
+
+                                try {
+                                    if(value?.userID!= "") {
+                                        val friendImage: entityFriendImage = entityFriendImage(
+                                            null,
+                                            value?.userID,
+                                            value?.userName,
+                                            bytesPrm
+                                        )
+                                        friendImageDB.insertRow(friendImage)
+                                    }
+                                } catch (ex: Exception) {
+                                }
+                            }
+                            .addOnFailureListener {
+                                itemView.orderDetail_Others_UserView.setImageDrawable(
+                                    getImageDrawable("image_default_member")
+                                )
+                            }
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {

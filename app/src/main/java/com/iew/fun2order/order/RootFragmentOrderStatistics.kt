@@ -93,13 +93,6 @@ class RootFragmentOrderStatistics(var _menuorder: USER_MENU_ORDER) : Fragment(),
 
         rcvStatistics.layoutManager = LinearLayoutManager(activity)
 
-
-        if (mSegmentedGroupLocation.childCount > 0) {
-            val default = mSegmentedGroupLocation.getChildAt(0) as RadioButton
-            default.isChecked = true
-            setupAccept()
-        }
-
         //---- User Select Location  -----
         mSegmentedGroupLocation.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { group, checkedId ->
             val radioButton: RadioButton = group.findViewById<RadioButton>(checkedId)
@@ -112,6 +105,12 @@ class RootFragmentOrderStatistics(var _menuorder: USER_MENU_ORDER) : Fragment(),
                 }
             }
         })
+
+
+        if (mSegmentedGroupLocation.childCount > 0) {
+            val default = mSegmentedGroupLocation.getChildAt(0) as RadioButton
+            default.isChecked = true
+        }
 
         noteBook.setOnClickListener()
        {
