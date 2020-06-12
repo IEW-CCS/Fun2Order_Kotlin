@@ -430,35 +430,35 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         MenuImaegByteArray.clear()
 
         multiMenuImageURL!!.forEach {
-            if(it != "") {
+            if (it != "") {
                 MenuImaegByteArray.put(it, null)
                 var menuImaeg = MenuImageDB.getMenuImageByName(it)
                 if (menuImaeg != null) {
-                    MenuImaegByteArray[it] = menuImaeg.image
-                    replyImageCount++
-                    if (replyImageCount == totalImageCount) {
-                        DisplayImage()
-                    }
-                } else {
-                    val islandRef = Firebase.storage.reference.child(it)
-                    val ONE_MEGABYTE = 1024 * 1024.toLong()
-                    islandRef.getBytes(ONE_MEGABYTE)
-                        .addOnSuccessListener { bytesPrm: ByteArray ->
-                            brandImageStream = bytesPrm.clone()
-                            MenuImaegByteArray[it] = brandImageStream
-
-                            try {
-                                MenuImageDB.insertRow(entityMeunImage(null, it, "", brandImageStream!!))
-                            }
-                            catch(e: Exception){ }
-
-                            replyImageCount++
-                            if (replyImageCount == totalImageCount) {
-                                DisplayImage()
-                            }
-                        }
-                        .addOnFailureListener {}
+                    MenuImageDB.delete(menuImaeg)
                 }
+                val islandRef = Firebase.storage.reference.child(it)
+                val ONE_MEGABYTE = 1024 * 1024.toLong()
+                islandRef.getBytes(ONE_MEGABYTE)
+                    .addOnSuccessListener { bytesPrm: ByteArray ->
+                        brandImageStream = bytesPrm.clone()
+                        MenuImaegByteArray[it] = brandImageStream
+
+                        try {
+                            MenuImageDB.insertRow(entityMeunImage(null, it, "", brandImageStream!!))
+                        } catch (e: Exception) {
+                        }
+
+                        replyImageCount++
+                        if (replyImageCount == totalImageCount) {
+                            DisplayImage()
+                        }
+                    }
+                    .addOnFailureListener {
+                        replyImageCount++
+                        if (replyImageCount == totalImageCount) {
+                            DisplayImage()
+                        }
+                    }
             }
         }
     }
@@ -467,10 +467,13 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         var width: Int = 0
         var iCnt: Int = 1
 
+        val MenuImaegExist = MenuImaegByteArray.filter { it.value != null }
+        val MenuImaegFailed = MenuImaegByteArray.filter { it.value == null }
+
         // val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
-        if (MenuImaegByteArray.count() > 1) {
-            width = (gridLayoutBtnList.width) / MenuImaegByteArray.count(); // 螢幕的寬度/4放近with
-            iCnt = MenuImaegByteArray.count()
+        if (MenuImaegExist.count() > 1) {
+            width = (gridLayoutBtnList.width) / MenuImaegExist.count(); // 螢幕的寬度/4放近with
+            iCnt = MenuImaegExist.count()
         } else {
             width = (gridLayoutBtnList.width) / 1;        // 螢幕的寬度/4放近with
         }
@@ -479,7 +482,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         gridLayoutBtnList.columnCount = iCnt;           // 設定GridLayout有幾行
         gridLayoutBtnList.rowCount = 1;              // 設定GridLayout有幾列
 
-        MenuImaegByteArray.forEach()
+        MenuImaegExist.forEach()
         {
             if(it.value != null) {
                 val b1 = ImageView(this)
@@ -491,6 +494,21 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                 b1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                 gridLayoutBtnList.addView(b1, width, 320);
             }
+        }
+
+        MenuImaegFailed.forEach()
+        {
+
+            val notifyAlert = AlertDialog.Builder(this).create()
+            notifyAlert.setTitle("存取影像錯誤")
+            notifyAlert.setMessage("照片路徑：${it.key} \n資料讀取錯誤!!")
+            notifyAlert.setButton(
+                AlertDialog.BUTTON_POSITIVE,
+                "OK"
+            ) { dialogInterface, i ->
+            }
+            notifyAlert.show()
+
         }
     }
 
@@ -526,14 +544,14 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                 if (resultCode == Activity.RESULT_OK) {
 
                     val selectProduct = data?.extras?.get("SelectItem") as MENU_PRODUCT
-                    if ((lstSelectedProduct.count() + 1) < 6) {
+                    if ((lstSelectedProduct.count() + 1) < 11) {
                         lstSelectedProduct.add(selectProduct)
                         rcvSelectedProduct.adapter!!.notifyDataSetChanged()
                         boolChangeOrder  = true
                     } else {
                         val notifyAlert = AlertDialog.Builder(this).create()
                         notifyAlert.setTitle("通知")
-                        notifyAlert.setMessage("訂單產品超過5筆, 無法再新增!!")
+                        notifyAlert.setMessage("訂單產品超過10筆, 無法再新增!!")
                         notifyAlert.setButton(
                             AlertDialog.BUTTON_POSITIVE,
                             "OK"
@@ -549,7 +567,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                     val referenceProduct =
                         data?.getParcelableArrayListExtra<MENU_PRODUCT>("referenceProducts")
                     val afterrefProductCount = referenceProduct?.count() ?: 0
-                    if (lstSelectedProduct.count().toInt() + afterrefProductCount < 6) {
+                    if (lstSelectedProduct.count().toInt() + afterrefProductCount < 11) {
                         referenceProduct!!.forEach()
                         {
                             lstSelectedProduct.add(it.copy())
@@ -559,7 +577,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                     } else {
                         val notifyAlert = AlertDialog.Builder(this).create()
                         notifyAlert.setTitle("通知")
-                        notifyAlert.setMessage("訂單產品超過5筆, 無法再新增!!")
+                        notifyAlert.setMessage("訂單產品超過10筆, 無法再新增!!")
                         notifyAlert.setButton(
                             AlertDialog.BUTTON_POSITIVE,
                             "OK"
@@ -591,6 +609,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                 lstSelectedProduct.removeAt(position)
                 rcvSelectedProduct.adapter!!.notifyDataSetChanged()
                 dialog.dismiss()
+                boolChangeOrder  = true
             }
             setNegativeButton("取消") { dialog, _ ->
                 dialog.dismiss()

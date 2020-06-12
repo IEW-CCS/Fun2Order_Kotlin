@@ -169,7 +169,7 @@
                 android:layout_gravity="left|center_vertical"
                 android:layout_marginLeft="20dp"
                 android:layout_weight="0.9"
-                android:text="新增產品(最多5筆)"
+                android:text="新增產品(最多10筆)"
                 android:textColor="#0000ff"
                 android:textSize="18dp" />
 

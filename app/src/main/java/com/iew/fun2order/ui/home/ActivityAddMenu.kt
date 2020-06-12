@@ -544,7 +544,6 @@ class ActivityAddMenu : AppCompatActivity() {
         textViewEditImageDesc.setOnClickListener {
 
             val bundle = Bundle()
-            //bundle.putString("EDIT", "N")
             var I = Intent(context, ActivityAddMenuImage::class.java)
             bundle.putParcelable("USER_MENU", mFirebaseUserMenu)
             I.putExtras(bundle)
@@ -682,7 +681,8 @@ class ActivityAddMenu : AppCompatActivity() {
                 if(resultCode == Activity.RESULT_OK && data != null){
 
                     mFirebaseUserMenu = data.extras.get("USER_MENU") as USER_MENU
-                    mbImageModified = data.extras.get("IMAGE_CHG") as Boolean
+                    mbImageModified = false
+                    //mbImageModified = data.extras.get("IMAGE_CHG") as Boolean
                     //mMenuImages = data.extras.get("MENU_IMAGES") as MutableList<Bitmap>
                     val editTextMenuDesc = findViewById(R.id.editTextMenuDesc) as EditText
                     editTextMenuDesc.setText( mFirebaseUserMenu.menuDescription)
