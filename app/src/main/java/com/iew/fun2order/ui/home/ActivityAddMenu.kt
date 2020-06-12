@@ -18,6 +18,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
+import androidx.core.view.children
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
@@ -32,6 +33,8 @@ import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.MenuTypeDAO
 import com.iew.fun2order.db.database.AppDatabase
+import com.iew.fun2order.db.database.MemoryDatabase
+import com.iew.fun2order.db.entity.entityMeunImage
 import com.iew.fun2order.db.firebase.PRODUCT
 import com.iew.fun2order.db.firebase.STORE_INFO
 import com.iew.fun2order.db.firebase.USER_MENU
@@ -48,6 +51,7 @@ import kotlin.math.roundToInt
 
 
 class ActivityAddMenu : AppCompatActivity() {
+
     private val ACTION_CAMERA_REQUEST_CODE = 100
     private val ACTION_ALBUM_REQUEST_CODE = 200
     private val ACTION_ADD_MENU_PROD_LIST_REQUEST_CODE = 300
@@ -60,10 +64,13 @@ class ActivityAddMenu : AppCompatActivity() {
     //private lateinit var mLocationDB: LocationDAO
     //private lateinit var mProductDB: ProductDAO
     private lateinit var mDBContext: AppDatabase
+    private var mContext : Context? = null
+
+    private var MenuImaegByteArray : MutableMap<String,ByteArray?> = mutableMapOf<String,ByteArray?>()
 
     //private lateinit var mMenuImage: ImageButton
     private lateinit var mMenuBitmap : Bitmap
-    var mMenuImages: MutableList<Bitmap> = mutableListOf()
+    // var mMenuImages: MutableList<Bitmap> = mutableListOf()
     private lateinit var mTextViewMenuPic: TextView
     private lateinit var  mDialog : AlertDialog
     var mMediaStorageDir: File? = null
@@ -76,7 +83,6 @@ class ActivityAddMenu : AppCompatActivity() {
     private lateinit var mDatabase: DatabaseReference
     private var mFirebaseUserMenu: USER_MENU = USER_MENU()
     private var mFirebaseUserProfile: USER_PROFILE = USER_PROFILE()
-    private var mbImageModified: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,6 +93,7 @@ class ActivityAddMenu : AppCompatActivity() {
 
         // [START initialize_database_ref]
         mDatabase = Firebase.database.reference
+        mContext = this
 
         // [END initialize_database_ref]
 
@@ -143,7 +150,6 @@ class ActivityAddMenu : AppCompatActivity() {
             editTextMenuID.setText(mFirebaseUserMenu.brandName)
             textViewCrMenuType.setText(mFirebaseUserMenu.brandCategory)
             editTextMenuDesc.setText(mFirebaseUserMenu.menuDescription)
-
             setImageButton()
             /*
             if(mFirebaseUserMenu.menuImageURL != ""){
@@ -679,17 +685,12 @@ class ActivityAddMenu : AppCompatActivity() {
 
             ACTION_ADD_MENU_IMAGE_REQUEST_CODE -> {
                 if(resultCode == Activity.RESULT_OK && data != null){
-
                     mFirebaseUserMenu = data.extras.get("USER_MENU") as USER_MENU
-                    mbImageModified = false
                     //mbImageModified = data.extras.get("IMAGE_CHG") as Boolean
                     //mMenuImages = data.extras.get("MENU_IMAGES") as MutableList<Bitmap>
                     val editTextMenuDesc = findViewById(R.id.editTextMenuDesc) as EditText
                     editTextMenuDesc.setText( mFirebaseUserMenu.menuDescription)
-                    if(mbImageModified){
-                        setImageButton()
-                    }
-
+                    showUpdateImage()
                 }
             }
 
@@ -777,6 +778,7 @@ class ActivityAddMenu : AppCompatActivity() {
         val editTextMenuDesc = findViewById(R.id.editTextMenuDesc) as EditText
         val textViewCrMenuType = findViewById(R.id.textViewCrMenuType) as TextView
         val baos = ByteArrayOutputStream()
+
         //mMenuBitmap.compress(Bitmap.CompressFormat.PNG, 50, baos)
 
         //val usermenu: UserMenu = UserMenu(null, editTextMenuID.getText().toString(), editTextMenuDesc.getText().toString(),
@@ -811,45 +813,26 @@ class ActivityAddMenu : AppCompatActivity() {
 
         //Create USER_MENU_ORDER
         userMenu.brandCategory = textViewCrMenuType.getText().toString()
-        userMenu.brandName=editTextMenuID.getText().toString()
+        userMenu.brandName=editTextMenuID.getText().toString().replace("\n","")
         userMenu.createTime=timeStamp
         //var location = LOCATION("FAB1")
         //userMenu.locations.add(location)
         //location.location="FAB2"
         //userMenu.locations.add(location)
         userMenu.menuDescription=editTextMenuDesc.getText().toString()
-        userMenu.menuImageURL="Menu_Image/${mAuth.currentUser!!.uid}/${userMenuID}.png"
+        userMenu.menuImageURL=""
         //userMenu.menuItems
         userMenu.menuNumber=userMenuID
         //userMenu.menuRecipes
         userMenu.userID=mAuth.currentUser!!.uid
         userMenu.userName=mAuth.currentUser!!.displayName
-        //Create
-        //Copy Image to Local
-        if(mbImageModified) {
-            mFirebaseUserMenu.multiMenuImageURL!!.clear()
-            var index = 0
-            mMenuImages.forEach() {
-                var filename = saveImageToLocal(it, index)
-                if (filename != "") {
-                    mFirebaseUserMenu.multiMenuImageURL!!.add(filename)
-                    index++
-                }
-            }
-        }
         userMenu.multiMenuImageURL = mFirebaseUserMenu.multiMenuImageURL
+
+        //------ Upload Image  -------
+        uploadImageToFirebase(userMenu.userID!!, userMenu.menuNumber!!, userMenu.multiMenuImageURL!!)
 
         mDatabase.child("USER_MENU_INFORMATION").child(mAuth.currentUser!!.uid).child(userMenuID).setValue(userMenu)
             .addOnSuccessListener {
-                //Toast.makeText(this, "建立菜單成功!", Toast.LENGTH_SHORT).show()
-                if(mbImageModified) {
-                    var index = 0
-                    mMenuImages.forEach() {
-                        uploadImage(it, userMenuID, index.toString())
-                        index++
-                    }
-                }
-
                 // Write was successful!
                 val bundle = Bundle()
                 bundle.putString("Result", "OK")
@@ -862,6 +845,72 @@ class ActivityAddMenu : AppCompatActivity() {
                 // Write failed
                 Toast.makeText(this, "建立菜單失敗!", Toast.LENGTH_SHORT).show()
             }
+    }
+
+
+    private fun uploadImageToFirebase(MenuUserID:String,  MenuNumber:String, MenuImageURL : MutableList<String>)
+    {
+
+        //---- 上傳之前先砍掉所有影像 -----
+        if(MenuUserID!= "" && MenuNumber != "") {
+            val ImageFolder = "Menu_Image/${MenuUserID}/${MenuNumber}"
+            val listRef = Firebase.storage.reference.child(ImageFolder!!)
+            listRef.listAll()
+                .addOnSuccessListener { listResult ->
+                    listResult.prefixes.forEach { prefix ->
+                        // All the prefixes under listRef.
+                        // You may call listAll() recursively on them.
+                    }
+
+                    listResult.items.forEach { item ->
+                        item.delete()
+                        // All the items under listRef
+                    }
+
+                    //--- 砍完以後再新增影像到Firebase 上面-----
+                    val MemoryDBContext = MemoryDatabase(this!!)
+                    val MenuImageDB = MemoryDBContext.menuImagedao()
+
+                    MenuImageURL.forEach()
+                    {
+                        imageURL ->
+                        val MenuImageObject = MenuImageDB.getMenuImageByName(imageURL)
+                        if(MenuImageObject!= null) {
+                            val islandRef = Firebase.storage.reference.child(imageURL!!)
+                            val uploadTask: UploadTask = islandRef.putBytes(MenuImageObject.image)
+                            uploadTask.addOnFailureListener(object : OnFailureListener {
+                                override fun onFailure(p0: Exception) {
+                                    Toast.makeText(mContext, "照片上傳失敗: " + imageURL, Toast.LENGTH_SHORT).show()
+                                }
+                            }).addOnSuccessListener(object :
+                                OnSuccessListener<UploadTask.TaskSnapshot?> {
+                                override fun onSuccess(p0: UploadTask.TaskSnapshot?) {
+                                    Toast.makeText(mContext, "照片上傳成功: " + imageURL, Toast.LENGTH_SHORT).show()
+                                }
+                            })
+                        }
+                        else
+                        {
+                            val notifyAlert = AlertDialog.Builder(this).create()
+                            notifyAlert.setTitle("存取影像錯誤")
+                            notifyAlert.setMessage("更新照片資料 ${imageURL} \n資料讀取錯誤!!")
+                            notifyAlert.setButton(
+                                AlertDialog.BUTTON_POSITIVE,
+                                "OK"
+                            ) { dialogInterface, i ->
+                            }
+                            notifyAlert.show()
+
+                        }
+                    }
+
+
+                }
+                .addOnFailureListener {
+                    // Uh-oh, an error occurred!
+                }
+        }
+
     }
 
     private fun uploadImage(bitmap: Bitmap, menu_number:String,  image_name: String) {
@@ -933,17 +982,8 @@ class ActivityAddMenu : AppCompatActivity() {
         startActivityForResult(I,ACTION_ADD_MENU_LOCATION_LIST_REQUEST_CODE)
     }
 
-
-    private fun setImageButton() {
-        AddImageItem()
-    }
-
-    private fun AddImageItem() {
-// 取得 LinearLayout 物件
-        // 取得 LinearLayout 物件
+    private fun showUpdateImage() {
         val gridLayoutBtnList = findViewById(com.iew.fun2order.R.id.gridLayoutImageBtnList) as GridLayout
-
-        // 將 TextView 加入到 LinearLayout 中
         var metrics = DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics); //抓取螢幕大小的資料
         var width:Int = 0
@@ -958,82 +998,41 @@ class ActivityAddMenu : AppCompatActivity() {
         gridLayoutBtnList.removeAllViews()
         gridLayoutBtnList.setColumnCount(iCnt);           // 設定GridLayout有幾行
         gridLayoutBtnList.setRowCount(1);              // 設定GridLayout有幾列
-        //var  lp2:GridLayout.LayoutParams = GridLayout.LayoutParams(GridLayout.LayoutParams.WRAP_CONTENT, 100);
-        // 將 Button 1 加入到 LinearLayout 中
-        mMenuImages.clear()
+
+
+        val MemoryDBContext = MemoryDatabase(this!!)
+        val MenuImageDB = MemoryDBContext.menuImagedao()
         mFirebaseUserMenu.multiMenuImageURL!!.forEach {
             if(it != null){
-                val file = File(mMediaStorageReadDir.toString() + "/" + it.toString())
-                if (file.exists()) {
-                    //val option = BitmapFactory.Options()
-                    //option.inJustDecodeBounds = true
-                    //option.inPurgeable = true
-                    val bm: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                    mMenuImages.add(bm)
+
+                var menuImaeg = MenuImageDB.getMenuImageByName(it)
+                if (menuImaeg != null) {
+                    val bm: Bitmap = BitmapFactory.decodeByteArray( menuImaeg.image, 0,  menuImaeg.image!!.size)
                     val b1 = ImageButton(this)
                     b1.setBackgroundResource(R.drawable.corners_rect_gray)
                     b1.setPadding(10, 10, 10, 10)
                     b1.setMinimumWidth(width)
-                    //b1.setMinWidth(width)
                     b1.setImageBitmap(bm)
-                    //this.getResources(),R.drawable.icon_add_group
-                    //b1.setBackgroundResource(com.iew.fun2order.R.drawable.button_bg)
-                    //mBtnList.add(b1)
-                    //button = new Button[9] ;
-                    //GridLayout gridLayout = (GridLayout)findViewById(R.id.root) ;
                     b1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     gridLayoutBtnList.addView(b1,width,350);
-                }else{
-                    val bitmap  = BitmapFactory.decodeResource(getResources(),R.drawable.image_default_member);
-                    if(it != ""){
-                        var islandRef = Firebase.storage.reference.child(it)
-                        val ONE_MEGABYTE = 1024 * 1024.toLong()
-                        islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener { bytesPrm: ByteArray ->
-                            val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
-                            mMenuImages.add(bmp)
-                            val b1 = ImageButton(this)
-                            b1.setBackgroundResource(R.drawable.corners_rect_gray)
-                            b1.setPadding(10, 10, 10, 10)
-                            b1.setMinimumWidth(width)
-                            //b1.setMinWidth(width)
-                            b1.setImageBitmap(bmp)
-                            //this.getResources(),R.drawable.icon_add_group
-                            //b1.setBackgroundResource(com.iew.fun2order.R.drawable.button_bg)
-                            //mBtnList.add(b1)
-                            //button = new Button[9] ;
-                            //GridLayout gridLayout = (GridLayout)findViewById(R.id.root) ;
-                            b1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                            gridLayoutBtnList.addView(b1,width,350);
-                        }
+                }
+                else{
 
-                        islandRef.getBytes(ONE_MEGABYTE).addOnCanceledListener {
-                            val bitmap  = BitmapFactory.decodeResource(getResources(),R.drawable.image_default_member);
-                            mMenuImages.add(bitmap)
-                            val b1 = ImageButton(this)
-                            //b1.setText((mBtnList.size+1).toString())
-                            b1.setMinimumWidth(width)
-                            //b1.setMinWidth(width)
-                            b1.setImageBitmap(bitmap)
-                            //this.getResources(),R.drawable.icon_add_group
-                            //b1.setBackgroundResource(com.iew.fun2order.R.drawable.button_bg)
-                            //mBtnList.add(b1)
-                            //button = new Button[9] ;
-                            //GridLayout gridLayout = (GridLayout)findViewById(R.id.root) ;
-                            b1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                            gridLayoutBtnList.addView(b1,width,350);
-                        }
+                    val notifyAlert = AlertDialog.Builder(this).create()
+                    notifyAlert.setTitle("存取影像錯誤")
+                    notifyAlert.setMessage("更新照片資料 ${it} \n資料讀取錯誤!!")
+                    notifyAlert.setButton(
+                        AlertDialog.BUTTON_POSITIVE,
+                        "OK"
+                    ) { dialogInterface, i ->
                     }
+                    notifyAlert.show()
                 }
             }
-
-
-
         }
 
-        val childCount: Int = gridLayoutBtnList.getChildCount()
-
-        for (i in 0 until childCount) {
-            val container = gridLayoutBtnList.getChildAt(i) as ImageButton
+        gridLayoutBtnList.children.forEach {
+            val container = it as ImageView
             container.setOnClickListener {
                 // your click code here
                 val bundle = Bundle()
@@ -1046,6 +1045,126 @@ class ActivityAddMenu : AppCompatActivity() {
         }
 
     }
+
+    private fun setImageButton() {
+        // AddImageItem()
+
+        if(mFirebaseUserMenu!!.multiMenuImageURL!!.count() !=0) {
+            DisplayMeunImageItem(mFirebaseUserMenu!!.multiMenuImageURL)
+        }
+        else if (mFirebaseUserMenu!!.menuImageURL != null )
+        {
+            val menuImage: MutableList<String>? = mutableListOf()
+            menuImage!!.add(mFirebaseUserMenu!!.menuImageURL!!)
+            DisplayMeunImageItem(menuImage)
+        }
+    }
+
+
+    private fun DisplayMeunImageItem(multiMenuImageURL: MutableList<String>?) {
+
+        var replyImageCount = 0
+        var totalImageCount = multiMenuImageURL!!.filter { it != "" }.count()
+        var MemoryDBContext = MemoryDatabase(this!!)
+        var MenuImageDB = MemoryDBContext.menuImagedao()
+        MenuImaegByteArray.clear()
+        multiMenuImageURL!!.forEach {
+            if (it != "") {
+                MenuImaegByteArray.put(it, null)
+                //----- 每次載入畫面都從FireBase抓取一次 -----
+                var menuImaeg = MenuImageDB.getMenuImageByName(it)
+                if (menuImaeg != null) {
+                    MenuImageDB.delete(menuImaeg)
+                }
+                val islandRef = Firebase.storage.reference.child(it)
+                val ONE_MEGABYTE = 1024 * 1024.toLong()
+                islandRef.getBytes(ONE_MEGABYTE)
+                    .addOnSuccessListener { bytesPrm: ByteArray ->
+                        MenuImaegByteArray[it] = bytesPrm.clone()
+                        try {
+                            MenuImageDB.insertRow(entityMeunImage(null, it, "", bytesPrm.clone()!!))
+                        } catch (e: Exception) {
+                        }
+
+                        replyImageCount++
+                        if (replyImageCount == totalImageCount) {
+                            DisplayImage()
+                        }
+                    }
+                    .addOnFailureListener {
+                        replyImageCount++
+                        if (replyImageCount == totalImageCount) {
+                            DisplayImage()
+                        }
+                    }
+            }
+        }
+    }
+
+    private fun DisplayImage() {
+
+        var width: Int = 0
+        var iCnt: Int = 1
+        val gridLayoutBtnList = findViewById(com.iew.fun2order.R.id.gridLayoutImageBtnList) as GridLayout
+        val MenuImaegExist = MenuImaegByteArray.filter { it.value != null }
+        val MenuImaegFailed = MenuImaegByteArray.filter { it.value == null }
+
+        // val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+        if (MenuImaegExist.count() > 1) {
+            width = (gridLayoutBtnList.width) / MenuImaegExist.count(); // 螢幕的寬度/4放近with
+            iCnt = MenuImaegExist.count()
+        } else {
+            width = (gridLayoutBtnList.width) / 1;        // 螢幕的寬度/4放近with
+        }
+
+        gridLayoutBtnList.removeAllViews()
+        gridLayoutBtnList.columnCount = iCnt;           // 設定GridLayout有幾行
+        gridLayoutBtnList.rowCount = 1;              // 設定GridLayout有幾列
+
+        MenuImaegExist.forEach()
+        {
+            if(it.value != null) {
+                val b1 = ImageView(this)
+                val bmp = BitmapFactory.decodeByteArray(it.value, 0, it.value!!.size)
+                b1.setBackgroundResource(R.drawable.corners_rect_gray)
+                b1.setPadding(10, 10, 10, 10)
+                b1.setMinimumWidth(width)
+                b1.setImageBitmap(bmp)
+                b1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                gridLayoutBtnList.addView(b1, width, 320);
+            }
+        }
+
+        MenuImaegFailed.forEach()
+        {
+
+            val notifyAlert = AlertDialog.Builder(this).create()
+            notifyAlert.setTitle("存取影像錯誤")
+            notifyAlert.setMessage("照片路徑：${it.key} \n資料讀取錯誤!!")
+            notifyAlert.setButton(
+                AlertDialog.BUTTON_POSITIVE,
+                "OK"
+            ) { dialogInterface, i ->
+            }
+            notifyAlert.show()
+
+        }
+
+        gridLayoutBtnList.children.forEach {
+            val container = it as ImageView
+            container.setOnClickListener {
+                // your click code here
+                val bundle = Bundle()
+                //bundle.putString("EDIT", "N")
+                var I = Intent(this, ActivityAddMenuImage::class.java)
+                bundle.putParcelable("USER_MENU", mFirebaseUserMenu)
+                I.putExtras(bundle)
+                startActivityForResult(I, ACTION_ADD_MENU_IMAGE_REQUEST_CODE)
+            }
+        }
+    }
+
+
 
     private fun addUserMenuFromFireBase(menutype: String)
     {

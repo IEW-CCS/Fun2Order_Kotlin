@@ -17,6 +17,8 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
+import com.iew.fun2order.db.database.MemoryDatabase
+import com.iew.fun2order.db.entity.entityMeunImage
 import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.ui.home.ActivityAddMenu
@@ -58,20 +60,13 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
         holder.imagePath = listdata[position].getItemImagePath()
         holder.mediaStorageDir =listdata[position].getMediaStorageDir()
         holder.mediaStorageReadDir =listdata[position].getMediaStorageReadDir()
-        if(holder.imagePath != ""){
-            val file = File(holder.mediaStorageReadDir.toString() + "/" + holder.imagePath.toString())
-            if (file.exists()) {
-                val bm: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                holder.imageViewMenu.setImageBitmap(bm)
-            }else{
-                var islandRef = Firebase.storage.reference.child(holder.imagePath!!)
-                val ONE_MEGABYTE = 1024 * 1024.toLong()
-                islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener { bytesPrm: ByteArray ->
-                    val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
-                    holder.imageViewMenu.setImageBitmap(bmp)
-                }
+        if (holder.imagePath != "") {
+            var islandRef = Firebase.storage.reference.child(holder.imagePath!!)
+            val ONE_MEGABYTE = 1024 * 1024.toLong()
+            islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener { bytesPrm: ByteArray ->
+                val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+                holder.imageViewMenu.setImageBitmap(bmp)
             }
-
         }
         holder.user_menu = listdata[position].getUserMenu()
         holder.user_profile = listdata[position].getUserProfile()
@@ -103,9 +98,33 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
                 setMessage(myListData.getItemName())
                 setPositiveButton("確定") { dialog, _ ->
                     try {
-                        var menuPath = "USER_MENU_INFORMATION/${holder.user_profile!!.userID.toString()}/${holder.user_menu!!.menuNumber}"
-                        val database = Firebase.database
-                        database.getReference(menuPath).removeValue()
+
+                        // 刪除菜單之前先把影像砍掉
+                        if(holder.user_profile!!.userID != "" && holder.user_menu!!.menuNumber !="") {
+                            var menuPath = "USER_MENU_INFORMATION/${holder.user_profile!!.userID.toString()}/${holder.user_menu!!.menuNumber}"
+                            val database = Firebase.database
+                            database.getReference(menuPath).removeValue()
+
+                            var imageFolder = "Menu_Image/${holder.user_profile!!.userID.toString()}/${holder.user_menu!!.menuNumber}"
+                            val listRef = Firebase.storage.reference.child(imageFolder!!)
+                            listRef.listAll()
+                                .addOnSuccessListener { listResult ->
+                                    listResult.prefixes.forEach { prefix ->
+                                        // All the prefixes under listRef.
+                                        // You may call listAll() recursively on them.
+                                    }
+
+                                    listResult.items.forEach { item ->
+                                        item.delete()
+                                        // All the items under listRef
+                                    }
+                                }
+                                .addOnFailureListener {
+                                    // Uh-oh, an error occurred!
+                                }
+                        }
+
+
                         listdata.removeAt(position)
                         notifyDataSetChanged()
                     }

@@ -1,5 +1,15 @@
 package com.iew.fun2order.ui.home
 
+/*
+程式邏輯
+1. 尚未系統將ManuInfo 傳進來先整理 ImageURL 照順序整理到 MenuImaegByteArray 中
+2. For Each MenuImaegByteArray 利用 URL ID 尋找Image Byte 的檔案
+3. 將ImageByte 轉 Bmp Show Image
+4. 案OK 離開之前 將Bmp 轉回 Image Byte 存進去DB之中
+5. 更新ＭanuInfo裡面照片資訊
+ */
+
+
 import android.Manifest
 import android.app.Activity
 import android.content.Context
@@ -11,7 +21,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -35,18 +44,13 @@ import com.jude.rollviewpager.RollPagerView
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.math.roundToInt
 
 class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
     private val ACTION_CAMERA_REQUEST_CODE = 100
     private val ACTION_ALBUM_REQUEST_CODE = 200
-    private val avatarCompressQuality = 20
 
+    private val avatarCompressQuality = 70
     private var mFirebaseUserMenu: USER_MENU = USER_MENU()
     private var mContext : Context? = null
 
@@ -55,7 +59,6 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
     var mRollPagerViewAdapter : RollPagerViewAdapter = RollPagerViewAdapter(this)
 
     private var MenuImaegByteArray : MutableMap<String,ByteArray?> = mutableMapOf<String,ByteArray?>()
-
     private lateinit var mTextViewAddMenuImage: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,10 +84,10 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
             //intent.putExtra("image", mRollPagerViewAdapter.menuImages[position])
             intent.putExtras(bundle)
             startActivity(intent)
-
         })
 
 
+        //-----  Load Exist Menu Image -------
         val MemoryDBContext = MemoryDatabase(this!!)
         val MenuImageDB = MemoryDBContext.menuImagedao()
         val totalImageCount = mFirebaseUserMenu!!.multiMenuImageURL!!.filter { it != "" }.count()
@@ -98,6 +101,9 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
                 if (menuImaeg != null) {
                     MenuImaegByteArray.put(imageURL, menuImaeg.image)
                     replyImageCount++
+                    if (replyImageCount == totalImageCount) {
+                        displayImage()
+                    }
                 }
                 else {
                     val islandRef = Firebase.storage.reference.child(imageURL)
@@ -120,19 +126,19 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
 
                             replyImageCount++
                             if (replyImageCount == totalImageCount) {
-                                DisplayImage()
+                                displayImage()
                             }
                         }
                         .addOnFailureListener {
                             replyImageCount++
                             if (replyImageCount == totalImageCount) {
-                                DisplayImage()
+                                displayImage()
                             }
                         }
                         .addOnCanceledListener {
                             replyImageCount++
                             if (replyImageCount == totalImageCount) {
-                                DisplayImage()
+                                displayImage()
                             }
                         }
                 }
@@ -157,91 +163,36 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
         editTextMenuDesc.setText(mFirebaseUserMenu.menuDescription)
 
         mTextViewAddMenuImage = findViewById(com.iew.fun2order.R.id.textViewAddMenuImage) as TextView
-        val ImageButtonAction = arrayOf("相機/相簿","取消")
         mTextViewAddMenuImage.setOnClickListener {
             //Toast.makeText(activity, "TESTING BUTTON CLICK 1", Toast.LENGTH_SHORT).show()
             if (!checkPermissionREAD_EXTERNAL_STORAGE(this)) {
                return@setOnClickListener
             }
-            val Alert =  AlertDialog.Builder(mContext!!)
-                .setTitle("選取照片來源")
-                .setItems(ImageButtonAction,  DialogInterface.OnClickListener { dialog, which ->
-
-                    when (which) {
-                        0 -> { takeImageFromAlbumWithCropImageLib()}
-                        else -> { // Note the block
-                            //Toast.makeText(this, "選取到取消", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                })
-                .create()
-                .show()
+            takeImageFromAlbumWithCropImageLib()
         }
 
         val btnAddImageOK = findViewById(R.id.btnAddImageOK) as Button
         // set on-click listener for ImageView
         btnAddImageOK.setOnClickListener {
 
-            //----- 直接編輯並且上傳到Firebase -----
-            //----- 先砍掉舊的在上傳新的影像 --------
-            mFirebaseUserMenu.multiMenuImageURL!!.forEach()
-            {
-                var islandRef = Firebase.storage.reference.child(it)
-                islandRef.delete().addOnSuccessListener {
-                        // File deleted successfully
-                    }.addOnFailureListener {
-                        // Uh-oh, an error occurred!
-                }
-            }
-
             mFirebaseUserMenu.multiMenuImageURL!!.clear()
             mMenuImages.forEachIndexed { index, bitmap ->
-
-                var imageURL = generatorFileURL (index)
+                val imageURL = generatorFileURL(index)
                 val baos = ByteArrayOutputStream()
                 bitmap.compress(Bitmap.CompressFormat.JPEG, avatarCompressQuality, baos)
                 val data: ByteArray = baos.toByteArray()
-
-                mFirebaseUserMenu.multiMenuImageURL!!.add(imageURL)
-
-                //--- Update Local DB ---
-                var menuImaeg = MenuImageDB.getMenuImageByName(imageURL)
-                if(menuImaeg == null)
-                {
-                    try {
+                try {
+                    val menuImaeg = MenuImageDB.getMenuImageByName(imageURL)
+                    if (menuImaeg == null) {
                         MenuImageDB.insertRow(entityMeunImage(null, imageURL, "", data.clone()!!))
-                    }
-                    catch (ex: Exception)
-                    {
-
-                    }
-                }
-                else
-                {
-                    menuImaeg.image = data.clone()
-                    try {
+                    } else {
+                        menuImaeg.image = data.clone()
                         MenuImageDB.updateTodo(menuImaeg)
                     }
-                    catch (ex: Exception)
-                    {
-
-                    }
+                    mFirebaseUserMenu.multiMenuImageURL!!.add(imageURL)
+                } catch (ex: Exception) {
                 }
-
-                //------- 接著上傳FireBase ---
-                var islandRef = Firebase.storage.reference.child(imageURL!!)
-                val uploadTask: UploadTask = islandRef.putBytes(data)
-                uploadTask.addOnFailureListener(object : OnFailureListener {
-                    override fun onFailure(p0: Exception) {
-                        Toast.makeText(mContext, "照片上傳失敗: " + imageURL, Toast.LENGTH_SHORT).show()
-                    }
-                }).addOnSuccessListener(object : OnSuccessListener<UploadTask.TaskSnapshot?> {
-                    override fun onSuccess(p0: UploadTask.TaskSnapshot?) {
-                        Toast.makeText(mContext, "照片上傳成功: " + imageURL, Toast.LENGTH_SHORT).show()
-                    }
-                })
             }
-
 
             //----- 所有資料政理完以後返回上一頁 -----
             val editTextMenuDesc = findViewById(R.id.editTextMenuDesc) as EditText
@@ -271,14 +222,11 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
         CropImage.activity().setCropShape(CropImageView.CropShape.RECTANGLE).start(this)
     }
 
-    private fun DisplayImage ()
+    private fun displayImage ()
     {
-
         val MenuImaegExist = MenuImaegByteArray.filter { it.value != null }
         val MenuImaegFailed = MenuImaegByteArray.filter { it.value == null }
-
         mMenuImages.clear()
-
         MenuImaegExist.forEach()
         {
             imageURL->
@@ -290,7 +238,6 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
 
         MenuImaegFailed.forEach()
         { imageURL ->
-
             val notifyAlert = AlertDialog.Builder(this).create()
             notifyAlert.setTitle("存取影像錯誤")
             notifyAlert.setMessage("照片路徑：${imageURL.key} \n資料讀取錯誤!!")
@@ -415,7 +362,7 @@ class ActivityAddMenuImage : AppCompatActivity() , IAdapterOnClick {
             setTitle("確認刪除照片")
             setPositiveButton("確定") { dialog, _ ->
                 mMenuImages.removeAt(pos)
-                mRollPagerViewAdapter.menuImages=mMenuImages
+                mRollPagerViewAdapter.menuImages = mMenuImages
                 mRollPagerViewAdapter.notifyDataSetChanged()
 
                 if(mMenuImages.size>=3){

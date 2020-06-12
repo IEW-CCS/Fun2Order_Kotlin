@@ -399,8 +399,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
             )
 
         txtjoinOrderShowDetail.setOnClickListener {
-
-
             val imageList: ArrayList<String> = ArrayList<String>(MenuImaegByteArray.keys)
             val bundle = Bundle()
             val I = Intent(this, ActivityShowMenuImage::class.java)
@@ -409,6 +407,27 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
             I.putExtras(bundle)
             startActivity(I)
         }
+
+        gridLayoutBtnList.setOnClickListener {
+            val imageList: ArrayList<String> = ArrayList<String>(MenuImaegByteArray.keys)
+            val bundle = Bundle()
+            val I = Intent(this, ActivityShowMenuImage::class.java)
+            bundle.putParcelable("MENU_INFO", mFirebaseUserMenu)
+            bundle.putStringArrayList("MENU_IMAGES", imageList)
+            I.putExtras(bundle)
+            startActivity(I)
+        }
+
+        txtjoinOrderDesc.setOnClickListener {
+            val imageList: ArrayList<String> = ArrayList<String>(MenuImaegByteArray.keys)
+            val bundle = Bundle()
+            val I = Intent(this, ActivityShowMenuImage::class.java)
+            bundle.putParcelable("MENU_INFO", mFirebaseUserMenu)
+            bundle.putStringArrayList("MENU_IMAGES", imageList)
+            I.putExtras(bundle)
+            startActivity(I)
+        }
+
     }
 
 
