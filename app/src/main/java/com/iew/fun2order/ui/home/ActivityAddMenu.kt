@@ -66,6 +66,8 @@ class ActivityAddMenu : AppCompatActivity() {
     private lateinit var mDBContext: AppDatabase
     private var mContext : Context? = null
 
+    private var bIsUpdateImage = false
+
     private var MenuImaegByteArray : MutableMap<String,ByteArray?> = mutableMapOf<String,ByteArray?>()
 
     //private lateinit var mMenuImage: ImageButton
@@ -84,12 +86,15 @@ class ActivityAddMenu : AppCompatActivity() {
     private var mFirebaseUserMenu: USER_MENU = USER_MENU()
     private var mFirebaseUserProfile: USER_PROFILE = USER_PROFILE()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_menu)
         supportActionBar?.hide()
 
         val context: Context = this@ActivityAddMenu
+
+        bIsUpdateImage = false
 
         // [START initialize_database_ref]
         mDatabase = Firebase.database.reference
@@ -691,6 +696,12 @@ class ActivityAddMenu : AppCompatActivity() {
                     val editTextMenuDesc = findViewById(R.id.editTextMenuDesc) as EditText
                     editTextMenuDesc.setText( mFirebaseUserMenu.menuDescription)
                     showUpdateImage()
+                    bIsUpdateImage = true
+                }
+                else
+                {
+                    bIsUpdateImage = false
+
                 }
             }
 
@@ -829,7 +840,10 @@ class ActivityAddMenu : AppCompatActivity() {
         userMenu.multiMenuImageURL = mFirebaseUserMenu.multiMenuImageURL
 
         //------ Upload Image  -------
-        uploadImageToFirebase(userMenu.userID!!, userMenu.menuNumber!!, userMenu.multiMenuImageURL!!)
+        if(bIsUpdateImage == true) {
+            uploadImageToFirebase(userMenu.userID!!, userMenu.menuNumber!!, userMenu.multiMenuImageURL!!)
+            bIsUpdateImage = false
+        }
 
         mDatabase.child("USER_MENU_INFORMATION").child(mAuth.currentUser!!.uid).child(userMenuID).setValue(userMenu)
             .addOnSuccessListener {
@@ -880,12 +894,11 @@ class ActivityAddMenu : AppCompatActivity() {
                             val uploadTask: UploadTask = islandRef.putBytes(MenuImageObject.image)
                             uploadTask.addOnFailureListener(object : OnFailureListener {
                                 override fun onFailure(p0: Exception) {
-                                    Toast.makeText(mContext, "照片上傳失敗: " + imageURL, Toast.LENGTH_SHORT).show()
+                                   // Toast.makeText(mContext, "照片上傳失敗: " + imageURL, Toast.LENGTH_SHORT).show()
                                 }
-                            }).addOnSuccessListener(object :
-                                OnSuccessListener<UploadTask.TaskSnapshot?> {
+                            }).addOnSuccessListener(object : OnSuccessListener<UploadTask.TaskSnapshot?> {
                                 override fun onSuccess(p0: UploadTask.TaskSnapshot?) {
-                                    Toast.makeText(mContext, "照片上傳成功: " + imageURL, Toast.LENGTH_SHORT).show()
+                                  //  Toast.makeText(mContext, "照片上傳成功: " + imageURL, Toast.LENGTH_SHORT).show()
                                 }
                             })
                         }
@@ -897,14 +910,12 @@ class ActivityAddMenu : AppCompatActivity() {
                             notifyAlert.setButton(
                                 AlertDialog.BUTTON_POSITIVE,
                                 "OK"
-                            ) { dialogInterface, i ->
+                            ) { _, i ->
                             }
                             notifyAlert.show()
-
                         }
                     }
-
-
+                    Toast.makeText(mContext, "菜單照片更新完成", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener {
                     // Uh-oh, an error occurred!
