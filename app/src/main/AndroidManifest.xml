@@ -102,6 +102,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ScalableImageViewActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.notifications.ActivityTapMessage"

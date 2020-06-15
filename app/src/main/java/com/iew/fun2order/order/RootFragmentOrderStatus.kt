@@ -378,11 +378,11 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
             val body = "團購訂單的訂購時間即將截止，請儘速決定是否參與團購，謝謝"
 
-            notificationHeader.put("title", "團購催定")
+            notificationHeader.put("title", "團購催訂")
             notificationHeader.put("body", body ?: "")   //Enter your notification message
 
             notificationBody.put("messageID", "")      //Enter
-            notificationBody.put("messageTitle", "團購催定")   //Enter
+            notificationBody.put("messageTitle", "團購催訂")   //Enter
             notificationBody.put("messageBody", body ?: "")    //Enter
 
             notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_DUETIME)   //Enter

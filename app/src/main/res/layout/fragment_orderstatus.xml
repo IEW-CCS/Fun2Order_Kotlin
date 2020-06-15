@@ -235,7 +235,7 @@
                 android:layout_below="@+id/imageCallable"
 
                 android:gravity="center_horizontal"
-                android:text="發出催定通知"
+                android:text="發出催訂通知"
                 android:textAlignment="center"
                 android:textColor="#B71C1C"
                 android:textSize="20dp" />
