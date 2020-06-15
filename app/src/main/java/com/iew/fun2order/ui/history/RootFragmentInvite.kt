@@ -60,21 +60,13 @@ class RootFragmentInvite() : Fragment(), IAdapterOnClick , IAdapterBtnOnClick {
             val list = (it as ArrayList<entityNotification>).asReversed()
             listInvites.clear()
             list.forEach() { it ->
-
-                if (it.dueTime != "" &&  (it.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT || it.replyStatus == "") ) {
+                var duetime = false
+                if (it.dueTime != ""  ) {
                     val timeExpired = timeCompare(it.dueTime)
                     if (timeExpired) {
-                        it.replyStatus = MENU_ORDER_REPLY_STATUS_EXPIRE
-                        notificationDB.update(it)
-                        try {
-                            updateFireBase(it.orderOwnerID, it.orderNumber, MENU_ORDER_REPLY_STATUS_EXPIRE)
-                        } catch (e: Exception) {
-                                val errorMsg = e.localizedMessage
-                                Toast.makeText(context, errorMsg.toString(), Toast.LENGTH_LONG).show()
-                        }
+                        duetime = true
                     }
                 }
-
                 listInvites.add(
                     ItemsLV_Invite(
                         it.messageID,
@@ -84,7 +76,8 @@ class RootFragmentInvite() : Fragment(), IAdapterOnClick , IAdapterBtnOnClick {
                         it.orderOwnerID,
                         it.orderNumber,
                         it.replyStatus,
-                        it.replyTime
+                        it.replyTime,
+                        duetime
                     )
                 )
             }

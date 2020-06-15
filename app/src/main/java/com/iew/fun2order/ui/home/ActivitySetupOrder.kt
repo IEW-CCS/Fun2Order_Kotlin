@@ -309,7 +309,6 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
             userMenuOrder.dueTime=textViewChuGroupDueDate.tag.toString()
         }else{
             textViewChuGroupDueDate.requestFocus()
-            textViewChuGroupDueDate.error ="未指定團購截止日期!"
             Toast.makeText(this, "未指定團購截止日期!", Toast.LENGTH_SHORT).show()
             return
         }

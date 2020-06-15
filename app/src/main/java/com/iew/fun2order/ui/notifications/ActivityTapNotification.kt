@@ -61,13 +61,6 @@ class ActivityTapNotification : AppCompatActivity() {
             val values = it.getParcelable("Notification") as entityNotification ?: entityNotification()
             lstSelectedProduct.clear()
 
-            if (values.dueTime != "" && (values.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT || values.replyStatus == "")) {
-                val timeExpired = timeCompare(values.dueTime)
-                if (timeExpired) {
-                    values.replyStatus = MENU_ORDER_REPLY_STATUS_EXPIRE
-                }
-            }
-
             when (values.notificationType) {
 
                 NOTIFICATION_TYPE_ACTION_JOIN_ORDER -> {
@@ -102,27 +95,22 @@ class ActivityTapNotification : AppCompatActivity() {
                 btnCheckNotifyOK.isClickable = false
                 btnCheckNotifyCancel.isClickable = false
 
-                //---- Expire 更新到 DateBase 與FireBase 上面  ----
-                if (messageID != "") {
-                    val notificationDB = AppDatabase(this).notificationdao()
-                    val currentNotify = notificationDB.getNotifybyMsgID(messageID)
-                    if (currentNotify != null) {
-                        try {
-                            currentNotify.replyStatus = MENU_ORDER_REPLY_STATUS_EXPIRE
-                            notificationDB.update(currentNotify)
-                            updateFireBase(
-                                currentNotify.orderOwnerID,
-                                currentNotify.orderNumber,
-                                MENU_ORDER_REPLY_STATUS_EXPIRE
-                            )
-                        } catch (e: Exception) {
-                            val errorMsg = e.localizedMessage
-                            Toast.makeText(this, errorMsg.toString(), Toast.LENGTH_LONG).show()
-                        }
-                    }
-                }
             } else {
                 txtDescription.text = "尚未回覆"
+            }
+
+
+           // ---------------------------------------
+            if (values.dueTime != "" ) {
+                val timeExpired = timeCompare(values.dueTime)
+                if (timeExpired) {
+                    txtDescription.text = "團購邀請--團購單已逾期"
+                    txtDescription.setTextColor(Color.rgb(255, 0, 0))
+                    btnCheckNotifyOK.isEnabled = false
+                    btnCheckNotifyCancel.isEnabled = false
+                    btnCheckNotifyOK.isClickable = false
+                    btnCheckNotifyCancel.isClickable = false
+                }
             }
 
             txtDrafter.text = values.orderOwnerName ?: ""

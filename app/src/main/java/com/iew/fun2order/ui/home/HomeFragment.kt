@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
@@ -32,10 +33,13 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.BuildConfig
 import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.MenuTypeDAO
 import com.iew.fun2order.db.database.AppDatabase
+import com.iew.fun2order.db.database.MemoryDatabase
+import com.iew.fun2order.db.entity.entityLocalmage
 import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.db.firebase.USER_MENU_INFORMATION
 import com.iew.fun2order.db.firebase.USER_PROFILE
@@ -45,6 +49,8 @@ import com.iew.fun2order.ui.home.data.MenuItemListData
 import com.iew.fun2order.utility.LOCALBROADCASE_MESSAGE
 import com.tooltip.Tooltip
 import info.hoang8f.android.segmented.SegmentedGroup
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 
 
@@ -483,7 +489,9 @@ mMenuType=""
     }
 
     fun setUserMenu(menutype: String) {
+
         getUserMenuList(menutype)
+
         /*
         mUserMenuDB.getMenusByType(menutype).observe(this, Observer {
             var list = it as java.util.ArrayList<UserMenu>
@@ -557,6 +565,12 @@ mMenuType=""
         var menuPath = "USER_MENU_INFORMATION/${mAuth.currentUser!!.uid.toString()}/"
         val database = Firebase.database
         val myRef = database.getReference(menuPath)
+
+        var DBContext = AppDatabase(context!!)
+        var menuICONdao = DBContext.localImagedao()
+        val DefalutBitmap :Bitmap = BitmapFactory.decodeResource(resources, R.drawable.image_default_member)
+
+
         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
 
@@ -566,10 +580,28 @@ mMenuType=""
 
                    var test =  it.getValue(USER_MENU::class.java)
                     //if(menuType!=""){
-                        if(test!!.brandCategory.equals(menuType)){
-                            var imagePath =""
-                            if(test!!.multiMenuImageURL!!.size>0){
-                                imagePath=test!!.multiMenuImageURL!!.get(0)
+                        if(test!!.brandCategory.equals(menuType)) {
+                            var imagePath = ""
+                            if (test!!.multiMenuImageURL!!.size > 0) {
+                                imagePath = test!!.multiMenuImageURL!!.get(0)
+                            }
+
+                            var IconBitmap :Bitmap = DefalutBitmap
+                            if(imagePath != "")
+                            {
+                                val menuICON = menuICONdao.getMenuImageByName(imagePath)
+                                if(menuICON != null)
+                                {
+                                    IconBitmap = BitmapFactory.decodeByteArray( menuICON.image, 0,  menuICON.image!!.size)
+                                }
+                                else
+                                {
+                                    var islandRef = Firebase.storage.reference.child(imagePath)
+                                    val ONE_MEGABYTE = 1024 * 1024.toLong()
+                                    islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener { bytesPrm: ByteArray ->
+                                        menuICONdao.insertRow(entityLocalmage(null, imagePath, "", bytesPrm.clone()!!))
+                                    }
+                                }
                             }
 
                             var mediaStorageDir: File? = null
@@ -590,8 +622,21 @@ mMenuType=""
                                         + "/Files/"
                             )
 
-                            mItemList.add(MenuItemListData(test!!.brandName, test!!.menuDescription, BitmapFactory.decodeResource(getResources(),
-                                R.drawable.image_default_member), imagePath ,test, mUserProfile, mediaStorageDir, mediaStorageReadDir))
+                            synchronized(this) {
+                                mItemList.add(
+                                    MenuItemListData(
+                                        test!!.brandName,
+                                        test!!.menuDescription,
+                                        IconBitmap,
+                                        imagePath,
+                                        test,
+                                        mUserProfile,
+                                        mediaStorageDir,
+                                        mediaStorageReadDir
+                                    )
+                                )
+
+                            }
                         }
                     //}else{
                     //    mItemList.add(MenuItemListData(test!!.brandName, test!!.menuDescription, BitmapFactory.decodeResource(getResources(),R.drawable.image_default_member), test!!.menuImageURL, test))
@@ -600,7 +645,7 @@ mMenuType=""
                 }
                 RecycleViewRefresh()
                 if(mItemList.count() == 0) {
-                    showToolTips_CreateMenu()
+                   showToolTips_CreateMenu()
                 }
             }
 

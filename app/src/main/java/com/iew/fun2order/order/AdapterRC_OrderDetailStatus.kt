@@ -27,6 +27,7 @@ import kotlinx.android.synthetic.main.row_notification.view.*
 import kotlinx.android.synthetic.main.row_orderdetail_accept.view.*
 import kotlinx.android.synthetic.main.row_orderdetail_others.view.*
 import kotlinx.android.synthetic.main.row_setup_memberinfobody.view.*
+import java.text.SimpleDateFormat
 
 
 class AdapterRC_OrderDetailStatus(
@@ -142,6 +143,18 @@ class AdapterRC_OrderDetailStatus(
                 override fun onCancelled(error: DatabaseError) {
                 }
             })
+
+
+                     val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
+            val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
+
+
+
+            if(OrderDetailStatusAccept.replyTime!= "") {
+                val startDateTime = sdfDecode.parse(OrderDetailStatusAccept.replyTime)
+                val formatStartDatetime = sdfEncode.format(startDateTime).toString()
+                itemView.orderDetail_Accept_DateTime.text = "回覆時間: ${formatStartDatetime}"
+            }
 
 
             // set description

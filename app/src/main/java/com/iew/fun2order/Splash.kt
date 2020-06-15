@@ -10,7 +10,6 @@ import com.google.firebase.auth.FirebaseAuth
 
 class Splash : AppCompatActivity() {
     private val SPLASH_DISPLAY_LENGTH = 1000L
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.launch_screen)
@@ -26,6 +25,6 @@ class Splash : AppCompatActivity() {
             }
             startActivity(newIntent)
             this.finish()
-        }, secondsDelayed * 1000L)
+        }, secondsDelayed * SPLASH_DISPLAY_LENGTH)
     }
 }

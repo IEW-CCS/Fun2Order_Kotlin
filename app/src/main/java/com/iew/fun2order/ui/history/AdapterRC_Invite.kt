@@ -13,9 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.iew.fun2order.R
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.ui.my_setup.listen
-import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_ACCEPT
-import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_EXPIRE
-import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_REJECT
+import com.iew.fun2order.utility.*
 import kotlinx.android.synthetic.main.activity_reference_order.view.*
 import kotlinx.android.synthetic.main.row_history_invite.view.*
 import java.text.SimpleDateFormat
@@ -71,42 +69,53 @@ class RCAdapter_Invite(var context: Context, var ItemsLV_Invite: List<ItemsLV_In
             itemView.inviteStartTime.text = formatStartDatetime
 
 
-            if (invite.inviteReplyTime == "") {
-                if(invite.inviteReplyStatus == MENU_ORDER_REPLY_STATUS_EXPIRE )
-                {
-                    itemView.invitetitle.text = invite.title + " -- 團購單已逾期"
-                    itemView.invitetitle.setTextColor(Color.RED)
 
-                    btnJoin.isEnabled = false
-                    btnReject.isEnabled = false
-                    btnJoin.isClickable = false
-                    btnReject.isClickable = false
+            if(invite.inviteReplyStatus == MENU_ORDER_REPLY_STATUS_EXPIRE)
+            {
+                itemView.invitetitle.text = invite.title + " -- 團購單已逾期"
+                itemView.invitetitle.setTextColor(Color.RED)
 
-                }
-                else {
+                btnJoin.isEnabled = false
+                btnReject.isEnabled = false
+                btnJoin.isClickable = false
+                btnReject.isClickable = false
+
+            }
+            else {
+                if (invite.inviteReplyStatus == MENU_ORDER_REPLY_STATUS_WAIT) {
                     itemView.inviteNote.text = "尚未回覆"
-
                     btnJoin.isEnabled = true
                     btnReject.isEnabled = true
                     btnJoin.isClickable = true
                     btnReject.isClickable = true
-                    itemView.inviteNote.setTextColor(Color.rgb(128,128,128))
-                }
+                    itemView.inviteNote.setTextColor(Color.rgb(128, 128, 128))
 
-               // itemView.inviteNote.text = ""
+                    // itemView.inviteNote.text = ""
+                } else {
+
+                    val replyDateTime = sdfDecode.parse(invite.inviteReplyTime)
+                    val formatReplyDatetime = sdfEncode.format(replyDateTime).toString()
+                    var replyStatus = ""
+                    if (invite.inviteReplyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT) {
+                        itemView.inviteNote.text = "已於 $formatReplyDatetime \n回覆 參加"
+                        itemView.inviteNote.setTextColor(Color.rgb(0, 0, 255))
+                    } else if (invite.inviteReplyStatus == MENU_ORDER_REPLY_STATUS_REJECT) {
+                        itemView.inviteNote.text = "已於 $formatReplyDatetime \n回覆 不參加"
+                        itemView.inviteNote.setTextColor(Color.rgb(255, 0, 0))
+                    }
+
+                }
             }
-            else {
 
-                val replyDateTime = sdfDecode.parse(invite.inviteReplyTime)
-                val formatReplyDatetime = sdfEncode.format(replyDateTime).toString()
-                var replyStatus = ""
-                if (invite.inviteReplyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT) {
-                    itemView.inviteNote.text = "已於 $formatReplyDatetime \n回覆 參加"
-                    itemView.inviteNote.setTextColor(Color.rgb(0,0,255))
-                } else if(invite.inviteReplyStatus == MENU_ORDER_REPLY_STATUS_REJECT){
-                    itemView.inviteNote.text = "已於 $formatReplyDatetime \n回覆 不參加"
-                    itemView.inviteNote.setTextColor(Color.rgb(255,0,0))
-                }
+            if(invite.duetime == true)
+            {
+                itemView.invitetitle.text = invite.title + " -- 團購單已逾期"
+                itemView.invitetitle.setTextColor(Color.RED)
+
+                btnJoin.isEnabled = false
+                btnReject.isEnabled = false
+                btnJoin.isClickable = false
+                btnReject.isClickable = false
 
             }
 

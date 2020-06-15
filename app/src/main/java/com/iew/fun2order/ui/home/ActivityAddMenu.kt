@@ -34,6 +34,7 @@ import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.MenuTypeDAO
 import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.database.MemoryDatabase
+import com.iew.fun2order.db.entity.entityLocalmage
 import com.iew.fun2order.db.entity.entityMeunImage
 import com.iew.fun2order.db.firebase.PRODUCT
 import com.iew.fun2order.db.firebase.STORE_INFO
@@ -842,6 +843,7 @@ class ActivityAddMenu : AppCompatActivity() {
         //------ Upload Image  -------
         if(bIsUpdateImage == true) {
             uploadImageToFirebase(userMenu.userID!!, userMenu.menuNumber!!, userMenu.multiMenuImageURL!!)
+            saveMenuICONToDB(userMenu.userID!!, userMenu.menuNumber!!, userMenu.multiMenuImageURL!!)
             bIsUpdateImage = false
         }
 
@@ -923,6 +925,33 @@ class ActivityAddMenu : AppCompatActivity() {
         }
 
     }
+
+    private fun saveMenuICONToDB(MenuUserID:String,  MenuNumber:String, MenuImageURL : MutableList<String>)
+    {
+
+        val dbContext = AppDatabase(this)
+        val menuICON = dbContext.localImagedao()
+        val MemoryDBContext = MemoryDatabase(this!!)
+        val MenuImageDB = MemoryDBContext.menuImagedao()
+        val ICON_Image = MenuImageURL.firstOrNull()
+        if(ICON_Image != null)
+        {
+            val oldICONImage = menuICON.getMenuImageByName(ICON_Image)
+            val MenuImageObject = MenuImageDB.getMenuImageByName(ICON_Image)
+            if(MenuImageObject!=null)
+            {
+                if(oldICONImage == null) {
+                    menuICON.insertRow(entityLocalmage(null, MenuImageObject.name, "", MenuImageObject.image.clone()!!))
+                }
+                else
+                {
+                    oldICONImage.image = MenuImageObject.image.clone()
+                    menuICON.updateTodo(oldICONImage)
+                }
+            }
+        }
+    }
+
 
     private fun uploadImage(bitmap: Bitmap, menu_number:String,  image_name: String) {
 

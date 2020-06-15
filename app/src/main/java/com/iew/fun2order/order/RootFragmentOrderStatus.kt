@@ -90,6 +90,8 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             layoutNotify = it.findViewById<LinearLayout>(R.id.orderStatusNotify)
             broadcast = LocalBroadcastManager.getInstance(it)
 
+
+
         }
 
         setOrderInfo()
@@ -235,7 +237,18 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
                             timeExpired = timeCompare(menuOrder.dueTime!!)
                         }
 
+                        layoutCallable.isClickable = true
+                        layoutCallable.isEnabled = true
+                        layoutCallable.visibility = View.VISIBLE
+
                         if (timeExpired) {
+
+                            //--- 關閉崔定通知 -----
+                            layoutCallable.isClickable = false
+                            layoutCallable.isEnabled = false
+                            layoutCallable.visibility = View.GONE
+                            txtOrderEndTime.setTextColor(requireContext().resources.getColor(R.color.red))
+
                             var needUpdate = false
                             menuOrder.contentItems?.forEach {
                                 if (it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT) {

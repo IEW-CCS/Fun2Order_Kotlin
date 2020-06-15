@@ -6,7 +6,7 @@ import kotlinx.android.parcel.Parcelize
 
 
 @Parcelize
-data class ItemsLV_OrderDetailStatusAccept (var userUUID: String, var userLocation:String, var quantity: String, var userContentProduct:MutableList<MENU_PRODUCT>, var userName:String): Parcelable
+data class ItemsLV_OrderDetailStatusAccept (var userUUID: String, var userLocation:String, var quantity: String, var userContentProduct:MutableList<MENU_PRODUCT>, var userName:String, var replyTime: String): Parcelable
 
 
 

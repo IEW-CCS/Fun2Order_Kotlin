@@ -160,8 +160,10 @@ class RootFragmentOrderStatistics(var _menuorder: USER_MENU_ORDER) : Fragment(),
     private fun setupAccept()
     {
         val orderJoin = menuOrder.contentItems!!.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT }
+        // sortByDescending 趙訂單成立時間排序
+        val sortedJoinOrder = orderJoin.sortedBy { it.orderContent.createTime }
         lstAccept.clear()
-        orderJoin.forEach()
+        sortedJoinOrder.forEach()
         {
             val userProduct =
                 it.orderContent.menuProductItems?.toMutableList() ?: mutableListOf()
@@ -171,7 +173,8 @@ class RootFragmentOrderStatistics(var _menuorder: USER_MENU_ORDER) : Fragment(),
                     it.orderContent.location!!,
                     it.orderContent.itemQuantity!!.toString(),
                     userProduct,
-                    it.orderContent.itemOwnerName!!
+                    it.orderContent.itemOwnerName!!,
+                    it.orderContent.createTime!!
                 )
             lstAccept.add(tmpAccept)
         }

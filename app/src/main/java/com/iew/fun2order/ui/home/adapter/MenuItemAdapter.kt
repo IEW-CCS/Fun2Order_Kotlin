@@ -17,6 +17,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
+import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.db.entity.entityMeunImage
 import com.iew.fun2order.db.firebase.USER_MENU
@@ -60,14 +61,6 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
         holder.imagePath = listdata[position].getItemImagePath()
         holder.mediaStorageDir =listdata[position].getMediaStorageDir()
         holder.mediaStorageReadDir =listdata[position].getMediaStorageReadDir()
-        if (holder.imagePath != "") {
-            var islandRef = Firebase.storage.reference.child(holder.imagePath!!)
-            val ONE_MEGABYTE = 1024 * 1024.toLong()
-            islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener { bytesPrm: ByteArray ->
-                val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
-                holder.imageViewMenu.setImageBitmap(bmp)
-            }
-        }
         holder.user_menu = listdata[position].getUserMenu()
         holder.user_profile = listdata[position].getUserProfile()
 
@@ -98,13 +91,20 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
                 setMessage(myListData.getItemName())
                 setPositiveButton("確定") { dialog, _ ->
                     try {
-
                         // 刪除菜單之前先把影像砍掉
                         if(holder.user_profile!!.userID != "" && holder.user_menu!!.menuNumber !="") {
+                            //----------順便砍掉LocalDB 資料------------
+                            var Imagepath =  "Menu_Image/" + holder.user_profile!!.userID + "/" + holder.user_menu!!.menuNumber
+                            var DBContext = AppDatabase(context!!)
+                            var menuICONdao = DBContext.localImagedao()
+                            menuICONdao.deleteICONImage(Imagepath)
+
+                            //--------------------------------
                             var menuPath = "USER_MENU_INFORMATION/${holder.user_profile!!.userID.toString()}/${holder.user_menu!!.menuNumber}"
                             val database = Firebase.database
                             database.getReference(menuPath).removeValue()
 
+                            //--------------------------------
                             var imageFolder = "Menu_Image/${holder.user_profile!!.userID.toString()}/${holder.user_menu!!.menuNumber}"
                             val listRef = Firebase.storage.reference.child(imageFolder!!)
                             listRef.listAll()
