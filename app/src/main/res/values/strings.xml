@@ -138,16 +138,16 @@
 
     <string name="admob_app_id">ca-app-pub-6672968234138119~3507792835</string>
 
-
-    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="interstitial_ad_unit_id">ca-app-pub-3940256099942544/8691691433</string>
-    <string name="native_ad_unit_id">ca-app-pub-3940256099942544/1044960115</string>
-
-
     <!-- 測試用 Unit ID
-      <string name="banner_ad_unit_id">ca-app-pub-6672968234138119/1707410409</string>
-      <string name="interstitial_ad_unit_id">ca-app-pub-6672968234138119/5442571472</string>
-      <string name="native_ad_unit_id">ca-app-pub-6672968234138119/2070588086</string>
-     -->
+        <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+        <string name="interstitial_ad_unit_id">ca-app-pub-3940256099942544/8691691433</string>
+        <string name="native_ad_unit_id">ca-app-pub-3940256099942544/1044960115</string>
+    -->
+
+
+    <string name="banner_ad_unit_id">ca-app-pub-6672968234138119/1707410409</string>
+    <string name="interstitial_ad_unit_id">ca-app-pub-6672968234138119/5442571472</string>
+    <string name="native_ad_unit_id">ca-app-pub-6672968234138119/2070588086</string>
+
 
  </resources>
