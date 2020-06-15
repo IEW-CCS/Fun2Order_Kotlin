@@ -275,8 +275,8 @@ class MainActivity : AppCompatActivity() {
             {
                 //----- 正常登入邏輯 -----
                 updateTokenID(FirebaseAuth.getInstance().currentUser!!.uid)
-                downloadSelfProfile(FirebaseAuth.getInstance().currentUser!!.uid)
-                downloadFriendList(context)
+                //downloadSelfProfile(FirebaseAuth.getInstance().currentUser!!.uid)
+                //downloadFriendList(context)
             }
         }
 

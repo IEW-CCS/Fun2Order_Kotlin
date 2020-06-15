@@ -1,20 +1,27 @@
 package com.iew.fun2order
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
+import com.iew.fun2order.SplashLoadDataTask.LoadDataCallback
 
 
-class Splash : AppCompatActivity() {
-    private val SPLASH_DISPLAY_LENGTH = 1000L
+class Splash : AppCompatActivity(), LoadDataCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.launch_screen)
-        val secondsDelayed = 1
-        Handler().postDelayed(Runnable {
+        // 启动加载应用数据任务类
+        val task = SplashLoadDataTask(this, this)
+        task.execute()
+    }
+
+    /**
+     * 跳转界面
+     */
+    private fun jump() {
+        Handler().postDelayed({ // 此处可以根据版本号进行一些判断，再跳转到相应的界面
+
             val newIntent = Intent()
             newIntent.setClass(this@Splash, Logon::class.java)
             newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -24,7 +31,30 @@ class Splash : AppCompatActivity() {
                 newIntent.putExtras(Bundle())            //沒有就帶空的值進去
             }
             startActivity(newIntent)
-            this.finish()
-        }, secondsDelayed * SPLASH_DISPLAY_LENGTH)
+            finish()
+        }, 1000) // 停留时间500ms
+    }
+
+    /**
+     * 数据加载完成
+     */
+    override fun loaded() {
+        jump()
+    }
+
+    /**
+     * 数据加载出错
+     */
+    override fun loadError() {
+        // 进行出错处理
+        // ...
+        jump()
+    }
+
+    override fun onBackPressed() {
+        // Splash界面不允许使用back键
     }
 }
+
+
+

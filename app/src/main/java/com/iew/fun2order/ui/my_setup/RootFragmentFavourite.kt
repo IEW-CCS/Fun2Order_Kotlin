@@ -297,6 +297,20 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                     dialog.show()
 
                 }
+                else if(uuid == FirebaseAuth.getInstance().currentUser!!.uid.toString())
+                {
+                    dialog.dismiss()
+                    val alert = AlertDialog.Builder(context!!)
+                    with(alert) {
+                        setTitle("資料內容錯誤")
+                        setMessage("無法自己加入自己好友 !!")
+                        setPositiveButton("確定") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                    }
+                    val dialog = alert.create()
+                    dialog.show()
+                }
                 else {
                     //---- 確認加入好友的當下 馬上去檢查 FireBase Exist info ----
                     val queryPath = "USER_PROFILE/$uuid"
