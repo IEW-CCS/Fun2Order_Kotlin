@@ -37,6 +37,7 @@ import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.BuildConfig
 import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.MenuTypeDAO
+import com.iew.fun2order.db.dao.localImageDAO
 import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.db.entity.entityLocalmage
@@ -63,6 +64,9 @@ class HomeFragment : Fragment() {
     private val ACTION_EDIT_MENU_REQUEST_CODE = 102
     private lateinit var imageAddMenu : ImageView
 
+    private lateinit var DBContext : AppDatabase
+    private lateinit var menuICONdao  :localImageDAO
+
 
     private lateinit var mMenuTypeDB: MenuTypeDAO
     private lateinit var mDBContext: AppDatabase
@@ -79,6 +83,10 @@ class HomeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MobileAds.initialize(this.context);
+
+        DBContext = AppDatabase(requireContext())
+        menuICONdao = DBContext.localImagedao()
+
     }
 
     fun showMenuTypeDiago(userProfile: USER_PROFILE) {
@@ -565,9 +573,6 @@ mMenuType=""
         var menuPath = "USER_MENU_INFORMATION/${mAuth.currentUser!!.uid.toString()}/"
         val database = Firebase.database
         val myRef = database.getReference(menuPath)
-
-        var DBContext = AppDatabase(context!!)
-        var menuICONdao = DBContext.localImagedao()
         val DefalutBitmap :Bitmap = BitmapFactory.decodeResource(resources, R.drawable.image_default_member)
 
 
