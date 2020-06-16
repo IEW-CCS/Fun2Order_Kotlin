@@ -68,10 +68,6 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
         if(listdata[position].getItemImage()!= null) {
             holder.imageViewMenu.setImageBitmap(listdata[position].getItemImage())
         }
-        else
-        {
-            holder.imageViewMenu.setImageDrawable(getImageDrawable("image_default_member"))
-        }
 
         holder.linearLayout.setOnClickListener { view ->
             /*
@@ -167,14 +163,6 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
 
     override fun getItemCount(): Int {
         return listdata.size
-    }
-
-    private fun getImageDrawable(imageName: String): Drawable {
-        val id = context!!.resources.getIdentifier(
-            imageName, "drawable",
-            context.packageName
-        )
-        return context.resources.getDrawable(id)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
