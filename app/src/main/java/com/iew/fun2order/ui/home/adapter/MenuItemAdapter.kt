@@ -68,6 +68,10 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
         if(listdata[position].getItemImage()!= null) {
             holder.imageViewMenu.setImageBitmap(listdata[position].getItemImage())
         }
+        else
+        {
+            holder.imageViewMenu.setImageBitmap(null)
+        }
 
         holder.linearLayout.setOnClickListener { view ->
             /*

@@ -75,6 +75,7 @@ class HomeFragment : Fragment() {
     var mRecyclerViewUserMenu: RecyclerView? = null
     var mSegmentedGroupMenuType: SegmentedGroup? = null
     var mItemList: MutableList<MenuItemListData> = mutableListOf()
+    var mMenuCount: Int = 0
     var mInflater: LayoutInflater? = null
     private lateinit var  mDialog : androidx.appcompat.app.AlertDialog
     //var mFdUserMenus: Map<String, USER_MENU2> = mapOf()
@@ -575,6 +576,7 @@ class HomeFragment : Fragment() {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
 
                 mItemList.clear()
+                mMenuCount =dataSnapshot.children.count()
                 dataSnapshot.children.forEach()
                 {
 
@@ -659,7 +661,7 @@ class HomeFragment : Fragment() {
 
     private fun showToolTips_CreateMenu()
     {
-        if(mItemList.count() ==0 ) {
+        if(mMenuCount ==0 ) {
             val sharedPreferences : SharedPreferences = requireContext().getSharedPreferences("share", AppCompatActivity.MODE_PRIVATE);
             val editor= sharedPreferences.edit();
             val tooltipCreateMenu: Boolean = sharedPreferences.getBoolean("tooltipCreateMenu", true);
