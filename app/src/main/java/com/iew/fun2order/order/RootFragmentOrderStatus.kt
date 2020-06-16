@@ -242,14 +242,13 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
                         layoutCallable.isClickable = true
                         layoutCallable.isEnabled = true
-                        textCallable.isEnabled = true
 
                         if (timeExpired) {
 
-                            //--- 關閉崔定通知 -----
+                            //--- 關閉催訂通知 -----
                             layoutCallable.isClickable = false
                             layoutCallable.isEnabled = false
-                            textCallable.isEnabled = false
+                            textCallable.setTextColor(Color.GRAY)
 
                             txtOrderEndTime.setTextColor(requireContext().resources.getColor(R.color.red))
 

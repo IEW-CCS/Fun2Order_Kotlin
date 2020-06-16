@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Environment
 import android.view.LayoutInflater
@@ -25,6 +26,7 @@ import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.ui.home.ActivityAddMenu
 import com.iew.fun2order.ui.home.ActivitySetupOrder
 import com.iew.fun2order.ui.home.data.MenuItemListData
+import kotlinx.android.synthetic.main.row_ordermaintain.view.*
 import java.io.File
 
 
@@ -57,12 +59,19 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
             sDesc = listdata[position].getItemValue().toString().substring(0,59)+ ".."
         }
         holder.txtItemValue.setText(sDesc)
-        holder.imageViewMenu.setImageBitmap(listdata[position].getItemImage())
         holder.imagePath = listdata[position].getItemImagePath()
         holder.mediaStorageDir =listdata[position].getMediaStorageDir()
         holder.mediaStorageReadDir =listdata[position].getMediaStorageReadDir()
         holder.user_menu = listdata[position].getUserMenu()
         holder.user_profile = listdata[position].getUserProfile()
+
+        if(listdata[position].getItemImage()!= null) {
+            holder.imageViewMenu.setImageBitmap(listdata[position].getItemImage())
+        }
+        else
+        {
+            holder.imageViewMenu.setImageDrawable(getImageDrawable("image_default_member"))
+        }
 
         holder.linearLayout.setOnClickListener { view ->
             /*
@@ -158,6 +167,14 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
 
     override fun getItemCount(): Int {
         return listdata.size
+    }
+
+    private fun getImageDrawable(imageName: String): Drawable {
+        val id = context!!.resources.getIdentifier(
+            imageName, "drawable",
+            context.packageName
+        )
+        return context.resources.getDrawable(id)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

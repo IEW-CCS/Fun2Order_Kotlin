@@ -432,7 +432,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
 
 
     override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
-        if (lstSelectedProduct.count() > 2) {
+        if (lstSelectedProduct.count() > 1) {
             rcvSelectedProduct.layoutParams.height = 0
         }
         return super.onCreateView(name, context, attrs)

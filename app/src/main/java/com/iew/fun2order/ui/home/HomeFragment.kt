@@ -70,7 +70,6 @@ class HomeFragment : Fragment() {
 
     private lateinit var mMenuTypeDB: MenuTypeDAO
     private lateinit var mDBContext: AppDatabase
-    private lateinit var DefalutBitmap :Bitmap
 
     var mMenuType: String? = ""
     var mRecyclerViewUserMenu: RecyclerView? = null
@@ -90,13 +89,9 @@ class HomeFragment : Fragment() {
 
     }
 
-    override fun onStart() {
-        super.onStart()
-        DefalutBitmap = BitmapFactory.decodeResource(resources, R.drawable.image_default_member)
-    }
-
     fun showMenuTypeDiago(userProfile: USER_PROFILE) {
-        val item = LayoutInflater.from(requireContext()).inflate(R.layout.alert_edit_menu_type, null)
+        val item =
+            LayoutInflater.from(requireContext()).inflate(R.layout.alert_edit_menu_type, null)
         /*
        * Consume the events here so the buttons cannot process them
        * if the CheckBox in the UI is checked
@@ -119,7 +114,7 @@ class HomeFragment : Fragment() {
 
          */
         val array = arrayListOf<String>()
-        if(userProfile!=null){
+        if (userProfile != null) {
             userProfile.brandCategoryList!!.forEach()
             {
                 array.add(it.toString())
@@ -137,22 +132,22 @@ class HomeFragment : Fragment() {
             (listView.getChildAt(i) as TextView).setTextColor(Color.GREEN)
         }
 
-        listView.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
-            // Get the selected item text from ListView
-            val selectedItem = parent.getItemAtPosition(position) as String
-            var editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
-            editTextMenuType.setText(selectedItem)
-        }
+        listView.onItemClickListener =
+            AdapterView.OnItemClickListener { parent, view, position, id ->
+                // Get the selected item text from ListView
+                val selectedItem = parent.getItemAtPosition(position) as String
+                var editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
+                editTextMenuType.setText(selectedItem)
+            }
 
         var btnDeleteMenuType = item.findViewById(R.id.btnDeleteMenuType) as Button
         btnDeleteMenuType.setOnClickListener {
             var editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
 
-            if (TextUtils.isEmpty(editTextMenuType.text.trim()))
-            {
+            if (TextUtils.isEmpty(editTextMenuType.text.trim())) {
                 editTextMenuType.requestFocus()
                 editTextMenuType.error = "類別不能為空白!"
-            }else {
+            } else {
 
                 // Insert DB
                 //val menutype: MenuType = MenuType(null, editTextMenuType.getText().toString())
@@ -169,7 +164,7 @@ class HomeFragment : Fragment() {
                 }
                  */
 
-                if(mUserProfile!!.brandCategoryList!!.size>0){
+                if (mUserProfile!!.brandCategoryList!!.size > 0) {
 
                     //super.onBackPressed()
                     androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -179,14 +174,14 @@ class HomeFragment : Fragment() {
                         .setPositiveButton(
                             "確定"
                         ) { dialog, which ->
-                            deleteUserMenuFromFireBase(editTextMenuType.getText().toString(),item)
+                            deleteUserMenuFromFireBase(editTextMenuType.getText().toString(), item)
                             resetUserMenuFromFireBase(editTextMenuType.getText().toString())
-                             }
+                        }
                         .setNegativeButton("取消", null)
                         .show()
 
 
-                }else{
+                } else {
                     editTextMenuType.requestFocus()
                     editTextMenuType.error = "找不到類別!"
                 }
@@ -197,24 +192,23 @@ class HomeFragment : Fragment() {
             var editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
 
 
-            if (TextUtils.isEmpty(editTextMenuType.text.trim()))
-            {
+            if (TextUtils.isEmpty(editTextMenuType.text.trim())) {
                 editTextMenuType.requestFocus()
                 editTextMenuType.error = "類別不能為空白!"
-            }else {
-                var bFound:Boolean = false
+            } else {
+                var bFound: Boolean = false
 
                 mUserProfile!!.brandCategoryList!!.forEach {
-                    if(editTextMenuType.getText().toString().equals(it)){
+                    if (editTextMenuType.getText().toString().equals(it)) {
                         bFound = true
                     }
                 }
-                if(bFound){
+                if (bFound) {
                     editTextMenuType.requestFocus()
                     editTextMenuType.error = "重覆類別!"
 
-                }else{
-                    addUserMenuFromFireBase(editTextMenuType.getText().toString(),item)
+                } else {
+                    addUserMenuFromFireBase(editTextMenuType.getText().toString(), item)
                     //MenuTypeListRefresh(item)
                     //editTextMenuType.setText("")
                 }
@@ -249,7 +243,7 @@ class HomeFragment : Fragment() {
 
         mDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE)
             .setOnClickListener {
-                mMenuType=""
+                mMenuType = ""
                 mDialog.dismiss()
                 createMenuTypeButton(mUserProfile!!)
             }
@@ -273,7 +267,7 @@ class HomeFragment : Fragment() {
                 }
 
                  */
-mMenuType=""
+                mMenuType = ""
                 mDialog.dismiss()
                 createMenuTypeButton(mUserProfile!!)
             }
@@ -573,9 +567,6 @@ mMenuType=""
         }
 
         var mAuth = FirebaseAuth.getInstance()
-        if (mAuth.currentUser != null) {
-
-        }
         var menuPath = "USER_MENU_INFORMATION/${mAuth.currentUser!!.uid.toString()}/"
         val database = Firebase.database
         val myRef = database.getReference(menuPath)
@@ -595,7 +586,7 @@ mMenuType=""
                                 imagePath = test!!.multiMenuImageURL!!.get(0)
                             }
 
-                            var IconBitmap :Bitmap = DefalutBitmap
+                            var IconBitmap :Bitmap? = null
                             if(imagePath != "")
                             {
                                 val menuICON = menuICONdao.getMenuImageByName(imagePath)
