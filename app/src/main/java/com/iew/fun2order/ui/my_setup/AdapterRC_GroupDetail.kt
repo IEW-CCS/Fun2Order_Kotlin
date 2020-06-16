@@ -78,98 +78,84 @@ class AdapterRC_GroupDetail(var context: Context, var lstItemsGroupDetail: List<
         abstract fun bindModel(item: T)
     }
 
-    inner class ItemsViewHolder(itemView: View) : BaseViewHolder<ItemsLV_Favourite>(itemView){
+    inner class ItemsViewHolder(itemView: View) : BaseViewHolder<ItemsLV_Favourite>(itemView) {
 
         val dbContext: MemoryDatabase = MemoryDatabase(context)
         val friendImageDB: friendImageDAO = dbContext.friendImagedao()
-
         override fun bindModel(ItemsLV_Favourite: ItemsLV_Favourite) {
-
             val friendInfo = friendImageDB.getFriendImageByName(ItemsLV_Favourite.Name.toString())
-            var queryPath = "USER_PROFILE/" + ItemsLV_Favourite.Name.toString()
-            val database = Firebase.database
-            val myRef = database.getReference(queryPath)
-
-            // Read from the database
-            myRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-
-                    val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                    itemView.UserName.text = value?.userName
-                    itemView.UserView.setImageDrawable(getImageDrawable(ItemsLV_Favourite.imageName))
-
-                    if (friendInfo != null) {
-                        val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
-                        itemView.UserView.setImageBitmap(bmp)
-                    } else {
+            if (friendInfo != null) {
+                itemView.UserName.text = friendInfo.displayname
+                val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
+                itemView.UserView.setImageBitmap(bmp)
+            } else {
+                var queryPath = "USER_PROFILE/" + ItemsLV_Favourite.Name.toString()
+                val database = Firebase.database
+                val myRef = database.getReference(queryPath)
+                // Read from the database
+                myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        val value = dataSnapshot.getValue(USER_PROFILE::class.java)
+                        itemView.UserName.text = value?.userName
+                        itemView.UserView.setImageDrawable(getImageDrawable(ItemsLV_Favourite.imageName))
                         val photoURL = value?.photoURL
                         if (photoURL != null) {
                             var islandRef = Firebase.storage.reference.child(photoURL)
                             val ONE_MEGABYTE = 1024 * 1024.toLong()
                             islandRef.getBytes(ONE_MEGABYTE)
                                 .addOnSuccessListener { bytesPrm: ByteArray ->
-                                    val bmp = BitmapFactory.decodeByteArray(
-                                        bytesPrm,
-                                        0,
-                                        bytesPrm.size
-                                    )
+                                    val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
                                     itemView.UserView.setImageBitmap(bmp)
-
                                     try {
-                                        if(value?.userID!= "") {
-                                            val friendImage: entityFriendImage = entityFriendImage(
-                                                null,
-                                                value?.userID,
-                                                value?.userName,
-                                                bytesPrm
-                                            )
+                                        if (value?.userID != "") {
+                                            val friendImage: entityFriendImage =
+                                                entityFriendImage(
+                                                    null,
+                                                    value?.userID,
+                                                    value?.userName,
+                                                    value?.tokenID,
+                                                    bytesPrm
+                                                )
                                             friendImageDB.insertRow(friendImage)
                                         }
                                     } catch (ex: Exception) {
                                     }
                                 }
                                 .addOnFailureListener {
-                                    itemView.UserView.setImageDrawable(
-                                        getImageDrawable(
-                                            ItemsLV_Favourite.imageName
-                                        )
-                                    )
                                 }
-                        } else {
-                            itemView.UserView.setImageDrawable(
-                                getImageDrawable(
-                                    ItemsLV_Favourite.imageName
-                                )
-                            )
                         }
                     }
-                }
 
-                override fun onCancelled(error: DatabaseError) {
-                    // Failed to read value
-                    // Log.w(TAG, "Failed to read value.", error.toException())
-                }
-            })
-
+                    override fun onCancelled(error: DatabaseError) {
+                        // Failed to read value
+                        // Log.w(TAG, "Failed to read value.", error.toException())
+                    }
+                })
+            }
         }
 
         private fun getImageDrawable(imageName: String): Drawable {
-            val id = context.resources.getIdentifier(imageName, "drawable",
-                context.packageName)
+            val id = context.resources.getIdentifier(
+                imageName, "drawable",
+                context.packageName
+            )
             return context.resources.getDrawable(id)
         }
     }
 
-    inner class HeaderViewHolder(itemView: View) : BaseViewHolder<ItemsLV_GroupAddMembersItem>(itemView){
+    inner class HeaderViewHolder(itemView: View) :
+        BaseViewHolder<ItemsLV_GroupAddMembersItem>(itemView) {
 
-        override fun bindModel(itemsLV_GroupAddMembersItem: ItemsLV_GroupAddMembersItem){
+        override fun bindModel(itemsLV_GroupAddMembersItem: ItemsLV_GroupAddMembersItem) {
             itemView.UserName.text = itemsLV_GroupAddMembersItem.Name;
             itemView.UserView.setImageDrawable(getImageDrawable(itemsLV_GroupAddMembersItem.imageName))
         }
 
         private fun getImageDrawable(imageName: String): Drawable {
-            val id = context.resources.getIdentifier(imageName, "drawable",
-                context.packageName)
+            val id = context.resources.getIdentifier(
+                imageName, "drawable",
+                context.packageName
+            )
             return context.resources.getDrawable(id)
         }
     }

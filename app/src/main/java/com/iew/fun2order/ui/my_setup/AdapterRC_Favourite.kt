@@ -43,80 +43,64 @@ class AdapterRC_Favourite(var context: Context, var lstItemsFavourite: List<Item
 
     // view
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
-
         val dbContext: MemoryDatabase = MemoryDatabase(context)
         val friendImageDB: friendImageDAO = dbContext.friendImagedao()
         fun bindModel(ItemsLV_Favourite: ItemsLV_Favourite) {
             val friendInfo = friendImageDB.getFriendImageByName(ItemsLV_Favourite.Name.toString())
-            val queryPath = "USER_PROFILE/" + ItemsLV_Favourite.Name.toString()
-            val database = Firebase.database
-            val myRef = database.getReference(queryPath)
-            myRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                    itemView.UserName.text = value?.userName
-                    itemView.UserView.setImageDrawable(getImageDrawable(ItemsLV_Favourite.imageName))
-                    ItemsLV_Favourite.displayname = value?.userName ?: ItemsLV_Favourite.Name
-
-                    if (friendInfo != null) {
-                        var bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
-                        itemView.UserView.setImageBitmap(bmp)
-                    } else {
+            if(friendInfo !=null)
+            {
+                itemView.UserName.text = friendInfo.displayname
+                var bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
+                itemView.UserView.setImageBitmap(bmp)
+            }
+            else {
+                val queryPath = "USER_PROFILE/" + ItemsLV_Favourite.Name.toString()
+                val database = Firebase.database
+                val myRef = database.getReference(queryPath)
+                myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        val value = dataSnapshot.getValue(USER_PROFILE::class.java)
+                        itemView.UserName.text = value?.userName
+                        itemView.UserView.setImageDrawable(getImageDrawable(ItemsLV_Favourite.imageName))
                         val photoURL = value?.photoURL
                         if (photoURL != null) {
                             val islandRef = Firebase.storage.reference.child(photoURL)
                             val ONE_MEGABYTE = 1024 * 1024.toLong()
                             islandRef.getBytes(ONE_MEGABYTE)
                                 .addOnSuccessListener { bytesPrm: ByteArray ->
-                                    val bmp = BitmapFactory.decodeByteArray(
-                                        bytesPrm,
-                                        0,
-                                        bytesPrm.size
-                                    )
+                                    val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
                                     itemView.UserView.setImageBitmap(bmp)
-
                                     try {
-                                        if(value?.userID!= "") {
-                                            val friendImage: entityFriendImage = entityFriendImage(
-                                                null,
-                                                value?.userID,
-                                                value?.userName,
-                                                bytesPrm
-                                            )
+                                        if (value?.userID != "") {
+                                            val friendImage: entityFriendImage =
+                                                entityFriendImage(
+                                                    null,
+                                                    value?.userID,
+                                                    value?.userName,
+                                                    value?.tokenID,
+                                                    bytesPrm
+                                                )
                                             friendImageDB.insertRow(friendImage)
                                         }
-                                    } catch (ex: Exception) { }
+                                    } catch (ex: Exception) {
+                                    }
                                 }
                                 .addOnFailureListener {
-                                    itemView.UserView.setImageDrawable(
-                                        getImageDrawable(
-                                            ItemsLV_Favourite.imageName
-                                        )
-                                    )
                                 }
-                        } else {
-                            itemView.UserView.setImageDrawable(
-                                getImageDrawable(
-                                    ItemsLV_Favourite.imageName
-                                )
-                            )
                         }
                     }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    // Failed to read value
-                    // Log.w(TAG, "Failed to read value.", error.toException())
-                }
-            })
+                    override fun onCancelled(error: DatabaseError) {
+                        // Failed to read value
+                        // Log.w(TAG, "Failed to read value.", error.toException())
+                    }
+                })
+            }
         }
-
 
         private fun getImageDrawable(imageName: String): Drawable {
             val id = context.resources.getIdentifier(imageName, "drawable",
                 context.packageName)
             return context.resources.getDrawable(id)
         }
-
     }
 }

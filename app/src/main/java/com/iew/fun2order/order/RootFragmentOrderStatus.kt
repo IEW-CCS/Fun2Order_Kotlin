@@ -50,6 +50,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
     private lateinit var layoutRefresh: LinearLayout
     private lateinit var layoutCallable: LinearLayout
+    private lateinit var textCallable: TextView
     private lateinit var layoutNotify: LinearLayout
 
     private lateinit var broadcast: LocalBroadcastManager
@@ -88,6 +89,8 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             layoutRefresh = it.findViewById<LinearLayout>(R.id.orderStatusReflash)
             layoutCallable = it.findViewById<LinearLayout>(R.id.orderStatusCallable)
             layoutNotify = it.findViewById<LinearLayout>(R.id.orderStatusNotify)
+            textCallable = it.findViewById<TextView>(R.id.orderStatusCallableText)
+
             broadcast = LocalBroadcastManager.getInstance(it)
 
 
@@ -239,14 +242,15 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
                         layoutCallable.isClickable = true
                         layoutCallable.isEnabled = true
-                        layoutCallable.visibility = View.VISIBLE
+                        textCallable.isEnabled = true
 
                         if (timeExpired) {
 
                             //--- 關閉崔定通知 -----
                             layoutCallable.isClickable = false
                             layoutCallable.isEnabled = false
-                            layoutCallable.visibility = View.GONE
+                            textCallable.isEnabled = false
+
                             txtOrderEndTime.setTextColor(requireContext().resources.getColor(R.color.red))
 
                             var needUpdate = false

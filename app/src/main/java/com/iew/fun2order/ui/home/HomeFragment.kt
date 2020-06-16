@@ -70,6 +70,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var mMenuTypeDB: MenuTypeDAO
     private lateinit var mDBContext: AppDatabase
+    private lateinit var DefalutBitmap :Bitmap
 
     var mMenuType: String? = ""
     var mRecyclerViewUserMenu: RecyclerView? = null
@@ -87,6 +88,11 @@ class HomeFragment : Fragment() {
         DBContext = AppDatabase(requireContext())
         menuICONdao = DBContext.localImagedao()
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        DefalutBitmap = BitmapFactory.decodeResource(resources, R.drawable.image_default_member)
     }
 
     fun showMenuTypeDiago(userProfile: USER_PROFILE) {
@@ -573,8 +579,6 @@ mMenuType=""
         var menuPath = "USER_MENU_INFORMATION/${mAuth.currentUser!!.uid.toString()}/"
         val database = Firebase.database
         val myRef = database.getReference(menuPath)
-        val DefalutBitmap :Bitmap = BitmapFactory.decodeResource(resources, R.drawable.image_default_member)
-
 
         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -859,7 +863,7 @@ mMenuType=""
             addButton(mInflater!!, mSegmentedGroupMenuType!!, it)
         }
         addButton(mInflater!!, mSegmentedGroupMenuType!!, "未分類")
-        addButton(mInflater!!, mSegmentedGroupMenuType!!, "編輯")
+        //addButton(mInflater!!, mSegmentedGroupMenuType!!, "編輯")
 
         val params: FrameLayout.LayoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT

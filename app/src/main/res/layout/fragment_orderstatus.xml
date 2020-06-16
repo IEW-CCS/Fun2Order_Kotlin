@@ -230,10 +230,11 @@
                 />
 
             <TextView
+                android:id="@+id/orderStatusCallableText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/imageCallable"
 
+                android:layout_below="@+id/imageCallable"
                 android:gravity="center_horizontal"
                 android:text="發出催訂通知"
                 android:textAlignment="center"
