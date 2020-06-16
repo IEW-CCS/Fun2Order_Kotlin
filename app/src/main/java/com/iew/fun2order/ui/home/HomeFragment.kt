@@ -659,24 +659,25 @@ class HomeFragment : Fragment() {
 
     private fun showToolTips_CreateMenu()
     {
+        if(mItemList.count() ==0 ) {
+            val sharedPreferences : SharedPreferences = requireContext().getSharedPreferences("share", AppCompatActivity.MODE_PRIVATE);
+            val editor= sharedPreferences.edit();
+            val tooltipCreateMenu: Boolean = sharedPreferences.getBoolean("tooltipCreateMenu", true);
+            if( tooltipCreateMenu ) {
 
-        val sharedPreferences : SharedPreferences = requireContext().getSharedPreferences("share", AppCompatActivity.MODE_PRIVATE);
-        val editor= sharedPreferences.edit();
-        val tooltipCreateMenu: Boolean = sharedPreferences.getBoolean("tooltipCreateMenu", true);
-
-        if(mItemList.count() ==0 && tooltipCreateMenu) {
-            val tooltip: Tooltip = Tooltip.Builder(imageAddMenu)
-                .setText("歡迎你使用Fun2Order\n重這裡開始\n製作你第一張菜單")
-                .setDismissOnClick(true)
-                .setCancelable(true)
-                .setCornerRadius(20f)
-                .setBackgroundColor(resources.getColor(R.color.blue))
-                .setTextColor(resources.getColor(R.color.white))
-                .setOnDismissListener {
-                    editor.putBoolean("tooltipCreateMenu", false);
-                    editor.apply();
-                }
-                .show()
+                val tooltip: Tooltip = Tooltip.Builder(imageAddMenu)
+                    .setText("歡迎你使用Fun2Order\n重這裡開始\n製作你第一張菜單")
+                    .setDismissOnClick(true)
+                    .setCancelable(true)
+                    .setCornerRadius(20f)
+                    .setBackgroundColor(resources.getColor(R.color.blue))
+                    .setTextColor(resources.getColor(R.color.white))
+                    .setOnDismissListener {
+                        editor.putBoolean("tooltipCreateMenu", false);
+                        editor.apply();
+                    }
+                    .show()
+            }
         }
     }
 
