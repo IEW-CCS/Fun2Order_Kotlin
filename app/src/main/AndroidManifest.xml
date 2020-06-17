@@ -17,6 +17,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:versionCode="110"
+        android:versionName="1.1.0"
         tools:ignore="LockedOrientationActivity">
 
 
