@@ -5,7 +5,9 @@ import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -27,6 +29,7 @@ import com.iew.fun2order.db.firebase.USER_MENU_ORDER
 import com.iew.fun2order.order.AdapterRC_SelectedProductNoClick
 import com.iew.fun2order.utility.*
 import kotlinx.android.synthetic.main.activity_check_notification.*
+import kotlinx.android.synthetic.main.row_selectedproduct.view.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -134,9 +137,6 @@ class ActivityTapNotification : AppCompatActivity() {
                 txtEndtime.text = "無逾期時間"
             }
 
-            rcv_joinOrderSelectedList.layoutManager = LinearLayoutManager(this)
-            rcv_joinOrderSelectedList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-            rcv_joinOrderSelectedList.adapter = AdapterRC_SelectedProductNoClick(this, lstSelectedProduct)
             txt_joinOrderSelectedTitle.text = ""
 
         }
@@ -284,8 +284,32 @@ class ActivityTapNotification : AppCompatActivity() {
                         txt_joinOrderSelectedTitle.text = "已回覆產品列表"
                         lstSelectedProduct.add(it)
                     }
-                    if(rcv_joinOrderSelectedList.adapter != null) {
-                        rcv_joinOrderSelectedList.adapter!!.notifyDataSetChanged()
+
+                    lstSelectedProduct.forEach()
+                    {
+                        menuProduct ->
+                        val itemView = LayoutInflater.from(this).inflate(R.layout.row_selectedproduct, null)
+
+                        var recipeItems = ""
+                        menuProduct.menuRecipes?.forEach {
+                            it.recipeItems!!.forEach { recipeItem ->
+                                if (recipeItem.checkedFlag == true) {
+                                    recipeItems = recipeItems + recipeItem.recipeName + " "
+                                }
+                            }
+                        }
+
+                        var comments = ""
+                        comments = if (menuProduct.itemComments != "") {
+                            "(${menuProduct.itemComments})"
+                        } else {
+                            menuProduct.itemComments!!
+                        }
+
+                        itemView.selectedproductItem.text = menuProduct.itemName
+                        itemView.selectedproductNote.text = "$recipeItems $comments"
+                        itemView.selectedproductCount.text = menuProduct.itemQuantity.toString()
+                        rcv_joinOrderSelectedLayout.addView(itemView)
                     }
                 }
             }
