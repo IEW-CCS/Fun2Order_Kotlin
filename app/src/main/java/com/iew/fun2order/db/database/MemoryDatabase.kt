@@ -21,7 +21,7 @@ import com.iew.fun2order.db.entity.entityMeunImage
 
 
 @Database(
-    entities = [entityFriend::class, entityMeunImage::class, entityFriendImage::class], version = 3
+    entities = [entityFriend::class, entityMeunImage::class, entityFriendImage::class], version = 4
 )
 abstract class MemoryDatabase : RoomDatabase(){
     abstract fun frienddao(): friendDAO
@@ -35,17 +35,9 @@ abstract class MemoryDatabase : RoomDatabase(){
             instance ?: buildDatabase(context).also { instance = it}
         }
 
-        private val MIGRATION_2_3: Migration = object : Migration(2, 3) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("CREATE TABLE `entityFriendImage` (`id` INTEGER, `name` VARCHAR(N) UNIQUE,  `displayname` VARCHAR(N),  `image` BLOB, " +
-                        "PRIMARY KEY(`id`))")
-            }
-        }
-
         private fun buildDatabase(context: Context) = Room.inMemoryDatabaseBuilder(context,
             MemoryDatabase::class.java)
             .allowMainThreadQueries()
-            .addMigrations(MIGRATION_2_3)
             .fallbackToDestructiveMigration()
             .build()
     }

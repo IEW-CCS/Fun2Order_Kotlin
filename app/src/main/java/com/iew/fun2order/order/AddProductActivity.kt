@@ -63,14 +63,17 @@ class AddProductActivity : AppCompatActivity(), IAdapterOnClick {
             lstProductList.clear()
             arraylistRecipes.clear()
 
-
             if (productList?.count() == 0) {
-                txtProductName.isEnabled = true
+                //--- Richard  要求aways 可以 Free Key in
+                //txtProductName.isEnabled = true
+                txtProductName.clearFocus()
+                txtProductNote.clearFocus()
                 txtProducList.visibility = View.INVISIBLE
                 rcvAddProduct.visibility = View.INVISIBLE
                 txtProductNote.clearFocus()
             } else {
-                txtProductName.isEnabled = false
+                //--- Richard  要求aways 可以 Free Key in
+                // txtProductName.isEnabled = false
                 txtProductName.clearFocus()
                 txtProductNote.clearFocus()
                 txtProducList.visibility = View.VISIBLE

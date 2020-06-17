@@ -32,7 +32,7 @@ class Splash : AppCompatActivity(), LoadDataCallback {
             }
             startActivity(newIntent)
             finish()
-        }, 1000) // 停留时间500ms
+        }, 2000) // 停留时间500ms
     }
 
     /**

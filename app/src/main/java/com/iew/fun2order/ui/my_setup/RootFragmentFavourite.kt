@@ -543,13 +543,11 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
 
 
     private fun downloadFriendList( context: Context) {
-
         val uuid = FirebaseAuth.getInstance().currentUser!!.uid.toString()
         val queryPath = "USER_PROFILE/$uuid/friendList"
         val myRef = Firebase.database.getReference(queryPath)
         friendDB.deleteall()
         friendImageDB.deleteall()
-
         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (snapshot in dataSnapshot.children) {
@@ -561,8 +559,37 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                     catch (e: Exception) {
 
                     }
+                    var queryPath = "USER_PROFILE/" + friendUUID.toString()
+                    val database = Firebase.database
+                    val myRef = database.getReference(queryPath)
+                    myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+                            val value = dataSnapshot.getValue(USER_PROFILE::class.java)
+                            val photoURL = value?.photoURL
+                            if (photoURL != null) {
+                                var islandRef = Firebase.storage.reference.child(photoURL)
+                                val ONE_MEGABYTE = 1024 * 1024.toLong()
+                                islandRef.getBytes(ONE_MEGABYTE)
+                                    .addOnSuccessListener { bytesPrm: ByteArray ->
+                                        try {
+                                            val friendImage: entityFriendImage = entityFriendImage(
+                                                null,
+                                                value?.userID!!,
+                                                value?.userName!!,
+                                                value?.tokenID!!,bytesPrm
+                                            )
+                                            friendImageDB.insertRow(friendImage)
+                                        } catch (ex: Exception) {
+                                        }
+                                    }
+                            }
+                        }
+                        override fun onCancelled(error: DatabaseError) {
+                            // Failed to read value
+                            // Log.w(TAG, "Failed to read value.", error.toException())
+                        }
+                    })
                 }
-
                 prepareFriendListShow()
             }
             override fun onCancelled(error: DatabaseError) {

@@ -48,66 +48,54 @@ class AdapterRC_Candidate(
         fun bindModel(ItemsLV_AddMember: ItemsLV_Canditate, Position: Int) {
 
             val friendInfo = friendImageDB.getFriendImageByName(ItemsLV_AddMember.Name.toString())
-            val queryPath = "USER_PROFILE/" + ItemsLV_AddMember.Name.toString()
-            val database = Firebase.database
-            val myRef = database.getReference(queryPath)
-            myRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                    itemView.SelectFriendName.text = value?.userName
-                    itemView.SelectFriendView.setImageDrawable(getImageDrawable(ItemsLV_AddMember.imageName))
-                    ItemsLV_AddMember.tokenid = value?.tokenID.toString()
+            if(friendInfo != null)
+            {
+                itemView.SelectFriendName.text = friendInfo.displayname
+                ItemsLV_AddMember.tokenid = friendInfo.tokenID
+                val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
+                itemView.SelectFriendView.setImageBitmap(bmp)
+            }
+            else {
 
-                    if (friendInfo != null) {
-                        val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
-                        itemView.SelectFriendView.setImageBitmap(bmp)
-                    } else {
-
+                val queryPath = "USER_PROFILE/" + ItemsLV_AddMember.Name.toString()
+                val database = Firebase.database
+                val myRef = database.getReference(queryPath)
+                myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        val value = dataSnapshot.getValue(USER_PROFILE::class.java)
+                        itemView.SelectFriendName.text = value?.userName
+                        itemView.SelectFriendView.setImageDrawable(getImageDrawable(ItemsLV_AddMember.imageName))
+                        ItemsLV_AddMember.tokenid = value?.tokenID.toString()
                         val photoURL = value?.photoURL
                         if (photoURL != null) {
                             val islandRef = Firebase.storage.reference.child(photoURL)
-
                             val ONE_MEGABYTE = 1024 * 1024.toLong()
                             islandRef.getBytes(ONE_MEGABYTE)
                                 .addOnSuccessListener { bytesPrm: ByteArray ->
-                                    val bmp =
-                                        BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+                                    val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
                                     itemView.SelectFriendView.setImageBitmap(bmp)
-
                                     try {
-                                        if(value?.userID!= "") {
-                                            val friendImage: entityFriendImage = entityFriendImage(
-                                                null,
-                                                value?.userID,
-                                                value?.userName,
-                                                bytesPrm
-                                            )
+                                        if (value?.userID != "") {
+                                            val friendImage: entityFriendImage =
+                                                entityFriendImage(
+                                                    null,
+                                                    value?.userID,
+                                                    value?.userName,
+                                                    value?.tokenID,
+                                                    bytesPrm
+                                                )
                                             friendImageDB.insertRow(friendImage)
                                         }
                                     } catch (ex: Exception) {
                                     }
                                 }
                                 .addOnFailureListener {
-                                    itemView.SelectFriendView.setImageDrawable(
-                                        getImageDrawable(
-                                            ItemsLV_AddMember.imageName
-                                        )
-                                    )
                                 }
-                        } else {
-                            itemView.SelectFriendView.setImageDrawable(
-                                getImageDrawable(
-                                    ItemsLV_AddMember.imageName
-                                )
-                            )
                         }
-
                     }
-
-                }
-
-                override fun onCancelled(error: DatabaseError) {}
-            })
+                    override fun onCancelled(error: DatabaseError) {}
+                })
+            }
 
             itemView.SelectCheckBox.tag = Position
             itemView.SelectCheckBox.isChecked = ItemsLV_AddMember.checked

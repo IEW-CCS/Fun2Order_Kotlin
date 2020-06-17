@@ -75,6 +75,7 @@ class HomeFragment : Fragment() {
     var mRecyclerViewUserMenu: RecyclerView? = null
     var mSegmentedGroupMenuType: SegmentedGroup? = null
     var mItemList: MutableList<MenuItemListData> = mutableListOf()
+    var mMenuCount: Int = 0
     var mInflater: LayoutInflater? = null
     private lateinit var  mDialog : androidx.appcompat.app.AlertDialog
     //var mFdUserMenus: Map<String, USER_MENU2> = mapOf()
@@ -90,7 +91,8 @@ class HomeFragment : Fragment() {
     }
 
     fun showMenuTypeDiago(userProfile: USER_PROFILE) {
-        val item = LayoutInflater.from(requireContext()).inflate(R.layout.alert_edit_menu_type, null)
+        val item =
+            LayoutInflater.from(requireContext()).inflate(R.layout.alert_edit_menu_type, null)
         /*
        * Consume the events here so the buttons cannot process them
        * if the CheckBox in the UI is checked
@@ -113,7 +115,7 @@ class HomeFragment : Fragment() {
 
          */
         val array = arrayListOf<String>()
-        if(userProfile!=null){
+        if (userProfile != null) {
             userProfile.brandCategoryList!!.forEach()
             {
                 array.add(it.toString())
@@ -131,22 +133,22 @@ class HomeFragment : Fragment() {
             (listView.getChildAt(i) as TextView).setTextColor(Color.GREEN)
         }
 
-        listView.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
-            // Get the selected item text from ListView
-            val selectedItem = parent.getItemAtPosition(position) as String
-            var editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
-            editTextMenuType.setText(selectedItem)
-        }
+        listView.onItemClickListener =
+            AdapterView.OnItemClickListener { parent, view, position, id ->
+                // Get the selected item text from ListView
+                val selectedItem = parent.getItemAtPosition(position) as String
+                var editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
+                editTextMenuType.setText(selectedItem)
+            }
 
         var btnDeleteMenuType = item.findViewById(R.id.btnDeleteMenuType) as Button
         btnDeleteMenuType.setOnClickListener {
             var editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
 
-            if (TextUtils.isEmpty(editTextMenuType.text.trim()))
-            {
+            if (TextUtils.isEmpty(editTextMenuType.text.trim())) {
                 editTextMenuType.requestFocus()
                 editTextMenuType.error = "類別不能為空白!"
-            }else {
+            } else {
 
                 // Insert DB
                 //val menutype: MenuType = MenuType(null, editTextMenuType.getText().toString())
@@ -163,7 +165,7 @@ class HomeFragment : Fragment() {
                 }
                  */
 
-                if(mUserProfile!!.brandCategoryList!!.size>0){
+                if (mUserProfile!!.brandCategoryList!!.size > 0) {
 
                     //super.onBackPressed()
                     androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -173,14 +175,14 @@ class HomeFragment : Fragment() {
                         .setPositiveButton(
                             "確定"
                         ) { dialog, which ->
-                            deleteUserMenuFromFireBase(editTextMenuType.getText().toString(),item)
+                            deleteUserMenuFromFireBase(editTextMenuType.getText().toString(), item)
                             resetUserMenuFromFireBase(editTextMenuType.getText().toString())
-                             }
+                        }
                         .setNegativeButton("取消", null)
                         .show()
 
 
-                }else{
+                } else {
                     editTextMenuType.requestFocus()
                     editTextMenuType.error = "找不到類別!"
                 }
@@ -191,24 +193,23 @@ class HomeFragment : Fragment() {
             var editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
 
 
-            if (TextUtils.isEmpty(editTextMenuType.text.trim()))
-            {
+            if (TextUtils.isEmpty(editTextMenuType.text.trim())) {
                 editTextMenuType.requestFocus()
                 editTextMenuType.error = "類別不能為空白!"
-            }else {
-                var bFound:Boolean = false
+            } else {
+                var bFound: Boolean = false
 
                 mUserProfile!!.brandCategoryList!!.forEach {
-                    if(editTextMenuType.getText().toString().equals(it)){
+                    if (editTextMenuType.getText().toString().equals(it)) {
                         bFound = true
                     }
                 }
-                if(bFound){
+                if (bFound) {
                     editTextMenuType.requestFocus()
                     editTextMenuType.error = "重覆類別!"
 
-                }else{
-                    addUserMenuFromFireBase(editTextMenuType.getText().toString(),item)
+                } else {
+                    addUserMenuFromFireBase(editTextMenuType.getText().toString(), item)
                     //MenuTypeListRefresh(item)
                     //editTextMenuType.setText("")
                 }
@@ -243,7 +244,7 @@ class HomeFragment : Fragment() {
 
         mDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE)
             .setOnClickListener {
-                mMenuType=""
+                mMenuType = ""
                 mDialog.dismiss()
                 createMenuTypeButton(mUserProfile!!)
             }
@@ -267,7 +268,7 @@ class HomeFragment : Fragment() {
                 }
 
                  */
-mMenuType=""
+                mMenuType = ""
                 mDialog.dismiss()
                 createMenuTypeButton(mUserProfile!!)
             }
@@ -567,19 +568,15 @@ mMenuType=""
         }
 
         var mAuth = FirebaseAuth.getInstance()
-        if (mAuth.currentUser != null) {
-
-        }
         var menuPath = "USER_MENU_INFORMATION/${mAuth.currentUser!!.uid.toString()}/"
         val database = Firebase.database
         val myRef = database.getReference(menuPath)
-        val DefalutBitmap :Bitmap = BitmapFactory.decodeResource(resources, R.drawable.image_default_member)
-
 
         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
 
                 mItemList.clear()
+                mMenuCount =dataSnapshot.children.count()
                 dataSnapshot.children.forEach()
                 {
 
@@ -591,7 +588,7 @@ mMenuType=""
                                 imagePath = test!!.multiMenuImageURL!!.get(0)
                             }
 
-                            var IconBitmap :Bitmap = DefalutBitmap
+                            var IconBitmap :Bitmap? = null
                             if(imagePath != "")
                             {
                                 val menuICON = menuICONdao.getMenuImageByName(imagePath)
@@ -664,24 +661,25 @@ mMenuType=""
 
     private fun showToolTips_CreateMenu()
     {
+        if(mMenuCount ==0 ) {
+            val sharedPreferences : SharedPreferences = requireContext().getSharedPreferences("share", AppCompatActivity.MODE_PRIVATE);
+            val editor= sharedPreferences.edit();
+            val tooltipCreateMenu: Boolean = sharedPreferences.getBoolean("tooltipCreateMenu", true);
+            if( tooltipCreateMenu ) {
 
-        val sharedPreferences : SharedPreferences = requireContext().getSharedPreferences("share", AppCompatActivity.MODE_PRIVATE);
-        val editor= sharedPreferences.edit();
-        val tooltipCreateMenu: Boolean = sharedPreferences.getBoolean("tooltipCreateMenu", true);
-
-        if(mItemList.count() ==0 && tooltipCreateMenu) {
-            val tooltip: Tooltip = Tooltip.Builder(imageAddMenu)
-                .setText("歡迎你使用Fun2Order\n重這裡開始\n製作你第一張菜單")
-                .setDismissOnClick(true)
-                .setCancelable(true)
-                .setCornerRadius(20f)
-                .setBackgroundColor(resources.getColor(R.color.blue))
-                .setTextColor(resources.getColor(R.color.white))
-                .setOnDismissListener {
-                    editor.putBoolean("tooltipCreateMenu", false);
-                    editor.apply();
-                }
-                .show()
+                val tooltip: Tooltip = Tooltip.Builder(imageAddMenu)
+                    .setText("歡迎你使用Fun2Order\n重這裡開始\n製作你第一張菜單")
+                    .setDismissOnClick(true)
+                    .setCancelable(true)
+                    .setCornerRadius(20f)
+                    .setBackgroundColor(resources.getColor(R.color.blue))
+                    .setTextColor(resources.getColor(R.color.white))
+                    .setOnDismissListener {
+                        editor.putBoolean("tooltipCreateMenu", false);
+                        editor.apply();
+                    }
+                    .show()
+            }
         }
     }
 
@@ -859,7 +857,7 @@ mMenuType=""
             addButton(mInflater!!, mSegmentedGroupMenuType!!, it)
         }
         addButton(mInflater!!, mSegmentedGroupMenuType!!, "未分類")
-        addButton(mInflater!!, mSegmentedGroupMenuType!!, "編輯")
+        //addButton(mInflater!!, mSegmentedGroupMenuType!!, "編輯")
 
         val params: FrameLayout.LayoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT

@@ -67,55 +67,55 @@ class AdapterRC_OrderMaintain(
 
         @SuppressLint("SimpleDateFormat")
         fun bindModel(orderMaintain: ItemsLV_OrderMaintain, position: Int) {
-
             val friendInfo = friendImageDB.getFriendImageByName(orderMaintain.userUUID.toString())
-
-
             itemView.orderMaintain_Edit.tag = position
-
-            val queryPath = "USER_PROFILE/" + orderMaintain.userUUID.toString()
-            val database = Firebase.database
-            val myRef = database.getReference(queryPath)
-            myRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                    itemView.orderMaintain_UserName.text = value?.userName
-                    itemView.orderMaintain_UserView.setImageDrawable(getImageDrawable("image_default_member"))
-
-                    if (friendInfo != null) {
-                        val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
-                        itemView.orderMaintain_UserView.setImageBitmap(bmp)
-                    } else {
-
+            if(friendInfo!= null)
+            {
+                itemView.orderMaintain_UserName.text = friendInfo.displayname
+                val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
+                itemView.orderMaintain_UserView.setImageBitmap(bmp)
+            }
+            else {
+                val queryPath = "USER_PROFILE/" + orderMaintain.userUUID.toString()
+                val database = Firebase.database
+                val myRef = database.getReference(queryPath)
+                myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        val value = dataSnapshot.getValue(USER_PROFILE::class.java)
+                        itemView.orderMaintain_UserName.text = value?.userName
+                        itemView.orderMaintain_UserView.setImageDrawable(getImageDrawable("image_default_member"))
                         val photoURL = value?.photoURL
-                        var islandRef = Firebase.storage.reference.child(photoURL!!)
-                        val ONE_MEGABYTE = 1024 * 1024.toLong()
-                        islandRef.getBytes(ONE_MEGABYTE)
-                            .addOnSuccessListener { bytesPrm: ByteArray ->
-                                val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
-                                itemView.orderMaintain_UserView.setImageBitmap(bmp)
-
-                                try {
-                                    if(value?.userID!= "") {
-                                        val friendImage: entityFriendImage = entityFriendImage(
-                                            null,
-                                            value?.userID,
-                                            value?.userName,
-                                            bytesPrm
-                                        )
-                                        friendImageDB.insertRow(friendImage)
+                        if(photoURL!= null)
+                        {
+                            var islandRef = Firebase.storage.reference.child(photoURL!!)
+                            val ONE_MEGABYTE = 1024 * 1024.toLong()
+                            islandRef.getBytes(ONE_MEGABYTE)
+                                .addOnSuccessListener { bytesPrm: ByteArray ->
+                                    val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+                                    itemView.orderMaintain_UserView.setImageBitmap(bmp)
+                                    try {
+                                        if (value?.userID != "") {
+                                            val friendImage: entityFriendImage = entityFriendImage(
+                                                null,
+                                                value?.userID,
+                                                value?.userName,
+                                                value?.tokenID,
+                                                bytesPrm
+                                            )
+                                            friendImageDB.insertRow(friendImage)
+                                        }
+                                    } catch (ex: Exception) {
                                     }
-                                } catch (ex: Exception) {
                                 }
-                            }
-                            .addOnFailureListener {
-                                itemView.orderMaintain_UserView.setImageDrawable(getImageDrawable("image_default_member"))
-                            }
+                                .addOnFailureListener {
+                                }
+                        }
                     }
-                }
-                override fun onCancelled(error: DatabaseError) {
-                }
-            })
+
+                    override fun onCancelled(error: DatabaseError) {
+                    }
+                })
+            }
 
             var userContentItemData: String = "請點擊查看訂單詳細內容"
             if(orderMaintain.userContentProduct.count()<5) {
