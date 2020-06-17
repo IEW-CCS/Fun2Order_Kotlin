@@ -127,7 +127,7 @@ class RootFragmentOrder() : Fragment(), IAdapterOnClick {
 
                         //----- 更新完以後轉換畫面 ------
                         val bundle = Bundle()
-                        bundle.putParcelable("menuOrder", listOrders[pos].copy())
+                        bundle.putParcelable("menuOrder", menuOrder.copy())
                         val intent = Intent(context, OrderDetailActivity::class.java)
                         intent.putExtras(bundle)
                         startActivity(intent)
