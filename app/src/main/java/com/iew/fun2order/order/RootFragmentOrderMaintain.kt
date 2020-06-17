@@ -74,7 +74,6 @@ class RootFragmentOrderMaintain(var _menuorder: USER_MENU_ORDER) : Fragment() , 
         lstMaintainStatus.clear()
         menuOrder.contentItems?.forEach ()
         {
-
             if(it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT) {
                 val orderContent = it.orderContent
                 val maintainStatus = ItemsLV_OrderMaintain(
@@ -95,7 +94,11 @@ class RootFragmentOrderMaintain(var _menuorder: USER_MENU_ORDER) : Fragment() , 
 
             if(munuOrder!= null) {
                 menuOrder = munuOrder.copy()
-
+                checkMaintainStatus()
+                if(rcvMaintain.adapter !=null)
+                {
+                    rcvMaintain.adapter!!.notifyDataSetChanged()
+                }
             }
         }
     }

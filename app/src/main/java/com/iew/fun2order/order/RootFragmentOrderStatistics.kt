@@ -49,10 +49,8 @@ class RootFragmentOrderStatistics(var _menuorder: USER_MENU_ORDER) : Fragment(),
     private var messageReceiver = object: BroadcastReceiver(){
         override fun onReceive(p0: Context?, p1: Intent?) {
             val munuOrder = p1?.getParcelableExtra<USER_MENU_ORDER>("userMenuOrder")
-
             if(munuOrder!= null) {
                 menuOrder = munuOrder.copy()
-
                 if (mSegmentedGroupLocation.childCount > 0) {
                     val default = mSegmentedGroupLocation.getChildAt(0) as RadioButton
                     default.isChecked = true
@@ -77,8 +75,6 @@ class RootFragmentOrderStatistics(var _menuorder: USER_MENU_ORDER) : Fragment(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         menuOrder = _menuorder.copy()
-
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

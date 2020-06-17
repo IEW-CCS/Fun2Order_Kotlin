@@ -85,10 +85,14 @@ class ActivityTapNotification : AppCompatActivity() {
                 var replyStatus = ""
                 if (values.replyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT) {
                     replyStatus = "參加"
+                    txtDescription.text = "已於 $formatReplyTime 回覆 $replyStatus "
+                    txtDescription.setTextColor(Color.BLUE)
                 } else if (values.replyStatus == MENU_ORDER_REPLY_STATUS_REJECT) {
                     replyStatus = "不參加"
+                    txtDescription.text = "已於 $formatReplyTime 回覆 $replyStatus "
+                    txtDescription.setTextColor(Color.RED)
                 }
-                txtDescription.text = "已於 $formatReplyTime 回覆 $replyStatus "
+
 
             } else if (values.replyStatus == MENU_ORDER_REPLY_STATUS_EXPIRE) {
                 txtDescription.text = "團購邀請--團購單已逾期"

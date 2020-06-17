@@ -133,10 +133,10 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="left|center_vertical"
-            android:gravity="left|center_vertical"
             android:layout_marginRight="20dp"
             android:layout_weight="0.7"
-            />
+            android:gravity="left|center_vertical"
+            android:textColor="@color/red" />
     </LinearLayout>
 
     <LinearLayout

@@ -26,8 +26,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.iew.fun2order.ProgressDialogUtil
 import com.iew.fun2order.R
-import com.iew.fun2order.db.entity.entityNotification
 import com.iew.fun2order.db.firebase.ORDER_MEMBER
 import com.iew.fun2order.db.firebase.USER_MENU_ORDER
 import com.iew.fun2order.utility.*
@@ -97,8 +97,6 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
         }
 
-        setOrderInfo()
-
         layoutRefresh.setOnClickListener{
             refreshMenuOrder()
         }
@@ -119,7 +117,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             sendNotify(menuorder)
         }
 
-        refreshMenuOrder()
+        checkOrdeStatus()
     }
 
 
@@ -130,8 +128,6 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
         val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
         val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
-
-
 
         if(menuorder.createTime!= "") {
             val startDateTime = sdfDecode.parse(menuorder.createTime)
@@ -153,9 +149,6 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             txtOrderEndTime.setTextColor(requireContext().resources.getColor(R.color.red))
             txtOrderEndTime.text = "無逾期時間"
         }
-
-
-
 
         val orderExpire = menuorder.contentItems?.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_EXPIRE }?.count() ?: 0
         val orderWait   = menuorder.contentItems?.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT }?.count()   ?: 0
@@ -223,8 +216,33 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
     }
 
+    private fun checkOrdeStatus() {
+
+        if (menuorder != null) {
+            if (menuorder.dueTime != null) {
+                var timeExpired = false
+                if (menuorder.dueTime!! != "") {
+                    timeExpired = timeCompare(menuorder.dueTime!!)
+                }
+
+                layoutCallable.isClickable = true
+                layoutCallable.isEnabled = true
+                if (timeExpired) {
+                    //--- 關閉催訂通知 -----
+                    layoutCallable.isClickable = false
+                    layoutCallable.isEnabled = false
+                    textCallable.setTextColor(Color.GRAY)
+                    txtOrderEndTime.setTextColor(requireContext().resources.getColor(R.color.red))
+                }
+            }
+
+            setOrderInfo()
+        }
+    }
+
     private fun refreshMenuOrder()
     {
+        ProgressDialogUtil.showProgressDialog(context);
         val userMenuOrderPath = "USER_MENU_ORDER/${FirebaseAuth.getInstance().currentUser!!.uid.toString()}/${_menuorder.orderNumber}"
         val database = Firebase.database
         val myRef = database.getReference(userMenuOrderPath)
@@ -233,25 +251,19 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
                 val menuOrder = dataSnapshot.getValue(USER_MENU_ORDER::class.java)
                 if(menuOrder!= null) {
                     if (menuOrder.dueTime != null) {
-
                         var timeExpired = false
-
                         if(menuOrder.dueTime!! != "") {
                             timeExpired = timeCompare(menuOrder.dueTime!!)
                         }
 
                         layoutCallable.isClickable = true
                         layoutCallable.isEnabled = true
-
                         if (timeExpired) {
-
                             //--- 關閉催訂通知 -----
                             layoutCallable.isClickable = false
                             layoutCallable.isEnabled = false
                             textCallable.setTextColor(Color.GRAY)
-
                             txtOrderEndTime.setTextColor(requireContext().resources.getColor(R.color.red))
-
                             var needUpdate = false
                             menuOrder.contentItems?.forEach {
                                 if (it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT) {
@@ -267,14 +279,17 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
                     menuorder = menuOrder.copy()
                     setOrderInfo()
                     sendMenuOrderRefresh(menuOrder.copy())
+                    ProgressDialogUtil.dismiss();
                     //------ 廣播更新資料 ------
-
+                }
+                else
+                {
+                    ProgressDialogUtil.dismiss();
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Failed to read value
-                // Log.w(TAG, "Failed to read value.", error.toException())
+                ProgressDialogUtil.dismiss();
             }
         })
 
