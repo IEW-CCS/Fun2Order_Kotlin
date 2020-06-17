@@ -65,6 +65,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
     private lateinit var gridLayoutBtnList: GridLayout
     private lateinit var txtjoinOrderDesc: TextView
     private lateinit var txtjoinOrderShowDetail: TextView
+    private var basicCellHeight : Int = 202
 
     private var selfSelectmenuLocation: String = ""
 
@@ -377,6 +378,11 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                     val view: View = recycler.getViewForPosition(0)
                     measureChild(view, widthSpec, heightSpec)
                     realHeight = (view.measuredHeight * lstSelectedProduct.count()) + 20
+                    basicCellHeight = view.measuredHeight
+                }
+                else if (state.itemCount == 0 && lstSelectedProduct.count() > 0)
+                {
+                    realHeight = (basicCellHeight * lstSelectedProduct.count()) + 20
                 }
 
                 // 額外加20 代表吃掉Marge top down height
