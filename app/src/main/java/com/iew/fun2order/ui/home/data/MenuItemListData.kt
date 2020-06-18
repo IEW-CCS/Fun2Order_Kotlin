@@ -12,19 +12,16 @@ class MenuItemListData {
     private var item_image_path: String? = ""
     private var user_menu: USER_MENU? = null
     private var user_profile: USER_PROFILE? = null
-    private var mediaStorageDir: File? = null
-    private var mediaStorageReadDir: File? = null
 
-    constructor(item_name: String?, item_desc: String?, item_image: Bitmap?, item_image_path: String?, user_menu: USER_MENU?, user_profile: USER_PROFILE?
-                , mediaStorageDir: File?, mediaStorageReadDir: File?) {
+
+    constructor(item_name: String?, item_desc: String?, item_image: Bitmap?, item_image_path: String?, user_menu: USER_MENU?, user_profile: USER_PROFILE?) {
         this.item_name = item_name
         this.item_desc = item_desc
         this.item_image = item_image
         this.item_image_path= item_image_path
         this.user_menu = user_menu
         this.user_profile = user_profile
-        this.mediaStorageDir = mediaStorageDir
-        this.mediaStorageReadDir = mediaStorageReadDir
+
     }
 
     fun getItemName(): String? {
@@ -75,19 +72,4 @@ class MenuItemListData {
         this.user_profile = user_profile
     }
 
-    fun getMediaStorageDir(): File? {
-        return mediaStorageDir
-    }
-
-    fun setMediaStorageDir(mediaStorageDir: File?) {
-        this.mediaStorageDir = mediaStorageDir
-    }
-
-    fun getMediaStorageReadDir(): File? {
-        return mediaStorageReadDir
-    }
-
-    fun setMediaStorageReadDir(mediaStorageReadDir: File?) {
-        this.mediaStorageReadDir = mediaStorageReadDir
-    }
 }

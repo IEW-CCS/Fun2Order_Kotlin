@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Environment
@@ -23,13 +24,80 @@ import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.db.entity.entityMeunImage
 import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.db.firebase.USER_PROFILE
+import com.iew.fun2order.ui.history.ItemsLV_Order
 import com.iew.fun2order.ui.home.ActivityAddMenu
 import com.iew.fun2order.ui.home.ActivitySetupOrder
 import com.iew.fun2order.ui.home.data.MenuItemListData
+import com.iew.fun2order.ui.my_setup.IAdapterOnClick
+import com.iew.fun2order.ui.my_setup.listen
+import kotlinx.android.synthetic.main.row_history_order.view.*
+import kotlinx.android.synthetic.main.row_menu_item.view.*
 import kotlinx.android.synthetic.main.row_ordermaintain.view.*
 import java.io.File
 
 
+class MenuItemAdapter(var context: Context, var listdata: MutableList<MenuItemListData>, val IAdapterOnClick: IAdapterOnClick) : RecyclerView.Adapter<MenuItemAdapter.ViewHolder>()
+{
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+
+        //---- Recycle View 套 ScrollView 顯示不全在於 inflate parent 不可以Null
+        val view = LayoutInflater.from(context).inflate(R.layout.row_menu_item,   parent, false)
+        return ViewHolder(view).listen()
+        { pos, type ->
+            IAdapterOnClick.onClick("Order",pos,type)
+        }
+    }
+
+    override fun getItemCount(): Int {
+        return listdata.size
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bindModel( listdata[position] )
+    }
+
+    // view
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+        fun bindModel(MenuItem: MenuItemListData){
+            var sDesc = ""
+            if(MenuItem.getItemValue().toString().length > 60){
+                sDesc = MenuItem.getItemValue().toString().substring(0,59)+ ".."
+            }
+            else
+            {
+                sDesc = MenuItem.getItemValue().toString()
+            }
+            itemView.textViewMenuName.text = MenuItem.getItemName()
+            itemView.textViewMenuDescription.text = sDesc
+            if(MenuItem.getItemImage()!= null) {
+                itemView.imageViewMenuItem.setImageBitmap(MenuItem.getItemImage())
+            }
+            else
+            {
+                itemView.imageViewMenuItem.setImageBitmap(null)
+            }
+
+            itemView.btnChuGroup.setOnClickListener { view ->
+                val bundle = Bundle()
+                bundle.putString("MENU_ID", MenuItem.getItemName())
+                bundle.putParcelable("USER_MENU", MenuItem.getUserMenu())
+                bundle.putParcelable("USER_PROFILE", MenuItem.getUserProfile())
+                var I = Intent(view.context, ActivitySetupOrder::class.java)
+                I.putExtras(bundle)
+                view.context.startActivity(I)
+            }
+        }
+    }
+}
+
+
+
+
+
+
+/*
+
+//-------- 架構大修改 -------
 class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
     RecyclerView.Adapter<MenuItemAdapter.ViewHolder>() {
     private val listdata: MutableList<MenuItemListData>
@@ -230,4 +298,6 @@ class MenuItemAdapter(listdata: MutableList<MenuItemListData>) :
     init {
         this.listdata = listdata
     }
-}
+
+
+}*/

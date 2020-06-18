@@ -76,8 +76,7 @@ class ActivityAddMenu : AppCompatActivity() {
     // var mMenuImages: MutableList<Bitmap> = mutableListOf()
     private lateinit var mTextViewMenuPic: TextView
     private lateinit var  mDialog : AlertDialog
-    var mMediaStorageDir: File? = null
-    var mMediaStorageReadDir: File? = null
+
     private var mbEdit = false
     //private lateinit var mUserMenu:UserMenu
     private lateinit var mbutton: Array<Button>
@@ -130,22 +129,7 @@ class ActivityAddMenu : AppCompatActivity() {
             mFirebaseUserMenu.userID=mAuth.currentUser!!.uid.toString()
             mFirebaseUserMenu.menuNumber=mAuth.currentUser!!.uid.toString() + "-MENU-" + timeStamp
         }
-        mMediaStorageDir = File(
-            Environment.getExternalStorageDirectory()
-                .toString() + "/Android/data/"
-                    + applicationContext.packageName
-                    + "/Files"
-                    + "/Menu_Image"
-                    + "/" + mFirebaseUserMenu.userID
-                    + "/" + mFirebaseUserMenu.menuNumber
-        )
 
-        mMediaStorageReadDir = File(
-            Environment.getExternalStorageDirectory()
-                .toString() + "/Android/data/"
-                    + applicationContext.packageName
-                    + "/Files/"
-        )
 
         if(mbEdit){
             val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
@@ -1231,50 +1215,7 @@ class ActivityAddMenu : AppCompatActivity() {
 
     }
 
-    private fun saveImageToLocal(bitmap: Bitmap, index: Int):String {
 
-        val filename:String
-        //val date = Date(0)
-        //val sdf = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
-        //filename = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
-        filename = index.toString()
-        var final_filename : String = ""
-        try
-        {
-            val path = Environment.getExternalStorageDirectory().toString()
-            /*
-            val mediaStorageDir = File(
-                Environment.getExternalStorageDirectory()
-                    .toString() + "/Android/data/"
-                        + applicationContext.packageName
-                        + "/Files"
-            )
-            if (! mediaStorageDir.exists()){
-                if (! mediaStorageDir.mkdirs()){
-                    return ""
-                }
-            }
-             */
-
-            var fOut: OutputStream? = null
-            var filepath =  "Menu_Image/" + mFirebaseUserMenu.userID + "/" + mFirebaseUserMenu.menuNumber
-            final_filename = filename + ".jpg"
-            val file = File(mMediaStorageDir,  final_filename)
-            fOut = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut)
-            fOut.flush()
-            fOut.close()
-            MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName())
-            final_filename = filepath + "/" + final_filename
-        }
-        catch (e:Exception) {
-            e.printStackTrace()
-            final_filename=""
-        }
-
-        return final_filename
-
-    }
     override fun onBackPressed() {
         //super.onBackPressed()
         AlertDialog.Builder(this)

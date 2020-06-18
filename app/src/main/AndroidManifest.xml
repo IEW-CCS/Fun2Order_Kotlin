@@ -116,6 +116,10 @@
             android:name=".order.ActivityShowMenuImage"
             android:screenOrientation="portrait"/>
 
+        <activity
+            android:name=".ui.home.ActivityAddShareMeunMember"
+            android:screenOrientation="portrait"/>
+
         <service
             android:name=".MessagingService"
             android:exported="false">
