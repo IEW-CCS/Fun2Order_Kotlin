@@ -17,12 +17,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
+import com.iew.fun2order.ProgressDialogUtil
 import com.iew.fun2order.R
 import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.entity.entityNotification
 import com.iew.fun2order.order.JoinOrderActivity
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.utility.*
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -50,6 +52,8 @@ class NotificationsFragment : Fragment(), IAdapterOnClick {
         notificationsViewModel = ViewModelProviders.of(this).get(NotificationsViewModel::class.java)
 
         val root = inflater.inflate(R.layout.fragment_notifications, container, false)
+        val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
+        val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
 
         adView = root.findViewById(R.id.adView) as AdView
         val request: AdRequest = AdRequest.Builder().build()
@@ -60,19 +64,19 @@ class NotificationsFragment : Fragment(), IAdapterOnClick {
             }
         })
 
-
         broadcast = LocalBroadcastManager.getInstance(requireContext())
         rcvNotification = root.findViewById<RecyclerView>(R.id.rcvNotification)
         rcvNotification!!.layoutManager = LinearLayoutManager(requireActivity())
         rcvNotification!!.adapter = AdapterRC_Notification(requireContext(), lstNotification, this)
 
-
+        ProgressDialogUtil.showProgressDialog(context);
         val notificationDB = AppDatabase(requireContext()).notificationdao()
         notificationDB.getAllNotify().observe(viewLifecycleOwner, Observer { notify ->
             val list = (notify as ArrayList<entityNotification>).asReversed()
             lstNotification.clear()
             list.forEach() { it ->
-
+                val receiveDateTime = sdfDecode.parse(it.receiveTime)
+                val formatReceiveDatetime = sdfEncode.format(receiveDateTime).toString()
                 lstNotification.add(
                     ItemsLV_Notify(
                         it.messageID,
@@ -80,19 +84,17 @@ class NotificationsFragment : Fragment(), IAdapterOnClick {
                         it.notificationType,
                         it.replyStatus,
                         it.brandName,
-                        it.receiveTime,
+                        formatReceiveDatetime,
                         it.messageBody,
                         it.isRead
                     )
                 )
             }
             recycleViewRefresh()
+            ProgressDialogUtil.dismiss()
         })
-
-
         return root
     }
-
 
     override fun onClick(sender: String, pos: Int, type: Int) {
 

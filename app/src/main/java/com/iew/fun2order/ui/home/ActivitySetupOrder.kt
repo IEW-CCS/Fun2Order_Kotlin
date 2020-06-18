@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -33,6 +35,8 @@ import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
 import com.iew.fun2order.utility.NOTIFICATION_TYPE_ACTION_JOIN_ORDER
 import org.json.JSONObject
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 
@@ -553,7 +557,9 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
 
 
 
+
     private fun sendFcmMessage(userMenuOrder: USER_MENU_ORDER) {
+        val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
 
         userMenuOrder.contentItems!!.forEach() {
 
@@ -585,7 +591,7 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
             notificationBody.put("messageBody", "來自 ${userMenuOrder.orderOwnerName} 的團購邀請, 請點擊通知以查看詳細資訊.")    //Enter
 
             notificationBody.put("notificationType",NOTIFICATION_TYPE_ACTION_JOIN_ORDER )   //Enter
-            notificationBody.put("receiveTime", userMenuOrder.createTime)   //Enter
+            notificationBody.put("receiveTime", timeStamp)   //Enter
             notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
             notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
             notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter

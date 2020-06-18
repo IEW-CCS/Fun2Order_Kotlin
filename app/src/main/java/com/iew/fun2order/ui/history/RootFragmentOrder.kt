@@ -25,13 +25,14 @@ import com.iew.fun2order.db.firebase.USER_MENU_ORDER
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_EXPIRE
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
+import kotlinx.android.synthetic.main.row_history_order.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 
 class RootFragmentOrder() : Fragment(), IAdapterOnClick {
 
-    var listOrders: MutableList<USER_MENU_ORDER> = mutableListOf()
+    var listOrders: MutableList<ItemsLV_Order> = mutableListOf()
     var rcvOrders: RecyclerView? = null
 
     override fun onCreateView(
@@ -55,37 +56,53 @@ class RootFragmentOrder() : Fragment(), IAdapterOnClick {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        ProgressDialogUtil.showProgressDialog(context);
+
         val userMenuOrderPath = "USER_MENU_ORDER/${FirebaseAuth.getInstance().currentUser!!.uid.toString()}/"
         val database = Firebase.database
         val myRef = database.getReference(userMenuOrderPath)
+        val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
+        val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
         listOrders.clear()
-        var tmp: MutableList<USER_MENU_ORDER> = mutableListOf()
         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 dataSnapshot.children.forEach()
                 {
                     it->
                     val userOrder =  it.getValue(USER_MENU_ORDER::class.java)
-                    if(userOrder != null) {
-                        tmp.add(userOrder.copy())
+                    if (userOrder != null) {
+                        try {
+                            val tmpStartTime = sdfDecode.parse(userOrder.createTime)
+                            val startTime = sdfEncode.format(tmpStartTime).toString()
+                            val joinCount = userOrder.contentItems!!.count().toString()
+                            var dueTime = ""
+                            var expired = false
+
+                            if (userOrder.dueTime != null) {
+                                var timeExpired = timeCompare(userOrder.dueTime!!)
+                                val tmpDueTime = sdfDecode.parse(userOrder.dueTime)
+                                dueTime = sdfEncode.format(tmpDueTime).toString()
+                                if (timeExpired) {
+                                    expired = true
+                                }
+                            }
+
+                            listOrders.add(
+                                ItemsLV_Order(userOrder.orderNumber!!, userOrder.brandName!!, startTime, dueTime, joinCount, expired)
+                            )
+                        } catch (ex: Exception) {
+                        }
                     }
                 }
-
-                tmp.asReversed().forEach()
-                {
-                    listOrders.add(it.copy())
-                }
-
+                listOrders.reverse()
                 rcvOrders!!.adapter!!.notifyDataSetChanged()
+                ProgressDialogUtil.dismiss();
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Failed to read value
-                // Log.w(TAG, "Failed to read value.", error.toException())
+                ProgressDialogUtil.dismiss();
             }
         })
-
-
     }
 
     override fun onClick(sender: String, pos: Int, type: Int) {

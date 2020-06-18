@@ -338,6 +338,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
     private fun sendNotifyFcmMessage(userMenuOrder: USER_MENU_ORDER, message: String) {
 
+        val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
         val notificationMsgList = userMenuOrder.contentItems?.toMutableList()
         notificationMsgList?.forEach {it->
             val orderMember = it as ORDER_MEMBER
@@ -356,7 +357,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             notificationBody.put("messageBody", body ?: "")    //Enter
 
             notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_INFORMATION)   //Enter
-            notificationBody.put("receiveTime", userMenuOrder.createTime)   //Enter
+            notificationBody.put("receiveTime", timeStamp)   //Enter
             notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
             notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
             notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
@@ -385,6 +386,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
     private fun sendCallableFcmMessage(userMenuOrder: USER_MENU_ORDER) {
 
+        val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
         val callableList = userMenuOrder.contentItems?.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT }?.toMutableList()
         callableList?.forEach {it->
 
@@ -404,7 +406,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             notificationBody.put("messageBody", body ?: "")    //Enter
 
             notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_DUETIME)   //Enter
-            notificationBody.put("receiveTime", userMenuOrder.createTime)   //Enter
+            notificationBody.put("receiveTime", timeStamp)   //Enter
             notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
             notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
             notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter

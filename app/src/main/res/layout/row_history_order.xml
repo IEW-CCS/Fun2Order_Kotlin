@@ -85,7 +85,7 @@
                 android:gravity="center_vertical|left"
                 android:scaleType="centerInside"
                 android:text="發起日期 :"
-                android:textColor="@android:color/primary_text_light"
+                android:textColor="@color/Black"
                 android:textSize="16dp" />
 
             <TextView
@@ -96,7 +96,7 @@
                 android:gravity="center_vertical|left"
                 android:scaleType="centerInside"
                 android:text="2020/03/04 19:51:26"
-                android:textColor="@android:color/secondary_text_light"
+                android:textColor="@color/Black"
                 android:textSize="16dp" />
         </LinearLayout>
 
@@ -118,7 +118,7 @@
                 android:gravity="center_vertical|left"
                 android:scaleType="centerInside"
                 android:text="截止日期 :"
-                android:textColor="@android:color/primary_text_light"
+                android:textColor="@color/Black"
                 android:textSize="16dp" />
 
             <TextView
@@ -129,7 +129,7 @@
                 android:gravity="center_vertical|left"
                 android:scaleType="centerInside"
                 android:text="2020/03/04 19:51:26"
-                android:textColor="@android:color/secondary_text_light"
+                android:textColor="@color/Black"
                 android:textSize="16dp" />
         </LinearLayout>
 
@@ -151,7 +151,7 @@
                 android:gravity="center_vertical|left"
                 android:scaleType="centerInside"
                 android:text="訂單編號 :"
-                android:textColor="@android:color/primary_text_light"
+                android:textColor="@color/Black"
                 android:textSize="16dp" />
 
             <TextView
@@ -162,7 +162,7 @@
                 android:gravity="center_vertical|left"
                 android:scaleType="centerInside"
                 android:text="M1234567890"
-                android:textColor="@android:color/secondary_text_light"
+                android:textColor="@color/Black"
                 android:textSize="16dp" />
         </LinearLayout>
 

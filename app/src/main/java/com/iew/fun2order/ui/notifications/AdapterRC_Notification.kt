@@ -46,11 +46,6 @@ class AdapterRC_Notification(var context: Context, var lstItemsNotify:List<Items
             itemView.notifytitle.text = "來自 ${ItemsLV_Notify.notifyTitle} 的團購訊息"
             itemView.brandName.text = "[ ${ItemsLV_Notify.brandName} ]"
 
-            val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
-            val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
-            val replyDateTime = sdfDecode.parse(ItemsLV_Notify.notifydatetime)
-            val formatReplyDatetime = sdfEncode.format(replyDateTime).toString()
-
             when(ItemsLV_Notify.msgType)
             {
                 NOTIFICATION_TYPE_ACTION_JOIN_ORDER ->
@@ -104,7 +99,7 @@ class AdapterRC_Notification(var context: Context, var lstItemsNotify:List<Items
                 }
             }
 
-            itemView.notifydatetime.text = formatReplyDatetime
+            itemView.notifydatetime.text = ItemsLV_Notify.notifydatetime
             itemView.notifdesc.setText ( ItemsLV_Notify.desc)
             itemView.notifdesc.setOnClickListener(View.OnClickListener {
                 IAdapterOnClick.onClick("Notify", adapterPosition,0)
