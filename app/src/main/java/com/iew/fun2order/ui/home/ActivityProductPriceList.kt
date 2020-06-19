@@ -48,13 +48,13 @@ class ActivityProductPriceList: AppCompatActivity() {
 
         val itemView = LayoutInflater.from(this).inflate(R.layout.row_product_item, null)
         itemView.textViewName.text = "產品名稱"
-        itemView.textViewName.setTextColor(context.resources.getColor(R.color.blue))
+        itemView.textViewName.setTextColor(Color.rgb(79,195,247))
 
         itemView.textViewPrice.text = "價格"
-        itemView.textViewPrice.setTextColor(context.resources.getColor(R.color.blue))
+        itemView.textViewPrice.setTextColor(Color.rgb(79,195,247))
 
         itemView.textViewLimit.text = "限量"
-        itemView.textViewLimit.setTextColor(context.resources.getColor(R.color.red))
+        itemView.textViewLimit.setTextColor(Color.rgb(255,0,0))
 
         titleroductList = findViewById<LinearLayout>(R.id.titleProductList)
         titleroductList.addView(itemView)
