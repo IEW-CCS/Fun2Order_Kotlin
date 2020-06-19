@@ -18,33 +18,17 @@
     android:layout_weight="1.0"
     >
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.15"
-            android:paddingLeft="10dp"
-            android:text="名稱"
-            android:textColor="#4FC3F7"
-            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/orderproductItem"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.55"
+            android:layout_weight="0.7"
             android:paddingLeft="10dp"
-            android:textColor="@android:color/primary_text_light"
+            android:text="產品名稱"
+            android:textColor="@color/blue"
             android:textSize="18sp" />
 
-        <TextView
-
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.15"
-            android:gravity="center_horizontal"
-            android:text="價格"
-            android:textColor="#4FC3F7"
-            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/orderproductPrice"
@@ -53,7 +37,20 @@
             android:layout_marginRight="10dp"
             android:layout_weight="0.15"
             android:gravity="center_horizontal"
-            android:textColor="@android:color/primary_text_light"
+            android:text="價格"
+            android:textColor="@color/Blue"
+            android:textSize="18sp" />
+
+
+        <TextView
+            android:id="@+id/orderproductLimit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_weight="0.15"
+            android:gravity="center_horizontal"
+            android:text="限量"
+            android:textColor="@color/Red"
             android:textSize="18sp" />
 
 </LinearLayout>

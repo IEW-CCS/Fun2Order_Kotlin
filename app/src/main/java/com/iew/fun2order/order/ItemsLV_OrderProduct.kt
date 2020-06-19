@@ -5,7 +5,7 @@ import kotlinx.android.parcel.Parcelize
 
 
 @Parcelize
-data class ItemsLV_OrderProduct (var itemName: String, var itemPrice:String, var sequenceNumber: String): Parcelable
+data class ItemsLV_OrderProduct (var itemName: String, var itemPrice:String, var itemLimit:String?, var sequenceNumber: String): Parcelable
 
 
 

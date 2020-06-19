@@ -22,8 +22,7 @@ class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>) :
         viewType: Int
     ): ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        val listItem: View =
-            layoutInflater.inflate(R.layout.row_product_item, parent, false)
+        val listItem: View = layoutInflater.inflate(R.layout.row_product_item, parent, false)
 
         return ViewHolder(listItem)
     }
@@ -34,19 +33,9 @@ class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>) :
     ) {
         val myListData: ProductPriceListData = listdata[position]
         holder.txtItemName.setText(listdata[position].getItemName())
-        holder.txtItemValue.setText(listdata[position].getItemValue())
-/*
-        holder.itemView.setOnClickListener { view ->
-            Toast.makeText(
-                view.context,
-                "click on item: " + myListData.getItemName(),
-                Toast.LENGTH_LONG
-            ).show()
+        holder.txtItemPrice.setText(listdata[position].getItemValue())
+        holder.txtItemLimit.setText("")
 
-        }
-
- */
-        //holder.linearLayout
     }
 
     override fun getItemCount(): Int {
@@ -55,18 +44,17 @@ class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>) :
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var txtItemName: TextView
-        var txtItemValue: TextView
+        var txtItemPrice: TextView
+        var txtItemLimit: TextView
         var linearLayout: LinearLayout
 
 
         init {
 
-            txtItemName =
-                itemView.findViewById<View>(R.id.textViewNameValue) as TextView
-            txtItemValue =
-                itemView.findViewById<View>(R.id.textViewPriceValue) as TextView
-            linearLayout =
-                itemView.findViewById<View>(R.id.linearLayoutProdPrice) as LinearLayout
+            txtItemName = itemView.findViewById<View>(R.id.textViewName) as TextView
+            txtItemPrice = itemView.findViewById<View>(R.id.textViewPrice) as TextView
+            txtItemLimit = itemView.findViewById<View>(R.id.textViewLimit) as TextView
+            linearLayout = itemView.findViewById<View>(R.id.linearLayoutProdPrice) as LinearLayout
 
         }
     }

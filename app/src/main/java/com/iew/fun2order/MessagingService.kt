@@ -74,6 +74,10 @@ class MessagingService : FirebaseMessagingService() {
                     {
                         addFriend(notification)
                     }
+                    else if(notification.notificationType == NOTIFICATION_TYPE_SHARE_MENU)
+                    {
+                        shareMenu(notification)
+                    }
                     else if (notification.notificationType == NOTIFICATION_TYPE_ACTION_JOIN_ORDER ||
                              notification.notificationType == NOTIFICATION_TYPE_MESSAGE_DUETIME||
                              notification.notificationType == NOTIFICATION_TYPE_MESSAGE_INFORMATION) {
@@ -85,13 +89,12 @@ class MessagingService : FirebaseMessagingService() {
                         } else {
                             showAlert(contentText)
                         }
-
                         val notificationDB = AppDatabase(this).notificationdao()
                         notificationDB.insertRow(notification)
                     }
 
                   } catch (e: Exception) {
-                      Log.d("Firebase", "Insert Notification Failed \${e.localizedMessage}")
+                      Log.d("Firebase", "Insert Notification Failed. ${e.localizedMessage}")
                 }
             }
         }
@@ -113,6 +116,12 @@ class MessagingService : FirebaseMessagingService() {
     private fun addFriend(notify: entityNotification) {
         val intent = Intent(LOCALBROADCASE_FRIEND)
         intent.putExtra("AddFriendMessage", notify)
+        broadcast.sendBroadcast(intent)
+    }
+
+    private fun shareMenu(notify: entityNotification) {
+        val intent = Intent(LOCALBROADCASE_SHAREMENU)
+        intent.putExtra("ShareMenuMessage", notify)
         broadcast.sendBroadcast(intent)
     }
 

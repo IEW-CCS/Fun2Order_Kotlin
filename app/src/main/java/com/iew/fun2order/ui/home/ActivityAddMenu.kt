@@ -8,16 +8,14 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
-import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.core.view.children
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -43,9 +41,6 @@ import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -373,8 +368,8 @@ class ActivityAddMenu : AppCompatActivity() {
 
             var alertDialog = AlertDialog.Builder(this)
                 .setView(item)
-                .setPositiveButton("確定", null)
-                .setNegativeButton("取消", null)
+                .setPositiveButton("確定",null)
+                .setNegativeButton("取消",null)
                 .show()
             alertDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener {

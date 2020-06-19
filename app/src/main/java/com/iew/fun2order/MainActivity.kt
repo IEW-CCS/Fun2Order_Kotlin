@@ -1,14 +1,16 @@
 package com.iew.fun2order
 
 
+import android.app.Activity
 import android.content.*
 import android.os.Bundle
 import android.text.Editable
+import android.text.SpannableString
 import android.util.AttributeSet
 import android.util.Log
-import android.view.Gravity
 import android.view.View
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +24,8 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -31,20 +35,18 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.db.dao.friendDAO
-import com.iew.fun2order.db.dao.friendImageDAO
 import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.database.MemoryDatabase
-import com.iew.fun2order.db.entity.entityFriend
-import com.iew.fun2order.db.entity.entityFriendImage
-import com.iew.fun2order.db.entity.entityNotification
-import com.iew.fun2order.db.entity.entityUserProfile
+import com.iew.fun2order.db.entity.*
+import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.order.JoinOrderActivity
 import com.iew.fun2order.utility.*
-import com.tooltip.Tooltip
 import org.json.JSONObject
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -92,7 +94,32 @@ class MainActivity : AppCompatActivity() {
             val orderInfo = p1?.getParcelableExtra<entityNotification>("AddFriendMessage")
             if(orderInfo != null)
             {
-                receiveAddFriendRequest(orderInfo.messageTitle, orderInfo.messageBody, orderInfo.orderOwnerID)
+                if(FirebaseAuth.getInstance().currentUser != null) {
+                    receiveAddFriendRequest(
+                        orderInfo.messageTitle,
+                        orderInfo.messageBody,
+                        orderInfo.orderOwnerID
+                    )
+                }
+            }
+        }
+    }
+
+    //--- 收到分享菜單資訊
+    private var shareMenuReceiver = object: BroadcastReceiver(){
+        override fun onReceive(p0: Context?, p1: Intent?) {
+            val shareMenuInfo = p1?.getParcelableExtra<entityNotification>("ShareMenuMessage")
+            if(shareMenuInfo != null)
+            {
+
+                if(FirebaseAuth.getInstance().currentUser != null) {
+                    receiveShareMenuRequest(
+                        shareMenuInfo.messageTitle,
+                        shareMenuInfo.messageBody,
+                        shareMenuInfo.orderOwnerID,
+                        shareMenuInfo.menuNumber
+                    )
+                }
             }
         }
     }
@@ -109,6 +136,7 @@ class MainActivity : AppCompatActivity() {
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, IntentFilter(LOCALBROADCASE_MESSAGE))
         LocalBroadcastManager.getInstance(this).registerReceiver(selfOrderJoinReceiver, IntentFilter(LOCALBROADCASE_JOIN))
         LocalBroadcastManager.getInstance(this).registerReceiver(addFriendReceiver, IntentFilter(LOCALBROADCASE_FRIEND))
+        LocalBroadcastManager.getInstance(this).registerReceiver(shareMenuReceiver, IntentFilter(LOCALBROADCASE_SHAREMENU))
         UpdateBadge()
     }
 
@@ -117,6 +145,7 @@ class MainActivity : AppCompatActivity() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver)
         LocalBroadcastManager.getInstance(this).unregisterReceiver(selfOrderJoinReceiver)
         LocalBroadcastManager.getInstance(this).unregisterReceiver(addFriendReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(shareMenuReceiver)
     }
 
     override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
@@ -307,6 +336,10 @@ class MainActivity : AppCompatActivity() {
                     {
                         receiveAddFriendRequest(notification.messageTitle, notification.messageBody, notification.orderOwnerID)
                     }
+                    else if (notification.notificationType == NOTIFICATION_TYPE_SHARE_MENU)
+                    {
+                        receiveShareMenuRequest(notification.messageTitle, notification.messageBody, notification.orderOwnerID, notification.menuNumber)
+                    }
                     else {
                         try {
                             val notificationDB = AppDatabase(this).notificationdao()
@@ -357,7 +390,6 @@ class MainActivity : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {}
         })
     }
-
 
     private fun downloadFriendListafterAddFriend( context:Context) {
         val uuid =  FirebaseAuth.getInstance().currentUser!!.uid.toString()
@@ -520,6 +552,279 @@ class MainActivity : AppCompatActivity() {
         }
         val dialog = alert.create()
         dialog.show()
+    }
+
+    //分享菜單請求資訊
+    private fun receiveShareMenuRequest(msgTitle: String, msgBody: String, menuOwner:String, menuNumber: String) {
+        val alert = AlertDialog.Builder(this)
+        with(alert) {
+            setTitle(msgTitle)
+            setMessage(msgBody)
+            setCancelable(false)
+            setPositiveButton("確定") { dialog, _ ->
+                dialog.dismiss()
+                DownLoadShareMenu(menuOwner,menuNumber)
+            }
+            setNegativeButton("取消") { dialog, _ ->
+                dialog.dismiss()
+            }
+        }
+        val dialog = alert.create()
+        dialog.show()
+    }
+
+    private fun DownLoadShareMenu(menuOwner:String, menuNumber: String) {
+        val uuid = FirebaseAuth.getInstance().currentUser!!.uid.toString()
+        val queryPath = "USER_PROFILE/$uuid"
+        val myRef = Firebase.database.getReference(queryPath)
+        var userProfile : USER_PROFILE? = null
+        var menuInfo : USER_MENU? = null
+        var MemoryDBContext = MemoryDatabase(this!!)
+        var MenuImageDB = MemoryDBContext.menuImagedao()
+
+        ProgressDialogUtil.showProgressDialog(this);
+        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                ProgressDialogUtil.dismiss()
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("錯誤")
+                    .setMessage("下載使用者資料時發生異常")
+                    .setPositiveButton("確定"){ dialog, _ -> }
+                    .create()
+                    .show()
+            }
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val tmp_userProfile = dataSnapshot.getValue(USER_PROFILE::class.java)
+                if(tmp_userProfile == null)
+                {
+                    ProgressDialogUtil.dismiss()
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle("錯誤")
+                        .setMessage("下載使用者資料時發生異常")
+                        .setPositiveButton("確定") { dialog, _ -> }
+                        .create()
+                        .show()
+                }
+                else {
+                    userProfile = tmp_userProfile.copy()
+                    //---- Download Menu Info
+                    val menuPath = "USER_MENU_INFORMATION/${menuOwner}/${menuNumber}"
+                    val menuRef = Firebase.database.getReference(menuPath)
+                    menuRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+                            menuInfo = dataSnapshot.getValue(USER_MENU::class.java)
+                            if (menuInfo == null) {
+                                ProgressDialogUtil.dismiss()
+                                AlertDialog.Builder(this@MainActivity)
+                                    .setTitle("錯誤")
+                                    .setMessage("分享的菜單不存在")
+                                    .setPositiveButton("確定") { dialog, _ -> }
+                                    .create()
+                                    .show()
+                            } else {
+                                menuInfo!!.multiMenuImageURL?.forEach()
+                                {
+                                    val islandRef = Firebase.storage.reference.child(it)
+                                    val ONE_MEGABYTE = 1024 * 1024.toLong()
+                                    islandRef.getBytes(ONE_MEGABYTE)
+                                        .addOnSuccessListener { bytesPrm: ByteArray ->
+                                            val brandImageStream = bytesPrm.clone()
+                                            try {
+                                                MenuImageDB.insertRow(
+                                                    entityMeunImage(
+                                                        null,
+                                                        it,
+                                                        "",
+                                                        brandImageStream!!
+                                                    )
+                                                )
+                                            } catch (e: Exception) {
+                                            }
+                                        }
+                                }
+
+                                ProgressDialogUtil.dismiss()
+                                CheckAddUserShareMenu(userProfile!!, menuInfo!!)
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+
+                            ProgressDialogUtil.dismiss()
+                            AlertDialog.Builder(this@MainActivity)
+                                .setTitle("錯誤")
+                                .setMessage("下載菜單時發生異常")
+                                .setPositiveButton("確定") { dialog, _ -> }
+                                .create()
+                                .show()
+                        }
+                    })
+                }
+            }
+        })
+    }
+
+
+    private fun CheckAddUserShareMenu(userProfile :USER_PROFILE, menuInfo: USER_MENU) {
+
+
+        var MemoryDBContext = MemoryDatabase(this!!)
+        var MenuImageDB = MemoryDBContext.menuImagedao()
+
+        val dbContext = AppDatabase(this)
+        val menuICON = dbContext.localImagedao()
+
+        val editBrandName = EditText(this)
+        val editBrandCategory = EditText(this)
+        val BrandNamehint = SpannableString(menuInfo.brandName)
+        val BrandCategoryhint = SpannableString(menuInfo.brandCategory)
+        editBrandName.hint = BrandNamehint
+        editBrandCategory.hint = BrandCategoryhint
+
+        val ll = LinearLayout(this)
+        ll.orientation = LinearLayout.VERTICAL
+        ll.addView(editBrandName)
+        ll.addView(editBrandCategory)
+        ll.setPadding(60, 0, 60, 0);
+
+        AlertDialog.Builder(this@MainActivity)
+            .setTitle("請修改菜單品牌名稱及分類")
+            .setView(ll)
+            .setCancelable(false)
+            .setPositiveButton("確定"){ dialog, _ ->
+                ProgressDialogUtil.showProgressDialog(this, "建立菜單中");
+
+                //----確認刪除資料 -------
+                // 1. 取得Menu Order Number NEW
+                var OwnerUUID = FirebaseAuth.getInstance().currentUser!!.uid.toString()
+                val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+                val MenuNumber = "${OwnerUUID}-MENU-${timeStamp}"
+
+                // 2. 組合菜單資訊 -------
+                menuInfo.createTime = timeStamp
+                if(editBrandName.text.toString() != "") {
+                    menuInfo.brandName = editBrandName.text.toString()
+                }
+                if(editBrandCategory.text.toString() != "") {
+                    menuInfo.brandCategory =editBrandCategory.text.toString()
+                }
+                menuInfo.menuNumber = MenuNumber
+                menuInfo.userID = OwnerUUID
+                menuInfo.userName = userProfile.userName
+                var MenuImageList : MutableList<String> = mutableListOf()
+                var index : Int = 0
+                menuInfo.multiMenuImageURL?.forEach {
+                    var menuImage = MenuImageDB.getMenuImageByName(it)
+                    if(menuImage != null) {
+                        val newPath = generatorFileURL(OwnerUUID,MenuNumber,index)
+                        MenuImageDB.insertRow(entityMeunImage(null,newPath , menuImage.desc, menuImage.image))
+                        MenuImageList.add(newPath)
+                        index++
+                    }
+                    // 如果菜單照片不存在直接忽略他
+                }
+
+                menuInfo.multiMenuImageURL?.clear()
+                MenuImageList.forEach()
+                {
+                    menuInfo.multiMenuImageURL?.add(it)
+                }
+
+
+                //----- 3. 直接上傳fireBase------
+                Firebase.database.reference.child("USER_MENU_INFORMATION").child(OwnerUUID).child(MenuNumber).setValue(menuInfo)
+                    .addOnSuccessListener {
+
+                        //----- 上傳成功以後 更新 Image ----
+                        menuInfo.multiMenuImageURL?.forEach()
+                        { it ->
+                            val MenuImageObject = MenuImageDB.getMenuImageByName(it)
+                            if (MenuImageObject != null) {
+                                val islandRef = Firebase.storage.reference.child(it!!)
+                                val uploadTask: UploadTask = islandRef.putBytes(MenuImageObject.image)
+                                uploadTask.addOnFailureListener {
+                                    Toast.makeText(this, "上傳照片失敗!! \n ${it}", Toast.LENGTH_SHORT).show()
+                                }.addOnSuccessListener {}
+                            }
+                        }
+
+                        val iCONImage =  menuInfo.multiMenuImageURL?.firstOrNull()
+                        if(iCONImage != null)
+                        {
+                            val oldICONImage = menuICON.getMenuImageByName(iCONImage)
+                            val MenuImageObject = MenuImageDB.getMenuImageByName(iCONImage)
+                            if(MenuImageObject!=null)
+                            {
+                                if(oldICONImage == null) {
+                                    menuICON.insertRow(entityLocalmage(null, MenuImageObject.name, "", MenuImageObject.image.clone()!!))
+                                }
+                                else
+                                {
+                                    oldICONImage.image = MenuImageObject.image.clone()
+                                    menuICON.updateTodo(oldICONImage)
+                                }
+                            }
+                        }
+
+                        //----- 更新MenuInfo ----
+                        if(menuInfo.brandCategory != "") {
+                            //--------- 檢查Category -------
+                            if (userProfile.brandCategoryList == null) {
+                                userProfile.brandCategoryList = mutableListOf()
+                                userProfile.brandCategoryList!!.add(menuInfo.brandCategory!!)
+                                val uuid =  FirebaseAuth.getInstance().currentUser!!.uid.toString()
+                                val queryPath = "USER_PROFILE/$uuid/brandCategoryList"
+                                Firebase.database.getReference(queryPath).setValue(userProfile.brandCategoryList)
+                            }
+                            else
+                            {
+                                if (!userProfile.brandCategoryList!!.contains(menuInfo.brandCategory!!))
+                                {
+                                    userProfile.brandCategoryList!!.add(menuInfo.brandCategory!!)
+                                    val uuid =  FirebaseAuth.getInstance().currentUser!!.uid.toString()
+                                    val queryPath = "USER_PROFILE/$uuid/brandCategoryList"
+                                    Firebase.database.getReference(queryPath).setValue(userProfile.brandCategoryList)
+                                }
+                            }
+                        }
+
+
+                        ProgressDialogUtil.dismiss()
+
+                        val broadcast = LocalBroadcastManager.getInstance(this@MainActivity)
+                        val intent = Intent("UpdateMenuList")
+                        broadcast.sendBroadcast(intent)
+
+                        AlertDialog.Builder(this@MainActivity)
+                            .setTitle("訊息")
+                            .setMessage("建立分享菜單完成!!")
+                            .setPositiveButton("確定") { dialog, _ -> }
+                            .create()
+                            .show()
+
+                    }
+                    .addOnFailureListener {
+                        ProgressDialogUtil.dismiss()
+                        AlertDialog.Builder(this@MainActivity)
+                            .setTitle("錯誤")
+                            .setMessage("建立分享菜單時發生錯誤")
+                            .setPositiveButton("確定") { dialog, _ -> }
+                            .create()
+                            .show()
+
+                    }
+            }
+            .create()
+            .show()
+
+
+    }
+
+
+    private fun generatorFileURL (MenuUserID:String, MenuNumber:String, index: Int) : String
+    {
+        val filepath =  "Menu_Image/${MenuUserID}/${MenuNumber}/${index.toString()}.jpg"
+        return filepath
     }
 
     private fun CheckFriendExist(FriendUUID: String) {

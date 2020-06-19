@@ -120,12 +120,12 @@
             android:layout_width="0dp"
             android:layout_height="33dp"
             android:layout_gravity="left|center_vertical"
-            android:layout_weight="0.3"
             android:layout_marginLeft="20dp"
+            android:layout_weight="0.3"
             android:background="@android:color/transparent"
             android:gravity="left|center_vertical"
             android:text="設定配方"
-            android:textColor="@android:color/holo_blue_light"
+            android:textColor="@color/blue"
             android:textSize="18dp" />
 
         <TextView
@@ -168,7 +168,7 @@
             android:background="@android:color/transparent"
             android:gravity="center"
             android:text="取消"
-            android:textColor="@android:color/holo_blue_light"
+            android:textColor="@color/Blue"
             android:textSize="18dp" />
 
         <android.widget.Button
@@ -181,7 +181,7 @@
             android:background="@android:color/transparent"
             android:gravity="center"
             android:text="新增"
-            android:textColor="@android:color/holo_blue_light"
+            android:textColor="@color/Blue"
             android:textSize="18dp" />
     </LinearLayout>
 

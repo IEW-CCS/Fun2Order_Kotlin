@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -24,11 +25,14 @@ import com.iew.fun2order.ui.home.adapter.ProductPriceItemAdapter
 import com.iew.fun2order.ui.home.data.ProductPriceListData
 import com.iew.fun2order.utility.RecyclerItemClickListenr
 import com.iew.fun2order.utility.SpacesItemDecoration
+import kotlinx.android.synthetic.main.row_product_item.view.*
 
 
 class ActivityProductPriceList: AppCompatActivity() {
 
     var mRecyclerViewProductList: RecyclerView? = null
+
+    lateinit var titleroductList: LinearLayout
     var mItemList: MutableList<ProductPriceListData> = mutableListOf()
     private var mFirebaseUserMenu: USER_MENU = USER_MENU()
     //private lateinit var mProductDB: ProductDAO
@@ -40,6 +44,21 @@ class ActivityProductPriceList: AppCompatActivity() {
         supportActionBar?.hide()
 
         val context: Context = this@ActivityProductPriceList
+
+
+        val itemView = LayoutInflater.from(this).inflate(R.layout.row_product_item, null)
+        itemView.textViewName.text = "產品名稱"
+        itemView.textViewName.setTextColor(context.resources.getColor(R.color.blue))
+
+        itemView.textViewPrice.text = "價格"
+        itemView.textViewPrice.setTextColor(context.resources.getColor(R.color.blue))
+
+        itemView.textViewLimit.text = "限量"
+        itemView.textViewLimit.setTextColor(context.resources.getColor(R.color.red))
+
+        titleroductList = findViewById<LinearLayout>(R.id.titleProductList)
+        titleroductList.addView(itemView)
+
         //mDBContext = AppDatabase(context!!)
         //mProductDB = mDBContext.productdao()
 

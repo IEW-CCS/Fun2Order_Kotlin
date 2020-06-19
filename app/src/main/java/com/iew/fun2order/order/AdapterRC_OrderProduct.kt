@@ -24,14 +24,28 @@ class AdapterRC_OrderProduct(var context: Context, var lstItemOrderProduct: List
         return lstItemOrderProduct.size
     }
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder?.bindModel( lstItemOrderProduct[position] )
+        holder?.bindModel( lstItemOrderProduct[position], position )
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
 
-        fun bindModel(ItemsLV_orderProduct: ItemsLV_OrderProduct){
+        fun bindModel(ItemsLV_orderProduct: ItemsLV_OrderProduct, Pos:Int){
+
             itemView.orderproductItem.text = ItemsLV_orderProduct.itemName.toString()
             itemView.orderproductPrice.text = ItemsLV_orderProduct.itemPrice.toString()
+            itemView.orderproductLimit.text = ItemsLV_orderProduct.itemLimit ?: ""
+
+            if(Pos == 0)
+            {
+                itemView.orderproductItem.setTextColor(context.resources.getColor(R.color.blue))
+                itemView.orderproductPrice.setTextColor(context.resources.getColor(R.color.blue))
+                itemView.orderproductLimit.setTextColor(context.resources.getColor(R.color.red))
+            }
+            else {
+                itemView.orderproductItem.setTextColor(context.resources.getColor(R.color.black))
+                itemView.orderproductPrice.setTextColor(context.resources.getColor(R.color.black))
+                itemView.orderproductLimit.setTextColor(context.resources.getColor(R.color.red))
+            }
         }
     }
 }

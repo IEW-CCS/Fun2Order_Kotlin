@@ -54,11 +54,11 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.home.ActivityAddMenu"
-            android:windowSoftInputMode="stateHidden"
+            android:windowSoftInputMode="stateAlwaysHidden"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.home.ActivityAddMenuImage"
-            android:windowSoftInputMode="stateHidden"
+            android:windowSoftInputMode="stateAlwaysHidden"
             android:screenOrientation="portrait" />
         <activity
             android:name=".LaunchScreen"
@@ -92,7 +92,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".order.AddProductActivity"
-            android:windowSoftInputMode="stateHidden"
+            android:windowSoftInputMode="stateAlwaysHidden"
             android:screenOrientation="portrait" />
         <activity
             android:name=".order.OrderRecipe"

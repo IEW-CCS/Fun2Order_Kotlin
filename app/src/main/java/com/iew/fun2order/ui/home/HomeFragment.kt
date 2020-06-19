@@ -2,9 +2,7 @@ package com.iew.fun2order.ui.home
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.DialogInterface
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -17,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.ads.AdListener
@@ -38,6 +37,7 @@ import com.iew.fun2order.db.dao.localImageDAO
 import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.db.entity.entityLocalmage
+import com.iew.fun2order.db.entity.entityNotification
 import com.iew.fun2order.db.firebase.ORDER_MEMBER
 import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.db.firebase.USER_PROFILE
@@ -155,7 +155,7 @@ class HomeFragment : Fragment(), IAdapterOnClick {
         val imageAboutInfo = root.findViewById(R.id.imageAboutInfo) as ImageView
         imageAboutInfo.setOnClickListener {
             // your code here
-            val versionInfo = "Version: ${BuildConfig.VERSION_NAME}.${BuildConfig.VERSION_CODE} - Beta02"
+            val versionInfo = "Version: ${BuildConfig.VERSION_NAME}.${BuildConfig.VERSION_CODE} - Beta03"
             val item = LayoutInflater.from(this.context).inflate(R.layout.alert_about_us, null)
             val version = item.findViewById<TextView>(R.id.textViewVersion)
             val welcome =  item.findViewById<TextView>(R.id.textViewWelcome)
@@ -188,6 +188,31 @@ class HomeFragment : Fragment(), IAdapterOnClick {
 
     fun setUserMenu(menutype: String) {
         getUserMenuList(menutype)
+    }
+
+
+    override fun onStart() {
+        super.onStart()
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(messageReceiver, IntentFilter("UpdateMenuList"))
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(messageReceiver)
+
+    }
+
+    private var messageReceiver = object: BroadcastReceiver(){
+        override fun onReceive(p0: Context?, p1: Intent?) {
+            queryUserMenuFromFireBase()
+        }
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        queryUserMenuFromFireBase()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -356,10 +381,7 @@ class HomeFragment : Fragment(), IAdapterOnClick {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        queryUserMenuFromFireBase()
-    }
+
 
     private fun queryUserMenuFromFireBase()
     {
@@ -483,7 +505,7 @@ class HomeFragment : Fragment(), IAdapterOnClick {
 
         else if(type == 1)
         {
-            val buttonActions = arrayOf("刪除菜單","分享給好友")
+            val buttonActions = arrayOf("刪除菜單!!","將菜單分享給好友!!")
             val userUUID = FirebaseAuth.getInstance().currentUser!!.uid.toString()
             val menuInformation = mItemList[pos].getUserMenu()!!
             androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -504,6 +526,7 @@ class HomeFragment : Fragment(), IAdapterOnClick {
         val alert = AlertDialog.Builder(context)
         with(alert) {
             setTitle("確認刪除菜單")
+            setCancelable(false)
             setMessage("菜單名稱:${MenuInfo.brandName}")
             setPositiveButton("確定") { dialog, _ ->
                 try {

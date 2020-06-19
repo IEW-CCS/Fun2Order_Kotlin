@@ -48,6 +48,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
     private var mInterstitialAd: InterstitialAd? = null
     private val lstSelectedProduct: MutableList<MENU_PRODUCT> = mutableListOf()
     private var mFirebaseUserMenu: USER_MENU? = null
+    private var mFirebaseUserMenuPath: String = ""
     private var mFirebaseUserMenuOrder: USER_MENU_ORDER? = null
 
     private lateinit var txtBrandName: TextView
@@ -153,6 +154,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
             loadSelfOrder(menuOrderOwnerID, menuOrderNumber)
 
             val menuPath = "USER_MENU_INFORMATION/${values.orderOwnerID}/${values.menuNumber}"
+            mFirebaseUserMenuPath = menuPath
             val database = Firebase.database
             val myRef = database.getReference(menuPath)
             myRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -174,6 +176,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                 ItemsLV_OrderProduct(
                                     product.itemName!!,
                                     product.itemPrice!!.toString(),
+                                    null,
                                     product.sequenceNumber!!.toString()
                                 )
                             )
@@ -268,6 +271,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         layOrderAddProduct.setOnClickListener {
 
             val bundle = Bundle()
+            bundle.putString("MenuInfoPath", mFirebaseUserMenuPath)
             bundle.putParcelableArrayList("productList", lstOrderProducts)
             bundle.putParcelableArrayList("recipeList", lstOrderRecipes)
             val intent = Intent(this, AddProductActivity::class.java)

@@ -13,9 +13,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.iew.fun2order.HorizontalNumberPicker
 import com.iew.fun2order.R
 import com.iew.fun2order.db.firebase.MENU_PRODUCT
+import com.iew.fun2order.db.firebase.PRODUCT
 import com.iew.fun2order.db.firebase.RECIPE
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.utility.ACTION_ADDRECIPE_CODE
@@ -38,6 +45,31 @@ class AddProductActivity : AppCompatActivity(), IAdapterOnClick {
     private val arraylistRecipes: ArrayList<RECIPE> = ArrayList<RECIPE>()
     private var lstmenuRecipes: MutableList<RECIPE> = mutableListOf()
 
+    private var MenuInfoPath = ""
+
+    private lateinit var menuRef:DatabaseReference
+    private lateinit var childEventListener: ChildEventListener
+
+
+    override fun onStart() {
+        super.onStart()
+        if(MenuInfoPath != "") {
+            val MenuItemsPath = "$MenuInfoPath/menuItems"
+            menuRef = Firebase.database.getReference(MenuItemsPath)
+            if(menuRef!= null) {
+                menuRef.addChildEventListener(childEventListener)
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if(menuRef!= null) {
+            menuRef.removeEventListener(childEventListener)
+        }
+    }
+
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +91,8 @@ class AddProductActivity : AppCompatActivity(), IAdapterOnClick {
 
             val productList = it.getParcelableArrayList<ItemsLV_OrderProduct>("productList")
             val recipeList = it.getParcelableArrayList<RECIPE>("recipeList")
+            MenuInfoPath =  it.getString("MenuInfoPath")
+
 
             lstProductList.clear()
             arraylistRecipes.clear()
@@ -80,6 +114,8 @@ class AddProductActivity : AppCompatActivity(), IAdapterOnClick {
                 rcvAddProduct.visibility = View.VISIBLE
             }
 
+
+            lstProductList.add(ItemsLV_OrderProduct("產品名稱", "價格", "限量", ""))
             productList?.forEach()
             { product ->
                 lstProductList.add(product)
@@ -131,13 +167,51 @@ class AddProductActivity : AppCompatActivity(), IAdapterOnClick {
             intent.putExtras(bundle)
             startActivityForResult(intent, ACTION_ADDRECIPE_CODE)
         }
+
+
+        childEventListener = object : ChildEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+
+            }
+
+            override fun onChildMoved(p0: DataSnapshot, p1: String?) {
+
+            }
+
+            override fun onChildChanged(p0: DataSnapshot, p1: String?) {
+                val upload: PRODUCT = p0.getValue(PRODUCT::class.java)!!
+                lstProductList.find { it.itemName == upload.itemName }?.itemPrice  = upload.itemPrice.toString()
+                RefreahItemDate()
+            }
+
+            override fun onChildAdded(p0: DataSnapshot, p1: String?) {
+
+            }
+
+            override fun onChildRemoved(p0: DataSnapshot) {
+
+            }
+
+        }
+
+
+    }
+
+    private fun RefreahItemDate()
+    {
+       if( rcvAddProduct.adapter  != null)
+       {
+           rcvAddProduct.adapter!!.notifyDataSetChanged()
+       }
     }
 
     override fun onClick(sender: String, pos: Int, type: Int) {
         when (type) {
             0 -> {
-                selectProduct = lstProductList[pos] as ItemsLV_OrderProduct
-                txtProductName.text = selectProduct?.itemName
+                if(pos != 0) {
+                    selectProduct = lstProductList[pos] as ItemsLV_OrderProduct
+                    txtProductName.text = selectProduct?.itemName
+                }
             }
         }
     }
