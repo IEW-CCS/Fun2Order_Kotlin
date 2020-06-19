@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="32dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/linearLayoutProdPrice"
     android:weightSum="1.0"
 >
@@ -14,11 +15,20 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
+        <ImageView
+            android:id="@+id/imageview_reorder"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            app:srcCompat="@drawable/ic_action_reorder" />
+
         <TextView
             android:id="@+id/textViewName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="20dp"
             android:text="Black Tea"
             android:textColor="@color/Black"
             android:textSize="20dp" />

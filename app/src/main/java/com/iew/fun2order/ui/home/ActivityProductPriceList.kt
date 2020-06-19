@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.iew.fun2order.R
@@ -22,6 +23,7 @@ import com.iew.fun2order.db.entity.Product
 import com.iew.fun2order.db.firebase.PRODUCT
 import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.ui.home.adapter.ProductPriceItemAdapter
+import com.iew.fun2order.ui.home.adapter.SwipeAndDragHelper
 import com.iew.fun2order.ui.home.data.ProductPriceListData
 import com.iew.fun2order.utility.RecyclerItemClickListenr
 import com.iew.fun2order.utility.SpacesItemDecoration
@@ -56,6 +58,8 @@ class ActivityProductPriceList: AppCompatActivity() {
         itemView.textViewLimit.text = "限量"
         itemView.textViewLimit.setTextColor(Color.rgb(255,0,0))
 
+        itemView.imageview_reorder.visibility = View.GONE
+
         titleroductList = findViewById<LinearLayout>(R.id.titleProductList)
         titleroductList.addView(itemView)
 
@@ -69,9 +73,17 @@ class ActivityProductPriceList: AppCompatActivity() {
         //activity!!.findViewById<View>(R.id.recyclerViewMenuItems) as RecyclerView
         val adapter = ProductPriceItemAdapter(mItemList)
 
+
+        val swipeAndDragHelper = SwipeAndDragHelper(adapter)
+        val touchHelper = ItemTouchHelper(swipeAndDragHelper)
+        adapter.setTouchHelper(touchHelper)
+
         mRecyclerViewProductList!!.setHasFixedSize(true)
         mRecyclerViewProductList!!.layoutManager = LinearLayoutManager(context)
         mRecyclerViewProductList!!.adapter = adapter
+
+        touchHelper.attachToRecyclerView(mRecyclerViewProductList)
+
         mRecyclerViewProductList!!.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
         val space = 30
         mRecyclerViewProductList!!.addItemDecoration(SpacesItemDecoration(space))
@@ -85,7 +97,8 @@ class ActivityProductPriceList: AppCompatActivity() {
         }
             //---------------------------------------
 
-            mRecyclerViewProductList!!.adapter!!.notifyDataSetChanged()
+        mRecyclerViewProductList!!.adapter!!.notifyDataSetChanged()
+
 
         mRecyclerViewProductList!!.addOnItemTouchListener(RecyclerItemClickListenr(this,
             mRecyclerViewProductList!!, object : RecyclerItemClickListenr.OnItemClickListener {

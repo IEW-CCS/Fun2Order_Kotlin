@@ -3,19 +3,23 @@ package com.iew.fun2order.ui.home.adapter
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.iew.fun2order.R
 import com.iew.fun2order.ui.home.ActivityItemList
 import com.iew.fun2order.ui.home.data.ProductPriceListData
 
 class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>) :
-    RecyclerView.Adapter<ProductPriceItemAdapter.ViewHolder>() {
+    RecyclerView.Adapter<ProductPriceItemAdapter.ViewHolder>(),
+    SwipeAndDragHelper.ActionCompletionContract {
     private val listdata: MutableList<ProductPriceListData>
     private val context: Context? = null
+    private var touchHelper: ItemTouchHelper? = null
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -35,6 +39,12 @@ class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>) :
         holder.txtItemName.setText(listdata[position].getItemName())
         holder.txtItemPrice.setText(listdata[position].getItemValue())
         holder.txtItemLimit.setText("")
+        holder.imageRander.setOnTouchListener { v, event ->
+            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                touchHelper!!.startDrag(holder)
+            }
+            false
+        }
 
     }
 
@@ -47,6 +57,7 @@ class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>) :
         var txtItemPrice: TextView
         var txtItemLimit: TextView
         var linearLayout: LinearLayout
+        var imageRander : ImageView
 
 
         init {
@@ -55,6 +66,7 @@ class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>) :
             txtItemPrice = itemView.findViewById<View>(R.id.textViewPrice) as TextView
             txtItemLimit = itemView.findViewById<View>(R.id.textViewLimit) as TextView
             linearLayout = itemView.findViewById<View>(R.id.linearLayoutProdPrice) as LinearLayout
+            imageRander = itemView.findViewById<View>(R.id.imageview_reorder) as ImageView
 
         }
     }
@@ -62,5 +74,22 @@ class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>) :
     // RecyclerView recyclerView;
     init {
         this.listdata = listdata
+    }
+
+    override fun onViewMoved(oldPosition: Int, newPosition: Int) {
+        val targetUser = listdata!![oldPosition]
+        val user = ProductPriceListData(targetUser.getItemName(),targetUser.getItemValue())
+        listdata!!.removeAt(oldPosition)
+        listdata!!.add(newPosition, user)
+        notifyItemMoved(oldPosition, newPosition)
+    }
+
+    override fun onViewSwiped(position: Int) {
+        listdata!!.removeAt(position)
+        notifyItemRemoved(position)
+    }
+
+    fun setTouchHelper(touchHelper: ItemTouchHelper?) {
+        this.touchHelper = touchHelper
     }
 }
