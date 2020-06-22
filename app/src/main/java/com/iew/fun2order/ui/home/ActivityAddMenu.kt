@@ -12,7 +12,7 @@ import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
-import android.view.inputmethod.InputMethodManager
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -366,12 +366,41 @@ class ActivityAddMenu : AppCompatActivity() {
         textViewAddProductPrice.setOnClickListener {
             val item = LayoutInflater.from(this).inflate(R.layout.alert_input_product_price, null)
 
+            val radioGroup =item.findViewById(R.id.radioGroup) as RadioGroup
+            val Radio1 =item.findViewById(R.id.radioLimit) as RadioButton
+            val Radio2  =item.findViewById(R.id.radioNoLimit) as RadioButton
+            var editLimitCount = item.findViewById(R.id.editLimitCount) as EditText
+
+            //------ Default 設定不限量 ----
+            radioGroup.check(Radio2.id)
+            editLimitCount.visibility = View.INVISIBLE
+            editLimitCount.isClickable = false
+
+
+            radioGroup.setOnCheckedChangeListener { group, checkedId ->
+                val radioButton: RadioButton = group.findViewById<RadioButton>(checkedId)
+                if(radioButton.text == "限量") {
+                    editLimitCount.visibility = View.VISIBLE
+                } else {
+                    editLimitCount.visibility = View.INVISIBLE
+                    editLimitCount.isClickable = false
+                }
+
+
+            }
+
+            //-----------------------
+            var editTextProduct = item.findViewById(R.id.editTextProduct) as EditText
+            var editTextProductPrice = item.findViewById(R.id.editTextProductPrice) as EditText
+
             var alertDialog = AlertDialog.Builder(this)
                 .setView(item)
+                .setCancelable(false)
                 .setPositiveButton("確定",null)
                 .setNegativeButton("取消",null)
                 .show()
-            alertDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+
+                alertDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener {
                     var editTextProduct = item.findViewById(R.id.editTextProduct) as EditText
                     var editTextProductPrice = item.findViewById(R.id.editTextProductPrice) as EditText
@@ -382,48 +411,60 @@ class ActivityAddMenu : AppCompatActivity() {
                     {
                         editTextProduct.requestFocus()
                         editTextProduct.error = "產品名稱不能為空白!"
+
                     }else {
 
-                        //Toast.makeText(applicationContext,
-                        //    "加入產品與價格:"+editTextProduct.getText().toString()+":"+editTextProductPrice.getText().toString(), Toast.LENGTH_SHORT).show()
-                        // Insert DB
-                        //val product: Product = Product(null, editTextMenuID.getText().toString(), editTextProduct.getText().toString(), editTextProductPrice.getText().toString())
-                        //mProductDB.insertRow(product)
-
-                        var bFOund = false
+                        var bFound = false
                         mFirebaseUserMenu.menuItems!!.forEach {
                             if(it.itemName.equals(editTextProduct.getText().toString().trim())){
-                                bFOund = true
+                                bFound = true
                             }
                         }
 
-                        if(bFOund){
+                        if(bFound){
                             editTextProduct.requestFocus()
                             editTextProduct.error = "產品名稱不能重覆!"
+
                         }else{
-                            //Firebase
-                            var fdproduct : PRODUCT = PRODUCT()
-                            fdproduct.itemName =editTextProduct.getText().toString().trim()
 
-                            try {
-                                val parsedInt = editTextProductPrice.getText().toString().toInt()
-                                fdproduct.itemPrice=parsedInt
-
-                            } catch (nfe: NumberFormatException) {
-                                // not a valid int
-                                fdproduct.itemPrice=0
+                            if(Radio1.isChecked && editLimitCount.text.toString()== "")
+                            {
+                                editLimitCount.requestFocus()
+                                editLimitCount.error = "限量數量必須填寫!"
                             }
+                            else {
 
-                            fdproduct.sequenceNumber = mFirebaseUserMenu.menuItems!!.size+1
-                            //mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString())
-                            mFirebaseUserMenu.menuItems!!.add(fdproduct)
-                            //textViewProductPriceItemCount.setText(mProductDB.getProductByMenuID(editTextMenuID.getText().toString()).count().toString() + " 項");
-                            textViewProductPriceItemCount.setText(mFirebaseUserMenu.menuItems!!.size.toString() + " 項");
-                            alertDialog.dismiss()
+                                //Firebase
+                                var fdproduct: PRODUCT = PRODUCT()
+                                fdproduct.itemName = editTextProduct.getText().toString().trim()
+
+                                try {
+                                    val parsedInt = editTextProductPrice.getText().toString().toInt()
+                                    fdproduct.itemPrice = parsedInt
+                                    if (Radio1.isChecked && editLimitCount.text.toString() != "") {
+                                        val LimitCount = editLimitCount.text.toString().toInt()
+                                        fdproduct.quantityLimitation = LimitCount
+                                        fdproduct.quantityRemained = LimitCount
+                                    }
+                                    else if(Radio2.isChecked)
+                                    {
+                                        fdproduct.quantityLimitation = null
+                                        fdproduct.quantityRemained = null
+
+                                    }
+
+                                } catch (nfe: NumberFormatException) {
+                                    fdproduct.itemPrice = 0
+                                }
+
+                                fdproduct.sequenceNumber = mFirebaseUserMenu.menuItems!!.size + 1
+                                //mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString())
+                                mFirebaseUserMenu.menuItems!!.add(fdproduct)
+                                //textViewProductPriceItemCount.setText(mProductDB.getProductByMenuID(editTextMenuID.getText().toString()).count().toString() + " 項");
+                                textViewProductPriceItemCount.setText(mFirebaseUserMenu.menuItems!!.size.toString() + " 項");
+                                alertDialog.dismiss()
+                            }
                         }
-
-
-
                     }
                 }
         }

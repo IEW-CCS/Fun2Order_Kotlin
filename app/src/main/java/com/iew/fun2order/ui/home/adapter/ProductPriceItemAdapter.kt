@@ -13,10 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.iew.fun2order.R
 import com.iew.fun2order.ui.home.ActivityItemList
 import com.iew.fun2order.ui.home.data.ProductPriceListData
+import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 
-class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>) :
-    RecyclerView.Adapter<ProductPriceItemAdapter.ViewHolder>(),
-    SwipeAndDragHelper.ActionCompletionContract {
+class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>, val IAdapterOnClick: IAdapterOnClick) : RecyclerView.Adapter<ProductPriceItemAdapter.ViewHolder>(), SwipeAndDragHelper.ActionCompletionContract {
     private val listdata: MutableList<ProductPriceListData>
     private val context: Context? = null
     private var touchHelper: ItemTouchHelper? = null
@@ -38,7 +37,13 @@ class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>) :
         val myListData: ProductPriceListData = listdata[position]
         holder.txtItemName.setText(listdata[position].getItemName())
         holder.txtItemPrice.setText(listdata[position].getItemValue())
-        holder.txtItemLimit.setText("")
+        holder.txtItemLimit.setText(listdata[position].getItemLimit())
+        holder.linearLayout.setOnLongClickListener {
+            IAdapterOnClick.onClick("productItemPrice", position, 1)
+            true
+        }
+
+
         holder.imageRander.setOnTouchListener { v, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
                 touchHelper!!.startDrag(holder)
@@ -78,7 +83,7 @@ class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>) :
 
     override fun onViewMoved(oldPosition: Int, newPosition: Int) {
         val targetUser = listdata!![oldPosition]
-        val user = ProductPriceListData(targetUser.getItemName(),targetUser.getItemValue())
+        val user = ProductPriceListData(targetUser.getItemName(),targetUser.getItemValue(),targetUser.getItemLimit())
         listdata!!.removeAt(oldPosition)
         listdata!!.add(newPosition, user)
         notifyItemMoved(oldPosition, newPosition)

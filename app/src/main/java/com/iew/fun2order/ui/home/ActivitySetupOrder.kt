@@ -319,8 +319,13 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
 
         var editTextChuGroupDetailMsg = this.findViewById(R.id.editTextChuGroupDetailMsg) as EditText
         msChuGroupDetailMsg=editTextChuGroupDetailMsg.getText().toString()
-
         userMenuOrder.menuNumber= mUserMenu.menuNumber
+
+        mUserMenu.menuItems?.filter { it.quantityLimitation != null }?.forEach()
+        {
+            userMenuOrder.limitedMenuItems!!.add(it)
+        }
+
         userMenuOrder.locations = mUserMenu.locations
 
         userMenuOrder.orderNumber="M"+timeStamp

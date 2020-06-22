@@ -35,16 +35,35 @@ class AdapterRC_OrderProduct(var context: Context, var lstItemOrderProduct: List
             itemView.orderproductPrice.text = ItemsLV_orderProduct.itemPrice.toString()
             itemView.orderproductLimit.text = ItemsLV_orderProduct.itemLimit ?: ""
 
+
+
             if(Pos == 0)
             {
+                itemView.isEnabled = false
                 itemView.orderproductItem.setTextColor(context.resources.getColor(R.color.blue))
                 itemView.orderproductPrice.setTextColor(context.resources.getColor(R.color.blue))
                 itemView.orderproductLimit.setTextColor(context.resources.getColor(R.color.red))
             }
             else {
+
+                itemView.isEnabled = true
                 itemView.orderproductItem.setTextColor(context.resources.getColor(R.color.black))
                 itemView.orderproductPrice.setTextColor(context.resources.getColor(R.color.black))
                 itemView.orderproductLimit.setTextColor(context.resources.getColor(R.color.red))
+
+            }
+
+
+            if(ItemsLV_orderProduct.itemLimit != "" && Pos != 0)
+            {
+                val count = ItemsLV_orderProduct.itemLimit?.toInt()
+                if(count != null && count <=0 )
+                {
+                    itemView.isEnabled = false
+                    itemView.orderproductItem.setTextColor(context.resources.getColor(R.color.gray))
+                    itemView.orderproductPrice.setTextColor(context.resources.getColor(R.color.gray))
+                    itemView.orderproductLimit.setTextColor(context.resources.getColor(R.color.gray))
+                }
             }
         }
     }

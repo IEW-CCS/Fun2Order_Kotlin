@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(p0: Context?, p1: Intent?) {
 
             // V1.1. Share Menu Function
-            /*val shareMenuInfo = p1?.getParcelableExtra<entityNotification>("ShareMenuMessage")
+            val shareMenuInfo = p1?.getParcelableExtra<entityNotification>("ShareMenuMessage")
             if(shareMenuInfo != null)
             {
 
@@ -123,7 +123,6 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
             }
-           */
         }
     }
 
@@ -342,7 +341,7 @@ class MainActivity : AppCompatActivity() {
                     else if (notification.notificationType == NOTIFICATION_TYPE_SHARE_MENU)
                     {
                         // V 1.1
-                        // receiveShareMenuRequest(notification.messageTitle, notification.messageBody, notification.orderOwnerID, notification.menuNumber)
+                        receiveShareMenuRequest(notification.messageTitle, notification.messageBody, notification.orderOwnerID, notification.menuNumber)
                     }
                     else {
                         try {

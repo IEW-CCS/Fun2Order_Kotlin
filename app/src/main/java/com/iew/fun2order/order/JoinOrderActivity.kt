@@ -19,9 +19,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.InterstitialAd
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -38,7 +36,6 @@ import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_ACCEPT
 import info.hoang8f.android.segmented.SegmentedGroup
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.Semaphore
 import kotlin.collections.ArrayList
 
 
@@ -50,6 +47,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
     private var mFirebaseUserMenu: USER_MENU? = null
     private var mFirebaseUserMenuPath: String = ""
     private var mFirebaseUserMenuOrder: USER_MENU_ORDER? = null
+    private var mFirebaseUserMenuOrderPath: String = ""
 
     private lateinit var txtBrandName: TextView
     private lateinit var layOrderReference: LinearLayout
@@ -66,12 +64,19 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
     private lateinit var gridLayoutBtnList: GridLayout
     private lateinit var txtjoinOrderDesc: TextView
     private lateinit var txtjoinOrderShowDetail: TextView
+
+    private val lstLimitedProductList: MutableList<PRODUCT> = mutableListOf()
+
+
     private var basicCellHeight : Int = 202
 
     private var selfSelectmenuLocation: String = ""
 
     private var MenuImaegByteArray : MutableMap<String,ByteArray?> = mutableMapOf<String,ByteArray?>()
     private var brandImageStream: ByteArray? = null
+
+    private lateinit var menuRef: DatabaseReference
+    private lateinit var childEventListener: ChildEventListener
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -106,7 +111,43 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         if(rcvSelectedProduct.adapter!= null) {
             rcvSelectedProduct.adapter!!.notifyDataSetChanged()
         }
+        if(mFirebaseUserMenuOrderPath != "") {
+            val MenuItemsPath = "$mFirebaseUserMenuOrderPath/limitedMenuItems"
+            menuRef = Firebase.database.getReference(MenuItemsPath)
+            if(menuRef!= null) {
+                menuRef.addChildEventListener(childEventListener)
+
+                menuRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                    }
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        dataSnapshot.children.forEach()
+                        {
+                            var upload =  it.getValue(PRODUCT::class.java)
+                            if (upload != null) {
+                                var ADD_PRODUCT = PRODUCT()
+                                ADD_PRODUCT.sequenceNumber = upload.sequenceNumber
+                                ADD_PRODUCT.itemPrice = upload.itemPrice
+                                ADD_PRODUCT.itemName = upload.itemName
+                                ADD_PRODUCT.quantityLimitation = upload.quantityLimitation
+                                ADD_PRODUCT.quantityRemained = upload.quantityRemained
+                                lstLimitedProductList.add(upload)
+                            }
+                        }
+                    }
+                })
+            }
+        }
     }
+
+
+    override fun onStop() {
+        super.onStop()
+        if(menuRef!= null) {
+            menuRef.removeEventListener(childEventListener)
+        }
+    }
+
 
     private fun requestNewInterstitial() {
         val adRequest: AdRequest = AdRequest.Builder().build()
@@ -151,6 +192,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
             menuOrderMessageID = values.messageID
 
             //預先載入自己選擇的產品
+            mFirebaseUserMenuOrderPath = "USER_MENU_ORDER/${menuOrderOwnerID}/${menuOrderNumber}"
             loadSelfOrder(menuOrderOwnerID, menuOrderNumber)
 
             val menuPath = "USER_MENU_INFORMATION/${values.orderOwnerID}/${values.menuNumber}"
@@ -269,9 +311,8 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
 
         //----- 選擇產品列表 ------
         layOrderAddProduct.setOnClickListener {
-
             val bundle = Bundle()
-            bundle.putString("MenuInfoPath", mFirebaseUserMenuPath)
+            bundle.putString("MenuOrderInfoPath", mFirebaseUserMenuOrderPath)
             bundle.putParcelableArrayList("productList", lstOrderProducts)
             bundle.putParcelableArrayList("recipeList", lstOrderRecipes)
             val intent = Intent(this, AddProductActivity::class.java)
@@ -281,37 +322,87 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
 
         //----- 選擇完畢上傳FireBase ------
         layOrderSubmit.setOnClickListener {
-            // Location is Optional  可能是空白值
+
+
             if (lstSelectedProduct.count() > 0) {
                 if ((mSegmentedGroupLocation.childCount > 0 && menuLocation != "") || mSegmentedGroupLocation.childCount == 0) {
-                    //1. ------- 上傳FireBase -----------
+                    //------ 檢查下載數值 --------
                     val menuPath = "USER_MENU_ORDER/${menuOrderOwnerID}/${menuOrderNumber}/contentItems"
                     val database = Firebase.database
                     val myRef = database.getReference(menuPath)
                     myRef.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(dataSnapshot: DataSnapshot) {
                             dataSnapshot.children.forEach()
-                            {
+                            { it ->
                                 val users = it.getValue(ORDER_MEMBER::class.java)
                                 if (users!!.memberID == FirebaseAuth.getInstance().currentUser!!.uid.toString()) {
 
-                                    users.orderContent.menuProductItems =
-                                        lstSelectedProduct.toMutableList()
-                                    users.orderContent.replyStatus = MENU_ORDER_REPLY_STATUS_ACCEPT
-                                    users.orderContent.createTime =
-                                        SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
-                                    users.orderContent.location = menuLocation
-                                    users.orderContent.itemOwnerName =
-                                        FirebaseAuth.getInstance().currentUser!!.displayName
+                                    //--- 檢查限量數值
+                                    val limitProduct = CheckLimited( users.orderContent.menuProductItems,lstSelectedProduct.toMutableList())
+                                    var overLimit = limitProduct.filter { it.itemQuantity!!  <= 0 }
 
-                                    var itemQuantity: Int = 0
-                                    lstSelectedProduct.forEach { menuProducts ->
-                                        if (menuProducts.itemQuantity != null) {
-                                            itemQuantity += menuProducts.itemQuantity!!
+                                    if(overLimit.count() == 0) {
+
+                                        users.orderContent.menuProductItems =
+                                            lstSelectedProduct.toMutableList()
+                                        users.orderContent.replyStatus =
+                                            MENU_ORDER_REPLY_STATUS_ACCEPT
+                                        users.orderContent.createTime =
+                                            SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+                                        users.orderContent.location = menuLocation
+                                        users.orderContent.itemOwnerName =
+                                            FirebaseAuth.getInstance().currentUser!!.displayName
+
+                                        var itemQuantity: Int = 0
+                                        lstSelectedProduct.forEach { menuProducts ->
+                                            if (menuProducts.itemQuantity != null) {
+                                                itemQuantity += menuProducts.itemQuantity!!
+                                            }
                                         }
+                                        users.orderContent.itemQuantity = itemQuantity
+
+                                        //-----更新Limit Count ----
+                                        it.ref.setValue(users)
+
+                                        // 2. ------ 更新LocalDB Status -------
+                                        var orderNumber = ""
+                                        val notificationDB = AppDatabase(this@JoinOrderActivity!!).notificationdao()
+                                        val currentNotify = notificationDB.getNotifybyMsgID(menuOrderMessageID)
+                                        orderNumber = currentNotify.orderNumber ?: ""
+                                        if (currentNotify != null && currentNotify?.messageID == menuOrderMessageID) {
+                                            currentNotify.replyStatus = MENU_ORDER_REPLY_STATUS_ACCEPT
+                                            currentNotify.replyTime =
+                                                SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+
+                                            try {
+                                                notificationDB.update(currentNotify)
+                                                updateOrderStatusToLocalDB(orderNumber, MENU_ORDER_REPLY_STATUS_ACCEPT)
+                                            } catch (e: Exception) {
+                                            }
+                                        }
+
+                                        finish()
+
                                     }
-                                    users.orderContent.itemQuantity = itemQuantity
-                                    it.ref.setValue(users)
+                                    else
+                                    {
+                                        var overLimitList :String = ""
+                                        overLimit.forEach()
+                                        {
+                                            overLimitProduct ->
+                                            overLimitList += "[${overLimitProduct}], "
+                                        }
+                                        val Alert = AlertDialog.Builder(this@JoinOrderActivity).create()
+                                        Alert.setTitle("錯誤")
+                                        Alert.setMessage("以下產品超過已經可以購買的數量\n${overLimitList}")
+                                        Alert.setButton(
+                                            AlertDialog.BUTTON_POSITIVE,
+                                            "OK"
+                                        ) { dialogInterface, i ->
+                                        }
+                                        Alert.show()
+
+                                    }
                                 }
                             }
                         }
@@ -321,27 +412,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                         }
                     })
 
-                    // 2. ------ 更新LocalDB Status -------
-                    var orderNumber = ""
-                    val notificationDB = AppDatabase(this!!).notificationdao()
-                    val currentNotify = notificationDB.getNotifybyMsgID(menuOrderMessageID)
-                    orderNumber = currentNotify.orderNumber ?: ""
-                    if (currentNotify != null && currentNotify?.messageID == menuOrderMessageID) {
-                        currentNotify.replyStatus = MENU_ORDER_REPLY_STATUS_ACCEPT
-                        currentNotify.replyTime =
-                            SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
-
-                        try {
-                            notificationDB.update(currentNotify)
-                            updateOrderStatusToLocalDB(orderNumber, MENU_ORDER_REPLY_STATUS_ACCEPT)
-                        } catch (e: Exception) {
-
-                        }
-
-                    }
-
-
-                    finish()
                 } else {
 
                     val Alert = AlertDialog.Builder(this).create()
@@ -438,6 +508,34 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
             startActivity(I)
         }
 
+
+
+        childEventListener = object : ChildEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+
+            }
+
+            override fun onChildMoved(p0: DataSnapshot, p1: String?) {
+
+            }
+
+            override fun onChildChanged(p0: DataSnapshot, p1: String?) {
+                val upload: PRODUCT = p0.getValue(PRODUCT::class.java)!!
+                if(upload!= null) {
+                    lstLimitedProductList.find { it.itemName == upload.itemName }?.quantityRemained = upload.quantityRemained
+                }
+            }
+
+            override fun onChildAdded(p0: DataSnapshot, p1: String?) {
+
+            }
+
+            override fun onChildRemoved(p0: DataSnapshot) {
+
+            }
+
+        }
+
     }
 
 
@@ -446,6 +544,55 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
             rcvSelectedProduct.layoutParams.height = 0
         }
         return super.onCreateView(name, context, attrs)
+    }
+
+
+    private fun CheckLimited( oldProductItems: MutableList<MENU_PRODUCT>?, newProductItems: MutableList<MENU_PRODUCT>?) : MutableList<MENU_PRODUCT>
+    {
+        var replyProductItems: MutableList<MENU_PRODUCT> = mutableListOf()
+        var oldProductItemKey : MutableList<String> = mutableListOf()
+        var newProductItemKey : MutableList<String> = mutableListOf()
+
+        if(oldProductItems != null ) {
+            oldProductItemKey = oldProductItems.mapNotNull { it.itemName }.toMutableList()
+        }
+
+        if(newProductItems != null) {
+             newProductItemKey = newProductItems.mapNotNull{it.itemName}.toMutableList()
+        }
+
+        val limitProductItemKey  = lstLimitedProductList.mapNotNull{it.itemName}
+        var mergeItems = (oldProductItemKey.union(newProductItemKey)).intersect(limitProductItemKey)
+
+        mergeItems.forEach()
+        {
+            mergeKey ->
+
+            //--取得old資料 ------
+            var oldDate = oldProductItems?.filter { it.itemName == mergeKey }
+            val sumOld = oldDate?.sumBy { it.itemQuantity!! } ?:0
+
+            //--取得新資料 ------
+            var newDate = newProductItems?.filter { it.itemName == mergeKey }
+            val sumNew = newDate?.sumBy { it.itemQuantity!! } ?:0
+
+            var diff = sumNew - sumOld
+            var limitItem = lstLimitedProductList.firstOrNull { it.itemName == mergeKey }
+
+            if(limitItem != null) {
+                if( limitItem.quantityRemained != null)
+                {
+                    val item = MENU_PRODUCT()
+                    item.itemName = limitItem.itemName
+                    var items_quantity = limitItem.quantityRemained!! - diff
+                    item.itemQuantity = items_quantity
+                    replyProductItems.add(item)
+                }
+
+            }
+        }
+
+        return replyProductItems
     }
 
 

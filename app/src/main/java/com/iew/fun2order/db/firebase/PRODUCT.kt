@@ -10,6 +10,8 @@ import kotlinx.android.parcel.Parcelize
 class PRODUCT (
     var itemName: String? = "",
     var itemPrice: Int? = 0,
+    var quantityLimitation: Int? = null ,
+    var quantityRemained: Int? = null,
     var sequenceNumber: Int? = 0
 ) : Parcelable {
     @Exclude
@@ -17,6 +19,8 @@ class PRODUCT (
         return mapOf(
             "itemName" to itemName,
             "itemPrice" to itemPrice,
+            "quantityLimitation" to quantityLimitation,
+            "quantityRemained" to quantityRemained,
             "sequenceNumber" to sequenceNumber
         )
     }
