@@ -53,20 +53,22 @@ class AddProductActivity : AppCompatActivity(), IAdapterOnClick {
 
     override fun onStart() {
         super.onStart()
-        if(MenuInfoPath != "") {
+
+       /* if(MenuInfoPath != "") {
             val MenuItemsPath = "$MenuInfoPath/menuItems"
             menuRef = Firebase.database.getReference(MenuItemsPath)
             if(menuRef!= null) {
                 menuRef.addChildEventListener(childEventListener)
             }
-        }
+        }*/
     }
 
     override fun onStop() {
         super.onStop()
+        /*
         if(menuRef!= null) {
             menuRef.removeEventListener(childEventListener)
-        }
+        }*/
     }
 
 

@@ -161,7 +161,7 @@ class HomeFragment : Fragment(), IAdapterOnClick {
             val welcome =  item.findViewById<TextView>(R.id.textViewWelcome)
 
             version.text = versionInfo
-            welcome.text = "歡迎使用 ${context!!.getString(R.string.app_name)}"
+            welcome.text = "歡迎使用 ${requireContext().getString(R.string.app_name)}"
             AlertDialog.Builder(this.context)
 
                 .setView(item)
@@ -505,14 +505,15 @@ class HomeFragment : Fragment(), IAdapterOnClick {
 
         else if(type == 1)
         {
-            val buttonActions = arrayOf("刪除菜單!!","將菜單分享給好友!!")
+            val buttonActions = arrayOf("刪除菜單!!")
             val userUUID = FirebaseAuth.getInstance().currentUser!!.uid.toString()
             val menuInformation = mItemList[pos].getUserMenu()!!
             androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setItems(buttonActions,  DialogInterface.OnClickListener { dialog, which ->
                     when (which) {
                         0 -> { checkRemoveMenu( userUUID, menuInformation, pos) }
-                        1 -> {  ShareMenuToFriend(menuInformation)}
+                        // 分享菜單功能 v1.1
+                        //1 -> {  ShareMenuToFriend(menuInformation)}
                     }
                 })
                 .setNegativeButton("關閉", null)

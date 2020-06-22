@@ -108,7 +108,9 @@ class MainActivity : AppCompatActivity() {
     //--- 收到分享菜單資訊
     private var shareMenuReceiver = object: BroadcastReceiver(){
         override fun onReceive(p0: Context?, p1: Intent?) {
-            val shareMenuInfo = p1?.getParcelableExtra<entityNotification>("ShareMenuMessage")
+
+            // V1.1. Share Menu Function
+            /*val shareMenuInfo = p1?.getParcelableExtra<entityNotification>("ShareMenuMessage")
             if(shareMenuInfo != null)
             {
 
@@ -121,6 +123,7 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
             }
+           */
         }
     }
 
@@ -338,7 +341,8 @@ class MainActivity : AppCompatActivity() {
                     }
                     else if (notification.notificationType == NOTIFICATION_TYPE_SHARE_MENU)
                     {
-                        receiveShareMenuRequest(notification.messageTitle, notification.messageBody, notification.orderOwnerID, notification.menuNumber)
+                        // V 1.1
+                        // receiveShareMenuRequest(notification.messageTitle, notification.messageBody, notification.orderOwnerID, notification.menuNumber)
                     }
                     else {
                         try {

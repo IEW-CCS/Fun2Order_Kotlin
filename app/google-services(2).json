@@ -15,14 +15,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "497838222896-mttcuf7e49pakmv8bf48rmjnggqdaj0s.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.iew.afun2order",
-            "certificate_hash": "151e3f20c69f9a6f9e3bdb29df0d0ae8ac92b244"
-          }
-        },
-        {
           "client_id": "497838222896-8aijdiobt0tlg4krdukkl8emk0ol4leb.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -66,14 +58,6 @@
         }
       },
       "oauth_client": [
-        {
-          "client_id": "497838222896-35qp2t8i98brt9docuha4q3c4f7hbkje.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.iew.fun2order",
-            "certificate_hash": "151e3f20c69f9a6f9e3bdb29df0d0ae8ac92b244"
-          }
-        },
         {
           "client_id": "497838222896-1gpkb0e7slufflfgbk0737pq919hr4ib.apps.googleusercontent.com",
           "client_type": 1,

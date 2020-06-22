@@ -107,20 +107,11 @@ class ActivityProductPriceList: AppCompatActivity() {
                 //do your work here..
             }
             override fun onItemLongClick(view: View?, position: Int) {
-                Toast.makeText(
-                    view!!.context,
-                    "click on item: " + position.toString(),
-                    Toast.LENGTH_LONG
-                ).show()
 
                 val str = mItemList.get(position).getItemName()
-                val item = LayoutInflater.from(view.context).inflate(R.layout.activity_product_item_list, null)
-
-                var alertDialog = AlertDialog.Builder(view.context)
+                var alertDialog = AlertDialog.Builder(view?.context!!)
                     .setTitle("確認刪除此產品")
                     .setMessage(str)
-                    .setView(item)
-
                     .setPositiveButton("確定", null)
                     .setNegativeButton("取消", null)
                     .show()
