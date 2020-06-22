@@ -121,6 +121,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                     override fun onCancelled(p0: DatabaseError) {
                     }
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        lstLimitedProductList.clear()
                         dataSnapshot.children.forEach()
                         {
                             var upload =  it.getValue(PRODUCT::class.java)
@@ -339,19 +340,15 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
 
                                     //--- 檢查限量數值
                                     val limitProduct = CheckLimited( users.orderContent.menuProductItems,lstSelectedProduct.toMutableList())
-                                    var overLimit = limitProduct.filter { it.itemQuantity!!  <= 0 }
+                                    var overLimit = limitProduct.filter { it.itemQuantity!!  < 0 }
 
                                     if(overLimit.count() == 0) {
-
-                                        users.orderContent.menuProductItems =
-                                            lstSelectedProduct.toMutableList()
-                                        users.orderContent.replyStatus =
-                                            MENU_ORDER_REPLY_STATUS_ACCEPT
-                                        users.orderContent.createTime =
-                                            SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+                                        updateLimit(limitProduct)
+                                        users.orderContent.menuProductItems = lstSelectedProduct.toMutableList()
+                                        users.orderContent.replyStatus = MENU_ORDER_REPLY_STATUS_ACCEPT
+                                        users.orderContent.createTime = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
                                         users.orderContent.location = menuLocation
-                                        users.orderContent.itemOwnerName =
-                                            FirebaseAuth.getInstance().currentUser!!.displayName
+                                        users.orderContent.itemOwnerName = FirebaseAuth.getInstance().currentUser!!.displayName
 
                                         var itemQuantity: Int = 0
                                         lstSelectedProduct.forEach { menuProducts ->
@@ -390,18 +387,17 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                         overLimit.forEach()
                                         {
                                             overLimitProduct ->
-                                            overLimitList += "[${overLimitProduct}], "
+                                            overLimitList += "[${overLimitProduct.itemName}]\n"
                                         }
                                         val Alert = AlertDialog.Builder(this@JoinOrderActivity).create()
                                         Alert.setTitle("錯誤")
-                                        Alert.setMessage("以下產品超過已經可以購買的數量\n${overLimitList}")
+                                        Alert.setMessage("以下產品超過已經可以購買的數量:\n${overLimitList}")
                                         Alert.setButton(
                                             AlertDialog.BUTTON_POSITIVE,
                                             "OK"
                                         ) { dialogInterface, i ->
                                         }
                                         Alert.show()
-
                                     }
                                 }
                             }
@@ -547,48 +543,80 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
     }
 
 
+    private fun updateLimit(  updateLimitProductItems: MutableList<MENU_PRODUCT>?)
+    {
+        if(mFirebaseUserMenuOrderPath != "") {
+            val MenuItemsPath = "$mFirebaseUserMenuOrderPath/limitedMenuItems"
+            menuRef = Firebase.database.getReference(MenuItemsPath)
+            if(menuRef!= null) {
+                menuRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                    }
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        dataSnapshot.children.forEach()
+                        {
+                            DataSnap->
+                            var upload =  DataSnap.getValue(PRODUCT::class.java)
+                            if (upload != null) {
+                                val updateItem = updateLimitProductItems?.firstOrNull { it.itemName == upload.itemName }
+                                if(updateItem != null)
+                                {
+                                    if( upload.quantityRemained != updateItem.itemQuantity) {
+                                        upload.quantityRemained = updateItem.itemQuantity
+                                        DataSnap.ref.setValue(upload)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+
+
+
     private fun CheckLimited( oldProductItems: MutableList<MENU_PRODUCT>?, newProductItems: MutableList<MENU_PRODUCT>?) : MutableList<MENU_PRODUCT>
     {
         var replyProductItems: MutableList<MENU_PRODUCT> = mutableListOf()
-        var oldProductItemKey : MutableList<String> = mutableListOf()
-        var newProductItemKey : MutableList<String> = mutableListOf()
+        if(lstLimitedProductList.count() != 0) {
 
-        if(oldProductItems != null ) {
-            oldProductItemKey = oldProductItems.mapNotNull { it.itemName }.toMutableList()
-        }
+            var oldProductItemKey: MutableList<String> = mutableListOf()
+            var newProductItemKey: MutableList<String> = mutableListOf()
 
-        if(newProductItems != null) {
-             newProductItemKey = newProductItems.mapNotNull{it.itemName}.toMutableList()
-        }
+            if (oldProductItems != null) {
+                oldProductItemKey = oldProductItems.mapNotNull { it.itemName }.toMutableList()
+            }
 
-        val limitProductItemKey  = lstLimitedProductList.mapNotNull{it.itemName}
-        var mergeItems = (oldProductItemKey.union(newProductItemKey)).intersect(limitProductItemKey)
+            if (newProductItems != null) {
+                newProductItemKey = newProductItems.mapNotNull { it.itemName }.toMutableList()
+            }
 
-        mergeItems.forEach()
-        {
-            mergeKey ->
+            val limitProductItemKey = lstLimitedProductList.mapNotNull { it.itemName }
+            var mergeItems = (oldProductItemKey.union(newProductItemKey)).intersect(limitProductItemKey)
 
-            //--取得old資料 ------
-            var oldDate = oldProductItems?.filter { it.itemName == mergeKey }
-            val sumOld = oldDate?.sumBy { it.itemQuantity!! } ?:0
+            mergeItems.forEach()
+            { mergeKey ->
 
-            //--取得新資料 ------
-            var newDate = newProductItems?.filter { it.itemName == mergeKey }
-            val sumNew = newDate?.sumBy { it.itemQuantity!! } ?:0
+                var oldDate = oldProductItems?.filter { it.itemName == mergeKey }
+                val sumOld = oldDate?.sumBy { it.itemQuantity!! } ?: 0
 
-            var diff = sumNew - sumOld
-            var limitItem = lstLimitedProductList.firstOrNull { it.itemName == mergeKey }
+                var newDate = newProductItems?.filter { it.itemName == mergeKey }
+                val sumNew = newDate?.sumBy { it.itemQuantity!! } ?: 0
 
-            if(limitItem != null) {
-                if( limitItem.quantityRemained != null)
-                {
-                    val item = MENU_PRODUCT()
-                    item.itemName = limitItem.itemName
-                    var items_quantity = limitItem.quantityRemained!! - diff
-                    item.itemQuantity = items_quantity
-                    replyProductItems.add(item)
+                var diff = sumNew - sumOld
+                var limitItem = lstLimitedProductList.firstOrNull { it.itemName == mergeKey }
+
+                if (limitItem != null) {
+                    if (limitItem.quantityRemained != null) {
+                        val item = MENU_PRODUCT()
+                        item.itemName = limitItem.itemName
+                        var items_quantity = limitItem.quantityRemained!! - diff
+                        item.itemQuantity = items_quantity
+                        replyProductItems.add(item)
+                    }
                 }
-
             }
         }
 
