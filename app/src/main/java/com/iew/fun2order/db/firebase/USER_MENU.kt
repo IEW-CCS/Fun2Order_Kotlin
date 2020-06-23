@@ -19,6 +19,7 @@ class USER_MENU (
     var menuNumber: String? = "",
     var menuRecipes: MutableList<RECIPE>? = mutableListOf(),
     var multiMenuImageURL: MutableList<String>? = mutableListOf(),
+    var needContactInfoFlag: Boolean? = null,
     var storeInfo: STORE_INFO? = null,
     var userID: String? = "",
     var userName: String? = ""
@@ -36,6 +37,7 @@ class USER_MENU (
             "menuNumber" to menuNumber,
             "menuRecipes" to menuRecipes,
             "multiMenuImageURL" to multiMenuImageURL,
+            "needContactInfoFlag" to needContactInfoFlag,
             "storeInfo" to storeInfo,
             "userID" to userID,
             "userName" to userName

@@ -505,7 +505,7 @@ class HomeFragment : Fragment(), IAdapterOnClick {
 
         else if(type == 1)
         {
-            val buttonActions = arrayOf("刪除菜單!!", "將菜單分享給好友!!")
+            val buttonActions = arrayOf("刪除菜單", "將菜單分享給好友")
             val userUUID = FirebaseAuth.getInstance().currentUser!!.uid.toString()
             val menuInformation = mItemList[pos].getUserMenu()!!
             androidx.appcompat.app.AlertDialog.Builder(requireContext())

@@ -81,6 +81,8 @@ class ActivityAddMenu : AppCompatActivity() {
     private var mFirebaseUserMenu: USER_MENU = USER_MENU()
     private var mFirebaseUserProfile: USER_PROFILE = USER_PROFILE()
 
+    private lateinit var mContactInfo :CheckBox
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,6 +107,8 @@ class ActivityAddMenu : AppCompatActivity() {
         //mMenuImage  = findViewById(R.id.imageBtnMenuImage) as ImageButton
         //mMenuImage.requestFocus()
         mTextViewMenuPic = findViewById(R.id.textViewMenuPic) as TextView
+
+        mContactInfo = findViewById(R.id.checkBoxContactInfo) as CheckBox
         var mAuth = FirebaseAuth.getInstance()
         if (mAuth.currentUser != null) {
 
@@ -135,6 +139,9 @@ class ActivityAddMenu : AppCompatActivity() {
             editTextMenuID.setText(mFirebaseUserMenu.brandName)
             textViewCrMenuType.setText(mFirebaseUserMenu.brandCategory)
             editTextMenuDesc.setText(mFirebaseUserMenu.menuDescription)
+
+            mContactInfo.isChecked = mFirebaseUserMenu.needContactInfoFlag?: false
+
             setImageButton()
             /*
             if(mFirebaseUserMenu.menuImageURL != ""){
@@ -859,6 +866,7 @@ class ActivityAddMenu : AppCompatActivity() {
         userMenu.userID=mAuth.currentUser!!.uid
         userMenu.userName=mAuth.currentUser!!.displayName
         userMenu.multiMenuImageURL = mFirebaseUserMenu.multiMenuImageURL
+        userMenu.needContactInfoFlag = mContactInfo.isChecked
 
         //------ Upload Image  -------
         if(bIsUpdateImage == true) {
