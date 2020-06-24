@@ -55,6 +55,7 @@ class NotificationsFragment : Fragment(), IAdapterOnClick {
         val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
         val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
 
+        /* ad Move  to recycle view
         adView = root.findViewById(R.id.adView) as AdView
         val request: AdRequest = AdRequest.Builder().build()
         adView!!.loadAd(request)
@@ -62,7 +63,7 @@ class NotificationsFragment : Fragment(), IAdapterOnClick {
             override fun onAdFailedToLoad(errorCode: Int) {
                 adView!!.visibility = View.GONE
             }
-        })
+        }) */
 
         broadcast = LocalBroadcastManager.getInstance(requireContext())
         rcvNotification = root.findViewById<RecyclerView>(R.id.rcvNotification)

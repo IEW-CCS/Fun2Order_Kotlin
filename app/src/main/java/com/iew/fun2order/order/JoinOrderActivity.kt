@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.text.Editable
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -323,8 +324,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
 
         //----- 選擇完畢上傳FireBase ------
         layOrderSubmit.setOnClickListener {
-
-
             if (lstSelectedProduct.count() > 0) {
                 if ((mSegmentedGroupLocation.childCount > 0 && menuLocation != "") || mSegmentedGroupLocation.childCount == 0) {
                     //------ 檢查下載數值 --------
@@ -344,6 +343,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
 
                                     if(overLimit.count() == 0) {
                                         updateLimit(limitProduct)
+
                                         users.orderContent.menuProductItems = lstSelectedProduct.toMutableList()
                                         users.orderContent.replyStatus = MENU_ORDER_REPLY_STATUS_ACCEPT
                                         users.orderContent.createTime = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
@@ -357,8 +357,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                             }
                                         }
                                         users.orderContent.itemQuantity = itemQuantity
-
-                                        //-----更新Limit Count ----
                                         it.ref.setValue(users)
 
                                         // 2. ------ 更新LocalDB Status -------
@@ -378,8 +376,55 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                             }
                                         }
 
-                                        finish()
+                                        val needContactInfoFlag = mFirebaseUserMenu?.needContactInfoFlag ?: false
+                                        if (needContactInfoFlag) {
+                                            val item = LayoutInflater.from(this@JoinOrderActivity)
+                                                .inflate(R.layout.alert_input_contact_information, null)
 
+                                            var editTextName = item.findViewById(R.id.editTextName) as EditText
+                                            var editTextPhone = item.findViewById(R.id.editTextPhone) as EditText
+                                            var editTextAddress = item.findViewById(R.id.editTextAddress) as EditText
+
+                                            if(users.orderContent.userContactInfo != null)
+                                            {
+                                                val tmpContact= users.orderContent.userContactInfo!!
+                                                editTextName.text = Editable.Factory.getInstance().newEditable(tmpContact.userName ?: "")
+                                                editTextPhone.text = Editable.Factory.getInstance().newEditable(tmpContact.userPhoneNumber ?: "")
+                                                editTextAddress.text = Editable.Factory.getInstance().newEditable(tmpContact.userAddress ?: "")
+                                            }
+
+                                            var alertDialog =
+                                                AlertDialog.Builder(this@JoinOrderActivity)
+                                                    .setView(item)
+                                                    .setCancelable(false)
+                                                    .setPositiveButton("確定") { dialog, _ ->
+
+                                                        var contactInfo = CONTENT_CONTACTINFO()
+                                                        contactInfo.userName = editTextName.text.trim().toString()
+                                                        contactInfo.userPhoneNumber  = editTextPhone.text.trim().toString()
+                                                        contactInfo.userAddress  = editTextAddress.text.trim().toString()
+                                                        users.orderContent.userContactInfo = contactInfo
+
+                                                        it.ref.setValue(users)
+
+                                                        finish()
+                                                        dialog.dismiss()
+
+                                                    }
+                                                    .setNegativeButton("暫不提供") { dialog, _ ->
+
+                                                        users.orderContent.userContactInfo = null
+                                                        it.ref.setValue(users)
+                                                        finish()
+                                                        dialog.dismiss()
+                                                    }
+                                                    .create()
+                                                    .show()
+                                        }
+                                        else
+                                        {
+                                            finish()
+                                        }
                                     }
                                     else
                                     {

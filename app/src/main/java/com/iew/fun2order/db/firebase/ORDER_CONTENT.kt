@@ -20,7 +20,8 @@ data class ORDER_CONTENT(
     var orderNumber: String? = "",
     var payNumber: Int? = 0,
     var payTime: String? = "",
-    var replyStatus: String? = ""
+    var replyStatus: String? = "",
+    var userContactInfo:CONTENT_CONTACTINFO? = null
 ): Parcelable {
     @Exclude
     fun toMap(): Map<String, Any?> {
@@ -36,7 +37,8 @@ data class ORDER_CONTENT(
             "orderNumber" to orderNumber,
             "payNumber" to payNumber,
             "payTime" to payTime,
-            "replyStatus" to replyStatus
+            "replyStatus" to replyStatus,
+            "userContactInfo" to userContactInfo
         )
     }
 }
