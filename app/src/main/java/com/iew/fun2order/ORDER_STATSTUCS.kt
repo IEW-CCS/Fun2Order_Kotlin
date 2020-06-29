@@ -10,6 +10,7 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class ORDER_STATSTUCS (
     var itemOwner: String? = "",
+    var itemOwnerID: String? = "",
     var itemComments: String? = "",
     var itemName: String? = "",
     var itemPrice: Int? = 0,
@@ -22,6 +23,7 @@ data class ORDER_STATSTUCS (
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "itemOwner" to itemOwner,
+            "itemOwnerID" to itemOwnerID,
             "itemComments" to itemComments,
             "itemName" to itemName,
             "itemPrice" to itemPrice,

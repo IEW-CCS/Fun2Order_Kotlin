@@ -80,7 +80,8 @@ class MessagingService : FirebaseMessagingService() {
                     }
                     else if (notification.notificationType == NOTIFICATION_TYPE_ACTION_JOIN_ORDER ||
                              notification.notificationType == NOTIFICATION_TYPE_MESSAGE_DUETIME||
-                             notification.notificationType == NOTIFICATION_TYPE_MESSAGE_INFORMATION) {
+                             notification.notificationType == NOTIFICATION_TYPE_MESSAGE_INFORMATION||
+                             notification.notificationType == NOTIFICATION_TYPE_SHIPPING_NOTICE) {
 
                         if ((notification.orderOwnerID == FirebaseAuth.getInstance().currentUser!!.uid) &&
                             notification.notificationType == NOTIFICATION_TYPE_ACTION_JOIN_ORDER ) {
@@ -91,6 +92,11 @@ class MessagingService : FirebaseMessagingService() {
                         }
                         val notificationDB = AppDatabase(this).notificationdao()
                         notificationDB.insertRow(notification)
+                    }
+                    else if(notification.notificationType == NOTIFICATION_TYPE_CHANGE_DUETIME)
+                    {
+
+
                     }
 
                   } catch (e: Exception) {

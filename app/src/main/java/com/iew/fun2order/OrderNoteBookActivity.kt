@@ -28,6 +28,7 @@ const val SUMMARY_COLOMNWIDTH2 = 200
 const val SUMMARY_COLOMNWIDTH3 = 400
 
 
+const val ADDRESS_WIDTH = 300
 const val RESPECT_TITLEWIDTH = 300
 const val RESPECT_COLOMNWIDTH0 = 400
 const val RESPECT_COLOMNWIDTH1 = 500
@@ -39,11 +40,16 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
     private lateinit var tablemain: TableLayout
     private lateinit var tableheader: TableLayout
+    private lateinit var tableaddress: TableLayout
     private lateinit var mSegmentedGroupLocation: SegmentedGroup
     private lateinit var txtcopyOrderContent: TextView
     private lateinit var txtshareOrderContent: ImageView
     private lateinit var txtStoreName : TextView
     private lateinit var txtStorePhone : TextView
+
+    private lateinit var meunOrder : USER_MENU_ORDER
+
+
     private var shareContext: String = ""
 
 
@@ -65,6 +71,8 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
         tablemain = findViewById<TableLayout>(R.id.table_main)
         tableheader = findViewById<TableLayout>(R.id.table_header)
+        tableaddress= findViewById<TableLayout>(R.id.table_address)
+
         mSegmentedGroupLocation = findViewById(R.id.SegmentedGroupLocation)
         txtcopyOrderContent = findViewById(R.id.copyOrderContent)
         txtshareOrderContent = findViewById(R.id.shareOrderContent)
@@ -74,26 +82,28 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
 
 
+
+
         val mInflater: LayoutInflater? = LayoutInflater.from(this);
 
         intent?.extras?.let {
 
-            val values = it.getParcelable("USER_MENU_ORDER") as USER_MENU_ORDER
+            meunOrder = it.getParcelable("USER_MENU_ORDER") as USER_MENU_ORDER
 
             addRadioButton(mInflater!!, mSegmentedGroupLocation, "合併顯示項目")
 
-            if(values?.locations?.count()==0)
+            if(meunOrder?.locations?.count()==0)
             {
                 addRadioButton(mInflater!!, mSegmentedGroupLocation, "全部項目")
             }
             else {
-                values?.locations?.forEach { location ->
+                meunOrder?.locations?.forEach { location ->
                     addRadioButton(mInflater!!, mSegmentedGroupLocation, location.toString())
                     mLocationList.add(location.toString())
                 }
             }
 
-            lstAccept = values.contentItems!!.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT }
+            lstAccept = meunOrder.contentItems!!.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT }
             statisticsSummyReport()
 
             if (mSegmentedGroupLocation.childCount > 0) {
@@ -103,8 +113,8 @@ class OrderNoteBookActivity : AppCompatActivity() {
             }
 
 
-            txtStoreName.text = values.storeInfo?.storeName
-            txtStorePhone.text = values.storeInfo?.storePhoneNumber
+            txtStoreName.text = meunOrder.storeInfo?.storeName
+            txtStorePhone.text = meunOrder.storeInfo?.storePhoneNumber
 
         }
 
@@ -202,6 +212,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
                 val items: ORDER_STATSTUCS = ORDER_STATSTUCS()
                 items.itemOwner = it.orderContent.itemOwnerName
+                items.itemOwnerID = it.orderContent.itemOwnerID
                 items.itemComments = menuProducts.itemComments
                 items.itemName = menuProducts.itemName
                 items.itemPrice = menuProducts.itemPrice
@@ -423,6 +434,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
         tablemain.removeAllViews()
         tableheader.removeAllViews()
+        tableaddress.removeAllViews()
         shareContext = ""
         var reportIndex = 0
 
@@ -488,6 +500,20 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
             tablemain.addView(tbrow0)
 
+
+            val address = TableRow(this)
+            val addr0 = TextView(this)
+            addr0.text = "聯絡方式"
+            addr0.gravity = Gravity.CENTER
+            addr0.setBackgroundResource(R.drawable.shape_rectangle_notebook_title)
+            addr0.setTextColor(Color.BLACK)
+            addr0.width = ADDRESS_WIDTH
+            addr0.height = CELLHEIGHT
+            addr0.textSize = TEXTSIZE
+            address.addView(addr0)
+            tableaddress.addView(address)
+
+
             val totalData: MutableList<ORDER_STATSTUCS> = mutableListOf<ORDER_STATSTUCS>()
             reportItemLocation.forEach()
             {
@@ -516,6 +542,29 @@ class OrderNoteBookActivity : AppCompatActivity() {
                 hd0.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
                 header.addView(hd0)
                 tableheader.addView(header)
+
+                val address = TableRow(this)
+                val addr0 = TextView(this)
+                addr0.gravity = Gravity.CENTER
+                addr0.height = CELLHEIGHT * data?.value.count()
+                addr0.width = RESPECT_TITLEWIDTH
+                addr0.textSize = TEXTSIZE
+                addr0.setTextColor(Color.BLACK)
+                addr0.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
+                if(data?.value.count() < 3) {
+                    addr0.text = "請點擊以查看訊息"
+
+                    /*
+                    val myCotent = meunOrder.contentItems?.filter { it.memberID  ==data?.value[0].itemOwnerID }
+                    addr0.tooltipText =  myCotent?.get(0)?.orderContent.
+
+                     */
+                }
+
+
+                address.addView(addr0)
+                tableaddress.addView(addr0)
+
 
                 val items = data.value.sortedBy { it -> it.itemName }
                 items.forEach()

@@ -343,6 +343,10 @@ class MainActivity : AppCompatActivity() {
                         // V 1.1
                         receiveShareMenuRequest(notification.messageTitle, notification.messageBody, notification.orderOwnerID, notification.menuNumber)
                     }
+                    else if(notification.notificationType == NOTIFICATION_TYPE_CHANGE_DUETIME)
+                    {
+                        //  改變Due TIme  需要直接修改內容
+                    }
                     else {
                         try {
                             val notificationDB = AppDatabase(this).notificationdao()

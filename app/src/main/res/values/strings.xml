@@ -135,6 +135,10 @@
     <string name="OrderStatistics">回覆統計</string>
     <string name="OrderMaintain">訂單維護</string>
 
+    <string name="NotifyInvite">團購邀請</string>
+    <string name="NotifyShipping">出貨通知</string>
+    <string name="NotifyOthers">其他訊息</string>
+
 
     <string name="admob_app_id">ca-app-pub-6672968234138119~3507792835</string>
 

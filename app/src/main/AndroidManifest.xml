@@ -120,6 +120,11 @@
             android:name=".ui.home.ActivityAddShareMeunMember"
             android:screenOrientation="portrait"/>
 
+        <activity
+            android:name=".ui.notifications.ActivityTapShipping"
+            android:screenOrientation="portrait" />
+
+
         <service
             android:name=".MessagingService"
             android:exported="false">

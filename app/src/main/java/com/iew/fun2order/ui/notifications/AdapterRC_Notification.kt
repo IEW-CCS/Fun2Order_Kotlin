@@ -43,7 +43,7 @@ class AdapterRC_Notification(var context: Context, var lstItemsNotify:List<Items
         @SuppressLint("SimpleDateFormat")
         fun bindModel(ItemsLV_Notify: ItemsLV_Notify){
 
-            itemView.notifytitle.text = "來自 ${ItemsLV_Notify.notifyTitle} 的團購訊息"
+            itemView.notifytitle.text = "來自 ${ItemsLV_Notify.orderOwnerName} 的團購訊息"
             itemView.brandName.text = "[ ${ItemsLV_Notify.brandName} ]"
 
             when(ItemsLV_Notify.msgType)

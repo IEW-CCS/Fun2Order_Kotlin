@@ -65,7 +65,8 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
     override fun getItemViewType(position: Int): Int {
         return when (lstItemsNotify[position]) {
             is ItemsLV_Notify -> TYPE_Items
-            else  -> TYPE_ADS
+            is ItemsLV_Ads  -> TYPE_ADS
+            else -> throw IllegalArgumentException()
         }
     }
 
@@ -85,26 +86,33 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
         @SuppressLint("SimpleDateFormat")
         override fun bindModel(ItemsLV_Notify: ItemsLV_Notify){
 
-            itemView.notifytitle.text = "來自 ${ItemsLV_Notify.notifyTitle} 的團購訊息"
+            itemView.notifytitle.text = "來自 ${ItemsLV_Notify.orderOwnerName} 的團購訊息"
             itemView.brandName.text = "[ ${ItemsLV_Notify.brandName} ]"
+
+            itemView.messageTitle.text = ItemsLV_Notify.MessageTitle
 
             when(ItemsLV_Notify.msgType)
             {
+
+
                 NOTIFICATION_TYPE_ACTION_JOIN_ORDER ->
                 {
-                    itemView.messageTitle.text = "團購邀請"
                     itemView.messageTitle.setTextColor(Color.rgb(0, 122, 255))
+                }
 
+                NOTIFICATION_TYPE_SHIPPING_NOTICE ->
+                {
+                    itemView.messageTitle.setTextColor(Color.rgb(0, 122, 255))
+                    itemView.acknowledge.visibility = View.INVISIBLE
+                    itemView.joinstatus.visibility = View.INVISIBLE
                 }
                 NOTIFICATION_TYPE_MESSAGE_DUETIME->
                 {
-                    itemView.messageTitle.text = "團購催訂"
                     itemView.messageTitle.setTextColor(Color.rgb(177, 0, 28))
                 }
 
                 NOTIFICATION_TYPE_MESSAGE_INFORMATION ->
                 {
-                    itemView.messageTitle.text = "團購訊息"
                     itemView.messageTitle.setTextColor(Color.rgb(177, 0, 28))
                     itemView.acknowledge.visibility = View.INVISIBLE
                     itemView.joinstatus.visibility = View.INVISIBLE

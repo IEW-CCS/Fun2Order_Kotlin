@@ -23,6 +23,12 @@ interface notificationDAO {
     @Query("Select * FROM entityNotification where notificationType = 'JOIN'")
     fun getAllInvite(): LiveData<List<entityNotification>>
 
+    @Query("Select * FROM entityNotification where notificationType = 'SHIPPING'")
+    fun getAllShipping(): LiveData<List<entityNotification>>
+
+    @Query("Select * FROM entityNotification where notificationType <> 'JOIN' and notificationType <> 'SHIPPING'")
+    fun getAllOthers(): LiveData<List<entityNotification>>
+
     @Query("Select * FROM entityNotification where isRead = 'N'")
     fun getUnreadNotify(): List<entityNotification>
 
