@@ -12,7 +12,9 @@ import android.text.ClipboardManager
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.util.rangeTo
 import com.iew.fun2order.db.firebase.ORDER_MEMBER
 import com.iew.fun2order.db.firebase.USER_MENU_ORDER
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_ACCEPT
@@ -28,7 +30,7 @@ const val SUMMARY_COLOMNWIDTH2 = 200
 const val SUMMARY_COLOMNWIDTH3 = 400
 
 
-const val ADDRESS_WIDTH = 300
+const val ADDRESS_WIDTH = 500
 const val RESPECT_TITLEWIDTH = 300
 const val RESPECT_COLOMNWIDTH0 = 400
 const val RESPECT_COLOMNWIDTH1 = 500
@@ -63,6 +65,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_order_note_book)
@@ -430,6 +433,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun respectivelyReport(location: String) {
 
         tablemain.removeAllViews()
@@ -551,19 +555,32 @@ class OrderNoteBookActivity : AppCompatActivity() {
                 addr0.textSize = TEXTSIZE
                 addr0.setTextColor(Color.BLACK)
                 addr0.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
+
+                var txtmailinfo =""
+                val myCotent = meunOrder.contentItems?.firstOrNull { it.memberID  ==data?.value[0].itemOwnerID }
+                if(myCotent != null)
+                {
+                    if(myCotent.orderContent.userContactInfo!= null) {
+                        txtmailinfo += "聯絡人: ${myCotent.orderContent.userContactInfo?.userName} \n"
+                        txtmailinfo += "聯絡電話: ${myCotent.orderContent.userContactInfo?.userPhoneNumber} \n"
+                        txtmailinfo += "聯絡住址: ${myCotent.orderContent.userContactInfo?.userAddress} \n"
+                    }
+
+                }
+
                 if(data?.value.count() < 3) {
                     addr0.text = "請點擊以查看訊息"
-
-                    /*
-                    val myCotent = meunOrder.contentItems?.filter { it.memberID  ==data?.value[0].itemOwnerID }
-                    addr0.tooltipText =  myCotent?.get(0)?.orderContent.
-
-                     */
+                    addr0.tooltipText = txtmailinfo
+                }
+                else
+                {
+                    addr0.text = txtmailinfo
+                    addr0.tooltipText = txtmailinfo
                 }
 
 
                 address.addView(addr0)
-                tableaddress.addView(addr0)
+                tableaddress.addView(address)
 
 
                 val items = data.value.sortedBy { it -> it.itemName }
