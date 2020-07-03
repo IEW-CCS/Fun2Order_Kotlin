@@ -38,17 +38,12 @@ class ActivityTapShipping : AppCompatActivity() {
 
     private var mFirebaseUserOrder: USER_MENU_ORDER? = null
     private val lstSelectedProduct: MutableList<MENU_PRODUCT> = mutableListOf()
-    private val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
-    private val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
 
-    @SuppressLint("SimpleDateFormat")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tap_shipping)
 
         supportActionBar?.hide()
-        val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
-        val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
         groupbuy_Title.text = ""
         txtBrand.text = ""
         txtDrafter.text = ""
@@ -60,19 +55,13 @@ class ActivityTapShipping : AppCompatActivity() {
 
         intent?.extras?.let {
 
-
             val values = it.getParcelable("Notification") as entityNotification
-            groupbuy_Title.text = "出貨通知"
+            groupbuy_Title.text = "到貨通知"
             txtBrand.text = values.brandName ?: ""
             txtDrafter.text = values.orderOwnerName ?: ""
             txtDescription.text = values.messageDetail ?: ""
-
-            try {
-                val receiveDateTime = sdfDecode.parse(values.receiveTime)
-                txtArrivalTime.text = sdfEncode.format(receiveDateTime).toString()
-            } catch (ex: ParseException) {
-                Log.v("Exception", ex.localizedMessage)
-            }
+            txtDeliveryPlace.text = values.shippingLocation ?: ""
+            txtArrivalTime.text = values.shippingDate ?: ""
 
             lstSelectedProduct.clear()
             loadFireBaseMenuOrder(values.orderOwnerID, values.orderNumber, values.orderOwnerName)
@@ -129,6 +118,8 @@ class ActivityTapShipping : AppCompatActivity() {
 
     private fun showSelfContentItemsItems() {
         if (mFirebaseUserOrder != null) {
+            val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
+            val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
             mFirebaseUserOrder!!.contentItems?.forEach { orderMember ->
                 if (orderMember.memberID == FirebaseAuth.getInstance().currentUser!!.uid.toString() && orderMember.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT) {
                     val refProductItems = orderMember.orderContent.menuProductItems?.toMutableList() ?: mutableListOf()
@@ -137,8 +128,6 @@ class ActivityTapShipping : AppCompatActivity() {
                         txtSelectItemTitle.text = "已訂購的產品列表"
                         lstSelectedProduct.add(it)
                     }
-
-                    txtDeliveryPlace.text = orderMember.orderContent.location
 
                     if ( orderMember.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT) {
                         val replyStatus = "參加"
@@ -155,10 +144,8 @@ class ActivityTapShipping : AppCompatActivity() {
                     }
 
                     lstSelectedProduct.forEach()
-                    {
-                            menuProduct ->
+                    { menuProduct ->
                         val itemView = LayoutInflater.from(this).inflate(R.layout.row_selectedproduct, null)
-
                         var recipeItems = ""
                         menuProduct.menuRecipes?.forEach {
                             it.recipeItems!!.forEach { recipeItem ->
@@ -174,7 +161,6 @@ class ActivityTapShipping : AppCompatActivity() {
                         } else {
                             menuProduct.itemComments!!
                         }
-
                         itemView.selectedproductItem.text = menuProduct.itemName
                         itemView.selectedproductNote.text = "$recipeItems $comments"
                         itemView.selectedproductCount.text = menuProduct.itemQuantity.toString()

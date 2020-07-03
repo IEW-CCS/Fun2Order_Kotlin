@@ -11,8 +11,8 @@ class Adapter_HistoryFragMamager(fragmentManager:FragmentManager, var context: C
 
     override fun getItem(position: Int): Fragment {
         return when(position){
-            0 -> RootFragmentOrder()
-            else -> RootFragmentInvite()
+            0 -> RootFragmentOrder_OnGoing()
+            else -> RootFragmentOrder_Expired()
         }
 
     }
@@ -23,8 +23,8 @@ class Adapter_HistoryFragMamager(fragmentManager:FragmentManager, var context: C
 
     override fun getPageTitle(position: Int): CharSequence {
         return when(position){
-            0 -> context.getString(R.string.Myorder)
-            else -> context.getString(R.string.Myinvite)
+            0 -> context.getString(R.string.OrderOnGoing)
+            else -> context.getString(R.string.OrderOnExpired)
 
         }
     }

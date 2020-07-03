@@ -37,12 +37,12 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
                 val adView = view.findViewById(R.id.adView) as AdView
                 val request: AdRequest = AdRequest.Builder().build()
                 adView.loadAd(request)
-                adView.setAdListener(object : AdListener() {
+                adView.adListener = object : AdListener() {
                     override fun onAdFailedToLoad(errorCode: Int) {
                         view.visibility = View.GONE
                         adView.visibility = View.GONE
                     }
-                })
+                }
                 return ADSViewHolder(view)
             }
             else -> throw IllegalArgumentException("Invalid view type")
@@ -70,7 +70,6 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
         }
     }
 
-
     companion object {
         private const val TYPE_Items = 0
         private const val TYPE_ADS = 1
@@ -85,39 +84,37 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
 
         @SuppressLint("SimpleDateFormat")
         override fun bindModel(ItemsLV_Notify: ItemsLV_Notify){
-
             itemView.notifytitle.text = "來自 ${ItemsLV_Notify.orderOwnerName} 的團購訊息"
             itemView.brandName.text = "[ ${ItemsLV_Notify.brandName} ]"
-
-            itemView.messageTitle.text = ItemsLV_Notify.MessageTitle
-
             when(ItemsLV_Notify.msgType)
             {
-
-
                 NOTIFICATION_TYPE_ACTION_JOIN_ORDER ->
                 {
+                    itemView.messageTitle.text = "團購邀請"
                     itemView.messageTitle.setTextColor(Color.rgb(0, 122, 255))
                 }
 
                 NOTIFICATION_TYPE_SHIPPING_NOTICE ->
                 {
+                    itemView.messageTitle.text = "到貨通知"
                     itemView.messageTitle.setTextColor(Color.rgb(0, 122, 255))
                     itemView.acknowledge.visibility = View.INVISIBLE
                     itemView.joinstatus.visibility = View.INVISIBLE
                 }
+
                 NOTIFICATION_TYPE_MESSAGE_DUETIME->
                 {
+                    itemView.messageTitle.text = "催定通知"
                     itemView.messageTitle.setTextColor(Color.rgb(177, 0, 28))
                 }
 
                 NOTIFICATION_TYPE_MESSAGE_INFORMATION ->
                 {
+                    itemView.messageTitle.text = "團購訊息"
                     itemView.messageTitle.setTextColor(Color.rgb(177, 0, 28))
                     itemView.acknowledge.visibility = View.INVISIBLE
                     itemView.joinstatus.visibility = View.INVISIBLE
                 }
-
             }
 
             if(ItemsLV_Notify.msgType == NOTIFICATION_TYPE_ACTION_JOIN_ORDER || ItemsLV_Notify.msgType == NOTIFICATION_TYPE_MESSAGE_DUETIME) {
@@ -138,7 +135,6 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
                             itemView.joinstatus.setTextColor(Color.rgb(177, 0, 28))
                             itemView.acknowledge.setTextColor(Color.rgb(177, 0, 28))
                         }
-
                         MENU_ORDER_REPLY_STATUS_EXPIRE -> {
                             itemView.acknowledge.text = "訂單逾期"
                             itemView.joinstatus.text = "沒有參加"
@@ -155,8 +151,6 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
                 IAdapterOnClick.onClick("Notify", adapterPosition,0)
             })
 
-
-
             if(ItemsLV_Notify.read == "N")
             {
                 itemView.notifylayout.setBackgroundResource(R.drawable.shape_rectangle_lightblue)
@@ -166,15 +160,7 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
                 itemView.notifylayout.setBackgroundResource(R.drawable.shape_rectangle_red)
             }
         }
-
-
-        private fun getImageDrawable(imageName: String): Drawable {
-            val id = context.resources.getIdentifier(imageName, "drawable",
-                context.packageName)
-            return context.resources.getDrawable(id)
-        }
     }
-
 
     inner class ADSViewHolder(itemView: View) : BaseViewHolder<ItemsLV_Notify>(itemView){
         override fun bindModel(item: ItemsLV_Notify) {
@@ -182,11 +168,3 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
         }
     }
 }
-
-
-
-
-
-
-
-

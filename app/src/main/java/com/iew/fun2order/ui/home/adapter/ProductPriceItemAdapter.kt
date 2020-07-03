@@ -39,7 +39,7 @@ class ProductPriceItemAdapter (listdata: MutableList<ProductPriceListData>, val 
         holder.txtItemPrice.setText(listdata[position].getItemValue())
         holder.txtItemLimit.setText(listdata[position].getItemLimit())
         holder.linearLayout.setOnLongClickListener {
-            IAdapterOnClick.onClick("productItemPrice", position, 1)
+            IAdapterOnClick.onClick("productItemPrice", holder.adapterPosition, 1)
             true
         }
 

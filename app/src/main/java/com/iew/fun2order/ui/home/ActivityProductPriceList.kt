@@ -117,7 +117,7 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
 
 
     override fun onClick(sender: String, pos: Int, type: Int) {
-        val buttonActions = arrayOf("刪除項目", "修改項目", "複製項目")
+        val buttonActions = arrayOf("刪除項目", "編輯項目", "複製項目")
         AlertDialog.Builder(this)
             .setTitle("請選擇操作項目")
             .setItems(buttonActions,  DialogInterface.OnClickListener { dialog, which ->
@@ -235,6 +235,7 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
     private fun CheckCopyItems(position: Int) {
 
         val str = mItemList.get(position).getItemName()
+        val addPosition = position + 1
         var getItems = mFirebaseUserMenu.menuItems!!.filter { it.itemName == str }.firstOrNull()
         if (getItems != null) {
             val item = LayoutInflater.from(this).inflate(R.layout.alert_input_product_price, null)
@@ -323,8 +324,8 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
                                     fdproduct.itemPrice = 0
                                 }
                                 fdproduct.sequenceNumber = mFirebaseUserMenu.menuItems!!.size + 1
-                                mFirebaseUserMenu.menuItems!!.add(fdproduct)
-                                mItemList.add(
+                                mFirebaseUserMenu.menuItems!!.add(addPosition,fdproduct)
+                                mItemList.add(addPosition,
                                     ProductPriceListData(
                                         fdproduct.itemName,
                                         fdproduct.itemPrice.toString(),

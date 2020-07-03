@@ -23,6 +23,7 @@ import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.formats.UnifiedNativeAd
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -37,8 +38,6 @@ import com.iew.fun2order.db.dao.localImageDAO
 import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.db.entity.entityLocalmage
-import com.iew.fun2order.db.entity.entityNotification
-import com.iew.fun2order.db.firebase.ORDER_MEMBER
 import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.nativead.TemplateView
@@ -46,10 +45,10 @@ import com.iew.fun2order.ui.home.adapter.MenuItemAdapter
 import com.iew.fun2order.ui.home.data.MenuItemListData
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
-import com.iew.fun2order.utility.NOTIFICATION_TYPE_ACTION_JOIN_ORDER
 import com.iew.fun2order.utility.NOTIFICATION_TYPE_SHARE_MENU
 import com.tooltip.Tooltip
 import info.hoang8f.android.segmented.SegmentedGroup
+import kotlinx.android.synthetic.main.bottom_sheet_menu_operator.view.*
 import org.json.JSONObject
 
 
@@ -155,7 +154,8 @@ class HomeFragment : Fragment(), IAdapterOnClick {
         val imageAboutInfo = root.findViewById(R.id.imageAboutInfo) as ImageView
         imageAboutInfo.setOnClickListener {
             // your code here
-            val versionInfo = "Version: ${BuildConfig.VERSION_NAME}.${BuildConfig.VERSION_CODE} - Beta03"
+
+            val versionInfo = "Version: ${BuildConfig.VERSION_NAME} - Beta ${BuildConfig.VERSION_CODE}"
             val item = LayoutInflater.from(this.context).inflate(R.layout.alert_about_us, null)
             val version = item.findViewById<TextView>(R.id.textViewVersion)
             val welcome =  item.findViewById<TextView>(R.id.textViewWelcome)
@@ -505,10 +505,23 @@ class HomeFragment : Fragment(), IAdapterOnClick {
 
         else if(type == 1)
         {
+
+            val userUUID = FirebaseAuth.getInstance().currentUser!!.uid.toString()
+            val menuInformation = mItemList[pos].getUserMenu()!!
+            val dialog = BottomSheetDialog(requireContext())
+            val bottomSheet = layoutInflater.inflate(R.layout.bottom_sheet_menu_operator, null)
+            bottomSheet.buttonShare.setOnClickListener { ShareMenuToFriend(menuInformation);dialog.dismiss() }
+            bottomSheet.buttonDelete.setOnClickListener {checkRemoveMenu( userUUID, menuInformation, pos); dialog.dismiss() }
+            bottomSheet.buttonSubmit.setOnClickListener { dialog.dismiss() }
+            dialog.setContentView(bottomSheet)
+            dialog.show()
+
+
+            /*
             val buttonActions = arrayOf("刪除菜單", "將菜單分享給好友")
             val userUUID = FirebaseAuth.getInstance().currentUser!!.uid.toString()
             val menuInformation = mItemList[pos].getUserMenu()!!
-            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            BottomSheetDialog(requireContext())
                 .setTitle("請選擇操作項目")
                 .setItems(buttonActions,  DialogInterface.OnClickListener { dialog, which ->
                     when (which) {
@@ -520,6 +533,8 @@ class HomeFragment : Fragment(), IAdapterOnClick {
                 .setNegativeButton("關閉", null)
                 .create()
                 .show()
+
+             */
 
         }
     }

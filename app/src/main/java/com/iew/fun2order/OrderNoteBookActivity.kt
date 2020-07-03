@@ -547,41 +547,9 @@ class OrderNoteBookActivity : AppCompatActivity() {
                 header.addView(hd0)
                 tableheader.addView(header)
 
-                val address = TableRow(this)
-                val addr0 = TextView(this)
-                addr0.gravity = Gravity.CENTER
-                addr0.height = CELLHEIGHT * data?.value.count()
-                addr0.width = RESPECT_TITLEWIDTH
-                addr0.textSize = TEXTSIZE
-                addr0.setTextColor(Color.BLACK)
-                addr0.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
-
-                var txtmailinfo =""
-                val myCotent = meunOrder.contentItems?.firstOrNull { it.memberID  ==data?.value[0].itemOwnerID }
-                if(myCotent != null)
-                {
-                    if(myCotent.orderContent.userContactInfo!= null) {
-                        txtmailinfo += "聯絡人: ${myCotent.orderContent.userContactInfo?.userName} \n"
-                        txtmailinfo += "聯絡電話: ${myCotent.orderContent.userContactInfo?.userPhoneNumber} \n"
-                        txtmailinfo += "聯絡住址: ${myCotent.orderContent.userContactInfo?.userAddress} \n"
-                    }
-
-                }
-
-                if(data?.value.count() < 3) {
-                    addr0.text = "請點擊以查看訊息"
-                    addr0.tooltipText = txtmailinfo
-                }
-                else
-                {
-                    addr0.text = txtmailinfo
-                    addr0.tooltipText = txtmailinfo
-                }
-
-
-                address.addView(addr0)
-                tableaddress.addView(address)
-
+                reportIndex++
+                shareContext += "${reportIndex}. 『${data?.value[0].itemOwner}』的訂單內容：\n"
+                shareContext += "[產品內容]：\n"
 
                 val items = data.value.sortedBy { it -> it.itemName }
                 items.forEach()
@@ -635,10 +603,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
 
                     //------- To Share ------
-                    reportIndex++
-                    shareContext += "${reportIndex}. "
-                    shareContext += "${data?.value[0].itemOwner}  "
-                    shareContext += "${item.itemName} ${item.itemRecipe} * ${item.itemQuantity}"
+                    shareContext += "\t ${item.itemName} ${item.itemRecipe} * ${item.itemQuantity}"
                     if (item.itemComments != "") {
                         shareContext += " [${item.itemComments}]"
                     }
@@ -646,6 +611,45 @@ class OrderNoteBookActivity : AppCompatActivity() {
                     //------- To Share ------
 
                 }
+
+
+                val address = TableRow(this)
+                val addr0 = TextView(this)
+                addr0.gravity = Gravity.CENTER
+                addr0.height = CELLHEIGHT * data?.value.count()
+                addr0.width = RESPECT_TITLEWIDTH
+                addr0.textSize = TEXTSIZE
+                addr0.setTextColor(Color.BLACK)
+                addr0.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
+
+                var txtmailinfo =""
+                val myCotent = meunOrder.contentItems?.firstOrNull { it.memberID  ==data?.value[0].itemOwnerID }
+                if(myCotent != null)
+                {
+                    if(myCotent.orderContent.userContactInfo!= null) {
+                        txtmailinfo += "姓名: ${myCotent.orderContent.userContactInfo?.userName} \n"
+                        txtmailinfo += "地址: ${myCotent.orderContent.userContactInfo?.userAddress} \n"
+                        txtmailinfo += "電話: ${myCotent.orderContent.userContactInfo?.userPhoneNumber} \n"
+
+                        if(data?.value.count() < 3) {
+                            addr0.text = "請點擊以查看訊息"
+                            addr0.tooltipText = txtmailinfo
+                        }
+                        else
+                        {
+                            addr0.text = txtmailinfo
+                            addr0.tooltipText = txtmailinfo
+                        }
+
+                        shareContext += "[聯絡資訊]：\n"
+                        shareContext += "$txtmailinfo\n"
+
+                    }
+                }
+                address.addView(addr0)
+                tableaddress.addView(address)
+
+
             }
         }
     }

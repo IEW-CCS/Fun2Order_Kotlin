@@ -5,12 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.BitmapFactory
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -33,10 +31,9 @@ import com.iew.fun2order.db.firebase.USER_MENU_ORDER
 import com.iew.fun2order.ui.my_setup.*
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
 import com.iew.fun2order.utility.NOTIFICATION_TYPE_ACTION_JOIN_ORDER
+import kotlinx.android.synthetic.main.alert_date_time_picker.view.*
 import org.json.JSONObject
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 
@@ -164,6 +161,24 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
             val sCrTimeStamp: String = SimpleDateFormat("yyyyMMddHHmm").format(Date())
 
             val item = LayoutInflater.from(this).inflate(R.layout.alert_date_time_picker, null)
+
+            //-----準備設定Fragment ------
+            // Extract the TabHost
+            val mTabHost = item.tab_host
+            mTabHost.setup()
+            // Create Date Tab and add to TabHost
+            val mDateTab: TabHost.TabSpec = mTabHost.newTabSpec("date")
+            mDateTab.setIndicator("日期");
+            mDateTab.setContent(R.id.date_content);
+
+            mTabHost.addTab(mDateTab)
+            // Create Time Tab and add to TabHost
+            val mTimeTab: TabHost.TabSpec = mTabHost.newTabSpec("time")
+            mTimeTab.setIndicator("時間");
+            mTimeTab.setContent(R.id.time_content);
+            mTabHost.addTab(mTimeTab)
+
+
             val picker = item.findViewById(R.id.tpPicker) as TimePicker
             picker.setIs24HourView(true)
             //picker.setCurrentHour(0);
@@ -559,9 +574,6 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
     }
 
      */
-
-
-
 
     private fun sendFcmMessage(userMenuOrder: USER_MENU_ORDER) {
         val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())

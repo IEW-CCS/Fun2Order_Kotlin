@@ -88,8 +88,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
     }
 
     protected fun exitByBackKey() {
-
-        if(boolChangeOrder == true) {
+        if(boolChangeOrder) {
             val notifyAlert = AlertDialog.Builder(this@JoinOrderActivity).create()
             notifyAlert.setTitle("提示訊息")
             notifyAlert.setTitle("訂購單已更動, 你確定要離開嗎？")
@@ -117,23 +116,21 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
             menuRef = Firebase.database.getReference(MenuItemsPath)
             if(menuRef!= null) {
                 menuRef.addChildEventListener(childEventListener)
-
                 menuRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onCancelled(p0: DatabaseError) {
-                    }
+                    override fun onCancelled(p0: DatabaseError) {}
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         lstLimitedProductList.clear()
                         dataSnapshot.children.forEach()
                         {
                             var upload =  it.getValue(PRODUCT::class.java)
                             if (upload != null) {
-                                var ADD_PRODUCT = PRODUCT()
-                                ADD_PRODUCT.sequenceNumber = upload.sequenceNumber
-                                ADD_PRODUCT.itemPrice = upload.itemPrice
-                                ADD_PRODUCT.itemName = upload.itemName
-                                ADD_PRODUCT.quantityLimitation = upload.quantityLimitation
-                                ADD_PRODUCT.quantityRemained = upload.quantityRemained
-                                lstLimitedProductList.add(upload)
+                                var addPRODUCT = PRODUCT()
+                                addPRODUCT.sequenceNumber = upload.sequenceNumber
+                                addPRODUCT.itemPrice = upload.itemPrice
+                                addPRODUCT.itemName = upload.itemName
+                                addPRODUCT.quantityLimitation = upload.quantityLimitation
+                                addPRODUCT.quantityRemained = upload.quantityRemained
+                                lstLimitedProductList.add(addPRODUCT)
                             }
                         }
                     }
@@ -171,15 +168,15 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         }
 
         menuLocation = ""
-        txtBrandName = findViewById(R.id.joinOrderBrandName)
-        layOrderReference = findViewById(R.id.joinOrderReference)
-        layOrderAddProduct = findViewById(R.id.joinOrderAddProduct)
-        layOrderSubmit = findViewById(R.id.joinOrderSubmit)
-        rcvSelectedProduct = findViewById(R.id.rcv_joinOrderSelectedList)
+        txtBrandName        = findViewById(R.id.joinOrderBrandName)
+        layOrderReference   = findViewById(R.id.joinOrderReference)
+        layOrderAddProduct  = findViewById(R.id.joinOrderAddProduct)
+        layOrderSubmit      = findViewById(R.id.joinOrderSubmit)
+        rcvSelectedProduct  = findViewById(R.id.rcv_joinOrderSelectedList)
         mSegmentedGroupLocation = findViewById(R.id.SegmentedGroupLocation)
-        gridLayoutBtnList = findViewById(R.id.gridLayoutImageBtnList)
-        txtjoinOrderDesc = findViewById(R.id.joinOrderDesc)
-        txtjoinOrderShowDetail = findViewById(R.id.joinOrderShowDetail)
+        gridLayoutBtnList       = findViewById(R.id.gridLayoutImageBtnList)
+        txtjoinOrderDesc        = findViewById(R.id.joinOrderDesc)
+        txtjoinOrderShowDetail  = findViewById(R.id.joinOrderShowDetail)
         lstSelectedProduct.clear()
 
         val mInflater: LayoutInflater? = LayoutInflater.from(this);
@@ -326,7 +323,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         layOrderSubmit.setOnClickListener {
             if (lstSelectedProduct.count() > 0) {
                 if ((mSegmentedGroupLocation.childCount > 0 && menuLocation != "") || mSegmentedGroupLocation.childCount == 0) {
-                    //------ 檢查下載數值 --------
+
                     val menuPath = "USER_MENU_ORDER/${menuOrderOwnerID}/${menuOrderNumber}/contentItems"
                     val database = Firebase.database
                     val myRef = database.getReference(menuPath)
@@ -337,19 +334,17 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                 val users = it.getValue(ORDER_MEMBER::class.java)
                                 if (users!!.memberID == FirebaseAuth.getInstance().currentUser!!.uid.toString()) {
 
-                                    //--- 檢查限量數值
+                                       //--- 1. 檢查限量 ---
                                     val limitProduct = CheckLimited( users.orderContent.menuProductItems,lstSelectedProduct.toMutableList())
-                                    var overLimit = limitProduct.filter { it.itemQuantity!!  < 0 }
+                                    val overLimit = limitProduct.filter { it.itemQuantity!!  < 0 }
 
                                     if(overLimit.count() == 0) {
                                         updateLimit(limitProduct)
-
                                         users.orderContent.menuProductItems = lstSelectedProduct.toMutableList()
                                         users.orderContent.replyStatus = MENU_ORDER_REPLY_STATUS_ACCEPT
                                         users.orderContent.createTime = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
                                         users.orderContent.location = menuLocation
                                         users.orderContent.itemOwnerName = FirebaseAuth.getInstance().currentUser!!.displayName
-
                                         var itemQuantity: Int = 0
                                         lstSelectedProduct.forEach { menuProducts ->
                                             if (menuProducts.itemQuantity != null) {
@@ -363,27 +358,37 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                         var orderNumber = ""
                                         val notificationDB = AppDatabase(this@JoinOrderActivity!!).notificationdao()
                                         val currentNotify = notificationDB.getNotifybyMsgID(menuOrderMessageID)
-                                        orderNumber = currentNotify.orderNumber ?: ""
-                                        if (currentNotify != null && currentNotify?.messageID == menuOrderMessageID) {
-                                            currentNotify.replyStatus = MENU_ORDER_REPLY_STATUS_ACCEPT
-                                            currentNotify.replyTime =
-                                                SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
-
-                                            try {
-                                                notificationDB.update(currentNotify)
-                                                updateOrderStatusToLocalDB(orderNumber, MENU_ORDER_REPLY_STATUS_ACCEPT)
-                                            } catch (e: Exception) {
+                                        if(currentNotify!= null) {
+                                            orderNumber = currentNotify.orderNumber
+                                            if (currentNotify.messageID == menuOrderMessageID) {
+                                                currentNotify.replyStatus = MENU_ORDER_REPLY_STATUS_ACCEPT
+                                                currentNotify.replyTime = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+                                                try {
+                                                    notificationDB.update(currentNotify)
+                                                    updateOrderStatusToLocalDB(orderNumber, MENU_ORDER_REPLY_STATUS_ACCEPT)
+                                                } catch (e: Exception) {
+                                                }
                                             }
                                         }
 
+                                        // 3. ----- 使否填寫聯絡資訊 -----
+
                                         val needContactInfoFlag = mFirebaseUserMenu?.needContactInfoFlag ?: false
                                         if (needContactInfoFlag) {
-                                            val item = LayoutInflater.from(this@JoinOrderActivity)
-                                                .inflate(R.layout.alert_input_contact_information, null)
-
+                                            val item = LayoutInflater.from(this@JoinOrderActivity).inflate(R.layout.alert_input_contact_information, null)
                                             var editTextName = item.findViewById(R.id.editTextName) as EditText
                                             var editTextPhone = item.findViewById(R.id.editTextPhone) as EditText
                                             var editTextAddress = item.findViewById(R.id.editTextAddress) as EditText
+
+                                            val dbContext = AppDatabase(this@JoinOrderActivity)
+                                            val profileDB = dbContext.userprofiledao()
+                                            val entity = profileDB.getProfileByID(FirebaseAuth.getInstance().currentUser!!.uid.toString())
+
+                                            if(entity!= null) {
+                                                editTextName.text = Editable.Factory.getInstance().newEditable(entity.userName ?: "")
+                                                editTextPhone.text = Editable.Factory.getInstance().newEditable(entity.phoneNumber ?: "")
+                                                editTextAddress.text = Editable.Factory.getInstance().newEditable(entity.address ?: "")
+                                            }
 
                                             if(users.orderContent.userContactInfo != null)
                                             {
@@ -393,20 +398,16 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                                 editTextAddress.text = Editable.Factory.getInstance().newEditable(tmpContact.userAddress ?: "")
                                             }
 
-                                            var alertDialog =
-                                                AlertDialog.Builder(this@JoinOrderActivity)
+                                            var alertDialog = AlertDialog.Builder(this@JoinOrderActivity)
                                                     .setView(item)
                                                     .setCancelable(false)
                                                     .setPositiveButton("確定") { dialog, _ ->
-
                                                         var contactInfo = CONTENT_CONTACTINFO()
                                                         contactInfo.userName = editTextName.text.trim().toString()
                                                         contactInfo.userPhoneNumber  = editTextPhone.text.trim().toString()
                                                         contactInfo.userAddress  = editTextAddress.text.trim().toString()
                                                         users.orderContent.userContactInfo = contactInfo
-
                                                         it.ref.setValue(users)
-
                                                         finish()
                                                         dialog.dismiss()
 
@@ -428,6 +429,8 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                     }
                                     else
                                     {
+
+                                        // overLimit.count() > 0  確認限量資訊
                                         var overLimitList :String = ""
                                         overLimit.forEach()
                                         {
@@ -437,11 +440,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                         val Alert = AlertDialog.Builder(this@JoinOrderActivity).create()
                                         Alert.setTitle("錯誤")
                                         Alert.setMessage("以下產品超過已經可以購買的數量:\n${overLimitList}")
-                                        Alert.setButton(
-                                            AlertDialog.BUTTON_POSITIVE,
-                                            "OK"
-                                        ) { dialogInterface, i ->
-                                        }
+                                        Alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK"){ _,_ -> }
                                         Alert.show()
                                     }
                                 }
@@ -458,11 +457,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                     val Alert = AlertDialog.Builder(this).create()
                     Alert.setTitle("錯誤")
                     Alert.setMessage("請選擇地點 !!")
-                    Alert.setButton(
-                        AlertDialog.BUTTON_POSITIVE,
-                        "OK"
-                    ) { dialogInterface, i ->
-                    }
+                    Alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK"){ _,_ -> }
                     Alert.show()
                 }
 
@@ -470,11 +465,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                 val Alert = AlertDialog.Builder(this).create()
                 Alert.setTitle("錯誤")
                 Alert.setMessage("請至少選擇一個產品 !!")
-                Alert.setButton(
-                    AlertDialog.BUTTON_POSITIVE,
-                    "OK"
-                ) { dialogInterface, i ->
-                }
+                Alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _,_ -> }
                 Alert.show()
             }
         }
@@ -629,18 +620,14 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
 
             var oldProductItemKey: MutableList<String> = mutableListOf()
             var newProductItemKey: MutableList<String> = mutableListOf()
-
             if (oldProductItems != null) {
                 oldProductItemKey = oldProductItems.mapNotNull { it.itemName }.toMutableList()
             }
-
             if (newProductItems != null) {
                 newProductItemKey = newProductItems.mapNotNull { it.itemName }.toMutableList()
             }
-
             val limitProductItemKey = lstLimitedProductList.mapNotNull { it.itemName }
             var mergeItems = (oldProductItemKey.union(newProductItemKey)).intersect(limitProductItemKey)
-
             mergeItems.forEach()
             { mergeKey ->
 
@@ -675,9 +662,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         var totalImageCount = multiMenuImageURL!!.filter { it != "" }.count()
         var MemoryDBContext = MemoryDatabase(this!!)
         var MenuImageDB = MemoryDBContext.menuImagedao()
-
         MenuImaegByteArray.clear()
-
         multiMenuImageURL!!.forEach {
             if (it != "") {
                 MenuImaegByteArray.put(it, null)
@@ -715,7 +700,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
     private fun DisplayImage() {
         var width: Int = 0
         var iCnt: Int = 1
-
         val MenuImaegExist = MenuImaegByteArray.filter { it.value != null }
         val MenuImaegFailed = MenuImaegByteArray.filter { it.value == null }
 
@@ -887,7 +871,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                         if(rcvSelectedProduct.adapter!= null) {
                             rcvSelectedProduct.adapter!!.notifyDataSetChanged()
                         }
-
 
                         selfSelectmenuLocation = refLocation ?: ""
                         if (refLocation != null) {

@@ -4,18 +4,71 @@
          android:layout_height="match_parent"
          android:orientation="vertical" >
 
-    <DatePicker
-        android:id="@+id/dpPicker"
-        style="@android:style/Widget.DatePicker"
+    <!-- TabHost that will hold the Tabs and its content -->
+    <TabHost
+        android:id="@+id/tab_host"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:calendarViewShown="false" />
+        android:layout_height="match_parent">
 
-    <TimePicker
-        android:id="@+id/tpPicker"
-        style="@android:style/Widget.Material.Light.TimePicker"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:timePickerMode="spinner"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- TabWidget that will hold the Tabs -->
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <!-- Layout that will hold the content of the Tabs -->
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_marginTop="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!-- Layout for the DatePicker -->
+                <LinearLayout
+                    android:id="@+id/date_content"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <DatePicker
+                        android:id="@+id/dpPicker"
+                        style="@android:style/Widget.DeviceDefault.DatePicker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:calendarViewShown="false"
+                        android:headerBackground="@drawable/shape_row_notification" />
+
+                </LinearLayout>
+
+                <!-- Layout for the TimePicker -->
+                <LinearLayout
+                    android:id="@+id/time_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TimePicker
+                        android:id="@+id/tpPicker"
+                        style="@android:style/Widget.Material.Light.TimePicker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:headerBackground="@drawable/shape_row_notification"
+                        android:numbersBackgroundColor="#FFFFFF"
+                        android:timePickerMode="spinner" />
+
+                </LinearLayout>
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </TabHost>
 
 </LinearLayout>

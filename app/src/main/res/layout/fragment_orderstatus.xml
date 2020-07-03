@@ -236,7 +236,7 @@
 
                 android:layout_below="@+id/imageCallable"
                 android:gravity="center_horizontal"
-                android:text="發出催訂通知"
+                android:text="截止日"
                 android:textAlignment="center"
                 android:textColor="#B71C1C"
                 android:textSize="20dp" />
@@ -271,7 +271,7 @@
                 android:layout_height="match_parent"
                 android:layout_below="@+id/imageCallable"
                 android:gravity="center_horizontal"
-                android:text="訊息通知"
+                android:text="發出通知訊息"
                 android:textAlignment="center"
                 android:textColor="#B71C1C"
                 android:textSize="20dp" />

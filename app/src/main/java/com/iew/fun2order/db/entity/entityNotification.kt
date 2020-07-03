@@ -43,6 +43,10 @@ data class entityNotification (
     @ColumnInfo(name = "replyStatus")
     var replyStatus:String = "",
     @ColumnInfo(name = "replyTime")
-    var replyTime:String = ""
+    var replyTime:String = "",
+    @ColumnInfo(name = "shippingDate")
+    var shippingDate: String? = null,
+    @ColumnInfo(name = "shippingLocation")
+    var shippingLocation: String? = null
 
 ): Parcelable

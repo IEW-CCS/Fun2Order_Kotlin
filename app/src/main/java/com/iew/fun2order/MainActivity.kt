@@ -1,8 +1,10 @@
 package com.iew.fun2order
 
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.*
+import android.net.ParseException
 import android.os.Bundle
 import android.text.Editable
 import android.text.SpannableString
@@ -45,6 +47,7 @@ import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.order.JoinOrderActivity
 import com.iew.fun2order.utility.*
+import kotlinx.android.synthetic.main.row_orderdetail_accept.view.*
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -126,6 +129,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //--- 收到分享ChangeDueTime的訊號
+    private var changeDUETIMEReceiver = object: BroadcastReceiver(){
+        override fun onReceive(p0: Context?, p1: Intent?) {
+            val ChangeDueTimeMenuInfo = p1?.getParcelableExtra<entityNotification>("ChangeDueTime")
+            receiveChangeDueTimeRequest(ChangeDueTimeMenuInfo)
+        }
+    }
+
     //endregion
 
 
@@ -139,6 +150,7 @@ class MainActivity : AppCompatActivity() {
         LocalBroadcastManager.getInstance(this).registerReceiver(selfOrderJoinReceiver, IntentFilter(LOCALBROADCASE_JOIN))
         LocalBroadcastManager.getInstance(this).registerReceiver(addFriendReceiver, IntentFilter(LOCALBROADCASE_FRIEND))
         LocalBroadcastManager.getInstance(this).registerReceiver(shareMenuReceiver, IntentFilter(LOCALBROADCASE_SHAREMENU))
+        LocalBroadcastManager.getInstance(this).registerReceiver(changeDUETIMEReceiver, IntentFilter(LOCALBROADCASE_CHANGEDUETIME))
         UpdateBadge()
     }
 
@@ -148,6 +160,7 @@ class MainActivity : AppCompatActivity() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(selfOrderJoinReceiver)
         LocalBroadcastManager.getInstance(this).unregisterReceiver(addFriendReceiver)
         LocalBroadcastManager.getInstance(this).unregisterReceiver(shareMenuReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(changeDUETIMEReceiver)
     }
 
     override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
@@ -306,6 +319,7 @@ class MainActivity : AppCompatActivity() {
             {
                 //----- 正常登入邏輯 -----
                 updateTokenID(FirebaseAuth.getInstance().currentUser!!.uid)
+                downloadSelfProfile( FirebaseAuth.getInstance().currentUser!!.uid)
                 //downloadSelfProfile(FirebaseAuth.getInstance().currentUser!!.uid)
                 //downloadFriendList(context)
             }
@@ -334,6 +348,9 @@ class MainActivity : AppCompatActivity() {
                     notification.isRead = intent!!.extras!!["isRead"]!!.toString()
                     notification.replyStatus    = MENU_ORDER_REPLY_STATUS_WAIT
 
+                    notification.shippingDate = intent!!.extras!!["shippingDate"]?.toString()
+                    notification.shippingLocation = intent!!.extras!!["shippingLocation"]?.toString()
+
                     if(notification.notificationType == NOTIFICATION_TYPE_ACTION_JOIN_NEW_FRIEND)
                     {
                         receiveAddFriendRequest(notification.messageTitle, notification.messageBody, notification.orderOwnerID)
@@ -345,7 +362,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     else if(notification.notificationType == NOTIFICATION_TYPE_CHANGE_DUETIME)
                     {
-                        //  改變Due TIme  需要直接修改內容
+                        receiveChangeDueTimeRequest(notification)
                     }
                     else {
                         try {
@@ -456,6 +473,30 @@ class MainActivity : AppCompatActivity() {
                             }
                             .addOnCanceledListener {
                                 profileDB.updateTodo(entity)
+                            }
+                    }
+                }
+                else
+                {
+                    var entity = entityUserProfile()
+                    entity.tokenID  =  value?.tokenID ?: ""
+                    entity.photoURL =  value?.photoURL?: ""
+                    entity.userName =  value?.userName ?: ""
+                    entity.gender   =  value?.gender ?: ""
+                    entity.address  =  value?.address ?: ""
+                    entity.birthday =  value?.birthday?: ""
+
+                    val photoURL = value?.photoURL ?: ""
+                    if (photoURL != "") {
+                        val islandRef = Firebase.storage.reference.child(photoURL!!)
+                        val ONE_MEGABYTE = (1024 * 1024).toLong()
+                        islandRef.getBytes(ONE_MEGABYTE)
+                            .addOnSuccessListener { bytesPrm: ByteArray ->
+                                entity.image = bytesPrm
+                                profileDB.insertRow(entity)
+                            }
+                            .addOnCanceledListener {
+
                             }
                     }
                 }
@@ -578,6 +619,56 @@ class MainActivity : AppCompatActivity() {
         }
         val dialog = alert.create()
         dialog.show()
+    }
+
+    // 收到修改截止時間請求
+    private fun receiveChangeDueTimeRequest(ChangeDueTime: entityNotification?) {
+        if(ChangeDueTime == null)
+        {
+            return
+        }
+
+        val notificationDB = AppDatabase(this).notificationdao()
+        val orderMessages = notificationDB.getNotifybyOrderNo(ChangeDueTime.orderNumber)
+        var changeDuetimeStatus : Boolean = false
+
+        orderMessages.forEach()
+        {
+           if( timeCompare(it.dueTime,ChangeDueTime.dueTime)) {
+               changeDuetimeStatus = true
+               it.dueTime = ChangeDueTime.dueTime
+               notificationDB.update(it)
+           }
+        }
+
+
+        if(orderMessages.count() == 0)
+        {
+            val alert = AlertDialog.Builder(this)
+            with(alert) {
+                setTitle("錯誤訊息")
+                setMessage("訂單編號：${ChangeDueTime.orderNumber}\n截止日期更新錯誤,系統中找不到訂單")
+                setPositiveButton("確定",null)
+            }
+            val dialog = alert.create()
+            dialog.show()
+        }
+
+        if(changeDuetimeStatus == true)
+        {
+            val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
+            val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
+            val newDueDTime = sdfDecode.parse(ChangeDueTime.dueTime)
+            val formatNewDuetime = sdfEncode.format(newDueDTime).toString()
+            val alert = AlertDialog.Builder(this)
+            with(alert) {
+                setTitle("訊息")
+                setMessage("訂單編號：${ChangeDueTime.orderNumber}\n截止日期成功更新為\n$formatNewDuetime !!")
+                setPositiveButton("確定",null)
+            }
+            val dialog = alert.create()
+            dialog.show()
+        }
     }
 
     private fun DownLoadShareMenu(menuOwner:String, menuNumber: String) {
@@ -877,6 +968,18 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun timeCompare(basicDatetime: String,ChangeDatetime: String): Boolean {
+        val timeFormat = SimpleDateFormat("yyyyMMddHHmmssSSS")
+        return try {
+            val beginTime: Date = timeFormat.parse(basicDatetime)
+            val endTime: Date = timeFormat.parse(ChangeDatetime)
+            (endTime.time - beginTime.time) > 0
+        } catch (e: ParseException) {
+            false
+        }
     }
 
 

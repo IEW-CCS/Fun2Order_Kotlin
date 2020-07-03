@@ -259,7 +259,7 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
                                         deleteGroup(click.GroupID, click.Name)
                                     }
                                     else -> {
-                                        Toast.makeText(activity, "選取到取消", Toast.LENGTH_SHORT).show()
+                                       // Toast.makeText(activity, "選取到取消", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             })

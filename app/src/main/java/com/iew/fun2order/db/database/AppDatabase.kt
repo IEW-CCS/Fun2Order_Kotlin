@@ -19,7 +19,7 @@ import com.iew.fun2order.db.entity.*
 
 @Database(
     entities = [entityFriend::class, entityGroup::class, entityGroup_detail::class, MenuType::class, UserMenu::class
-        , Location::class, Product::class,  entityNotification::class, entityUserProfile::class, entityLocalmage::class], version = 3
+        , Location::class, Product::class,  entityNotification::class, entityUserProfile::class, entityLocalmage::class], version = 4
 )
 abstract class AppDatabase : RoomDatabase(){
     abstract fun groupdao(): groupDAO
@@ -44,17 +44,17 @@ abstract class AppDatabase : RoomDatabase(){
             instance ?: buildDatabase(context).also { instance = it}
         }
 
-        val MIGRATION_2_3: Migration = object : Migration(2, 3) {
+        val MIGRATION_3_4: Migration = object : Migration(3, 4) {
                 override fun migrate(database: SupportSQLiteDatabase) {
-                    database.execSQL("CREATE TABLE `entityLocalmage` (`id` INTEGER, `name` TEXT UNIQUE NOT NULL,  `desc` TEXT NOT NULL,  `image` BLOB NOT NULL, " + "PRIMARY KEY(`id`))")
-                    database.execSQL("CREATE UNIQUE INDEX  index_entityLocalmage_name ON `entityLocalmage`('name')")
+                    database.execSQL("ALTER TABLE `entityNotification`  ADD COLUMN shippingDate TEXT")
+                    database.execSQL("ALTER TABLE `entityNotification`  ADD COLUMN shippingLocation TEXT")
                 }
         }
 
         private fun buildDatabase(context: Context) = Room.databaseBuilder(context,
             AppDatabase::class.java, "Fun2Order.db")
             .allowMainThreadQueries()
-            .addMigrations(MIGRATION_2_3)
+            .addMigrations(MIGRATION_3_4)
             .fallbackToDestructiveMigration()
             .build()
     }

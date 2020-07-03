@@ -70,6 +70,9 @@ class MessagingService : FirebaseMessagingService() {
                     notification.isRead           = msg.data["isRead"]!!.toString()
                     notification.replyStatus      = MENU_ORDER_REPLY_STATUS_WAIT
 
+                    notification.shippingDate = msg.data["shippingDate"]?.toString()
+                    notification.shippingLocation = msg.data["shippingLocation"]?.toString()
+
                     if(notification.notificationType == NOTIFICATION_TYPE_ACTION_JOIN_NEW_FRIEND)
                     {
                         addFriend(notification)
@@ -95,8 +98,7 @@ class MessagingService : FirebaseMessagingService() {
                     }
                     else if(notification.notificationType == NOTIFICATION_TYPE_CHANGE_DUETIME)
                     {
-
-
+                        changeDueTime(notification)
                     }
 
                   } catch (e: Exception) {
@@ -104,6 +106,8 @@ class MessagingService : FirebaseMessagingService() {
                 }
             }
         }
+
+      //  sendNotificationchannel("Test")
     }
 
 
@@ -128,6 +132,12 @@ class MessagingService : FirebaseMessagingService() {
     private fun shareMenu(notify: entityNotification) {
         val intent = Intent(LOCALBROADCASE_SHAREMENU)
         intent.putExtra("ShareMenuMessage", notify)
+        broadcast.sendBroadcast(intent)
+    }
+
+    private fun changeDueTime(notify: entityNotification) {
+        val intent = Intent(LOCALBROADCASE_CHANGEDUETIME)
+        intent.putExtra("ChangeDueTime", notify)
         broadcast.sendBroadcast(intent)
     }
 
@@ -157,6 +167,7 @@ class MessagingService : FirebaseMessagingService() {
             // .setSmallIcon(R.drawable.ic_stat_ic_notification)
             .setContentTitle("FCM Message")
             .setContentText(messageBody)
+            .setSmallIcon(R.drawable.icon_cup)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)

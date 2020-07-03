@@ -131,12 +131,15 @@
     <string name="Myorder">我的團購單</string>
     <string name="Myinvite">我的邀請單</string>
 
+    <string name="OrderOnGoing">進行中</string>
+    <string name="OrderOnExpired">已逾期</string>
+
     <string name="OrderStatus">訂單狀態</string>
     <string name="OrderStatistics">回覆統計</string>
     <string name="OrderMaintain">訂單維護</string>
 
     <string name="NotifyInvite">團購邀請</string>
-    <string name="NotifyShipping">出貨通知</string>
+    <string name="NotifyShipping">到貨通知</string>
     <string name="NotifyOthers">其他訊息</string>
 
 

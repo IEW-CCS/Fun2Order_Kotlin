@@ -26,7 +26,6 @@ import com.iew.fun2order.utility.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 class RootFragmentInvitation() : Fragment() ,IAdapterOnClick  {
     private var lstNotification: MutableList<Any> = mutableListOf()
     private var rcvNotification: RecyclerView? = null
@@ -77,8 +76,7 @@ class RootFragmentInvitation() : Fragment() ,IAdapterOnClick  {
                         it.brandName,
                         formatReceiveDatetime,
                         it.messageBody,
-                        it.isRead,
-                        it.messageTitle
+                        it.isRead
                     )
                 )
             }
@@ -88,14 +86,10 @@ class RootFragmentInvitation() : Fragment() ,IAdapterOnClick  {
         return root
     }
 
-
-
     override fun onClick(sender: String, pos: Int, type: Int) {
-
         if (type == 1) {
             checkRemoveNotify(pos)
         } else {
-
             if(lstNotification[pos] is ItemsLV_Notify) {
                 val notification = (lstNotification[pos] as ItemsLV_Notify).copy()
                 val notificationDB = AppDatabase(requireContext()).notificationdao()
@@ -135,7 +129,6 @@ class RootFragmentInvitation() : Fragment() ,IAdapterOnClick  {
     }
 
     fun checkRemoveNotify(position: Int) {
-
         if(lstNotification[position] is ItemsLV_Notify) {
             val deleteItems = lstNotification[position] as ItemsLV_Notify
             val deleteUUID = deleteItems.messageid
@@ -194,6 +187,3 @@ class RootFragmentInvitation() : Fragment() ,IAdapterOnClick  {
         }
     }
 }
-
-
-
