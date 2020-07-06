@@ -100,6 +100,7 @@ class AdapterRC_OrderMaintain(
                                                 value?.userID,
                                                 value?.userName,
                                                 value?.tokenID,
+                                                value?.ostype,
                                                 bytesPrm
                                             )
                                             friendImageDB.insertRow(friendImage)

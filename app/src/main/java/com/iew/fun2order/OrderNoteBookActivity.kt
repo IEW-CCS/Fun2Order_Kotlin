@@ -632,7 +632,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
                         txtmailinfo += "電話: ${myCotent.orderContent.userContactInfo?.userPhoneNumber} \n"
 
                         if(data?.value.count() < 3) {
-                            addr0.text = "請點擊以查看訊息"
+                            addr0.text = "請長按點擊以查看訊息"
                             addr0.tooltipText = txtmailinfo
                         }
                         else
@@ -640,10 +640,8 @@ class OrderNoteBookActivity : AppCompatActivity() {
                             addr0.text = txtmailinfo
                             addr0.tooltipText = txtmailinfo
                         }
-
                         shareContext += "[聯絡資訊]：\n"
                         shareContext += "$txtmailinfo\n"
-
                     }
                 }
                 address.addView(addr0)

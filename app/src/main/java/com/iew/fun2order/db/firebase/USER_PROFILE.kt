@@ -16,6 +16,7 @@ data class USER_PROFILE (
     var gender:  String?= null ,
     var address:  String? = null,
     var birthday:  String? = null,
+    var ostype:  String? = null,
     var brandCategoryList: MutableList<String>? = mutableListOf(),
     var friendList: MutableList<String>? = mutableListOf()
 

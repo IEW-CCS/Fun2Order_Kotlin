@@ -34,6 +34,7 @@ import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.BuildConfig
 import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.MenuTypeDAO
+import com.iew.fun2order.db.dao.friendImageDAO
 import com.iew.fun2order.db.dao.localImageDAO
 import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.database.MemoryDatabase
@@ -630,6 +631,9 @@ class HomeFragment : Fragment(), IAdapterOnClick {
 
     private fun sendShareMenuInfoToFCM(tokenID:String, Menu:USER_MENU)
     {
+        val dbContext: MemoryDatabase = MemoryDatabase(requireContext())
+        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
+
         val topic = tokenID
         val notification = JSONObject()
         val notificationHeader = JSONObject()
@@ -656,8 +660,19 @@ class HomeFragment : Fragment(), IAdapterOnClick {
 
         // your notification message
         notification.put("to", topic)
-        notification.put("notification", notificationHeader)
+
+        val getDate = friendImageDB.getFriendImageByTokenID(tokenID)
+        if(getDate!= null)
+        {
+            if(getDate.OSType?:"" == "iOS")
+            {
+                notification.put("notification", notificationHeader)
+            }
+        }
+
         notification.put("data", notificationBody)
+
+        Thread.sleep(100)
         com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
 
     }

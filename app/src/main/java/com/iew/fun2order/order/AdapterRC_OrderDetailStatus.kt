@@ -125,6 +125,7 @@ class AdapterRC_OrderDetailStatus(
                                                 value?.userID,
                                                 value?.userName,
                                                 value?.tokenID,
+                                                value?.ostype,
                                                 bytesPrm
                                             )
                                             friendImageDB.insertRow(friendImage)
@@ -229,6 +230,7 @@ class AdapterRC_OrderDetailStatus(
                                                 value?.userID,
                                                 value?.userName,
                                                 value?.tokenID,
+                                                value?.ostype,
                                                 bytesPrm
                                             )
                                             friendImageDB.insertRow(friendImage)

@@ -82,6 +82,7 @@ class AdapterRC_Candidate(
                                                     value?.userID,
                                                     value?.userName,
                                                     value?.tokenID,
+                                                    value?.ostype,
                                                     bytesPrm
                                                 )
                                             friendImageDB.insertRow(friendImage)

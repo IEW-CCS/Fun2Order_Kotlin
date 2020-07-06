@@ -103,6 +103,10 @@ class MainActivity : AppCompatActivity() {
                         orderInfo.messageBody,
                         orderInfo.orderOwnerID
                     )
+
+                    val notificationDB = AppDatabase(this@MainActivity ).notificationdao()
+                    notificationDB.deleteNotify(orderInfo.messageID)
+
                 }
             }
         }
@@ -124,6 +128,9 @@ class MainActivity : AppCompatActivity() {
                         shareMenuInfo.orderOwnerID,
                         shareMenuInfo.menuNumber
                     )
+
+                    val notificationDB = AppDatabase(this@MainActivity ).notificationdao()
+                    notificationDB.deleteNotify(shareMenuInfo.messageID)
                 }
             }
         }
@@ -376,6 +383,28 @@ class MainActivity : AppCompatActivity() {
                { }
             }
         }
+
+
+        //------ 處理 DB 裡面Acility Event Hangdle -----
+        val notificationDB = AppDatabase(this).notificationdao()
+        var InterActiveList = notificationDB.getInterActive()
+        InterActiveList.forEach()
+        {
+
+            if(it.notificationType == NOTIFICATION_TYPE_ACTION_JOIN_NEW_FRIEND)
+            {
+                receiveAddFriendRequest(it.messageTitle, it.messageBody, it.orderOwnerID)
+                notificationDB.delete(it)
+            }
+            else if(it.notificationType == NOTIFICATION_TYPE_SHARE_MENU)
+            {
+                receiveShareMenuRequest(it.messageTitle, it.messageBody, it.orderOwnerID, it.menuNumber)
+                notificationDB.delete(it)
+            }
+        }
+
+        //----- 是否起來到最後要不要清空所有事件值得討論看看 --------
+        notificationDB.deleteNotifyWithInteractive()
     }
 
 
@@ -389,6 +418,7 @@ class MainActivity : AppCompatActivity() {
                 val queryPath = "USER_PROFILE/$uuid"
                 val myRef = Firebase.database.getReference(queryPath)
                 myRef.child("tokenID").setValue(task.result?.token.toString());
+                myRef.child("OSType").setValue("Android");
                 localtokenID = task.result?.token.toString()
             })
     }

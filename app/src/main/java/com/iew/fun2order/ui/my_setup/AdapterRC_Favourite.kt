@@ -78,6 +78,7 @@ class AdapterRC_Favourite(var context: Context, var lstItemsFavourite: List<Item
                                                     value?.userID,
                                                     value?.userName,
                                                     value?.tokenID,
+                                                    value?.ostype,
                                                     bytesPrm
                                                 )
                                             friendImageDB.insertRow(friendImage)

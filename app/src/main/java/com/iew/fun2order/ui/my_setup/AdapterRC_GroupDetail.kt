@@ -114,6 +114,7 @@ class AdapterRC_GroupDetail(var context: Context, var lstItemsGroupDetail: List<
                                                     value?.userID,
                                                     value?.userName,
                                                     value?.tokenID,
+                                                    value?.ostype,
                                                     bytesPrm
                                                 )
                                             friendImageDB.insertRow(friendImage)

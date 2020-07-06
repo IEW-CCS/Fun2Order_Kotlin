@@ -99,7 +99,9 @@ class SplashLoadDataTask(private val callback: LoadDataCallback, val context: Co
                                                 null,
                                                 value?.userID!!,
                                                 value?.userName!!,
-                                                value?.tokenID!!,bytesPrm
+                                                value?.tokenID!!,
+                                                value?.ostype,
+                                                bytesPrm
                                             )
                                             friendImageDB.insertRow(friendImage)
                                         } catch (ex: Exception) {

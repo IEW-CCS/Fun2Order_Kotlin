@@ -28,6 +28,8 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.iew.fun2order.ProgressDialogUtil
 import com.iew.fun2order.R
+import com.iew.fun2order.db.dao.friendImageDAO
+import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.db.firebase.ORDER_MEMBER
 import com.iew.fun2order.db.firebase.USER_MENU_ORDER
 import com.iew.fun2order.utility.*
@@ -467,6 +469,9 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
     private fun sendNotifyFcmMessage(userMenuOrder: USER_MENU_ORDER, message: String) {
 
+        val dbContext: MemoryDatabase = MemoryDatabase(context!!)
+        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
+
         val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
         val notificationMsgList = userMenuOrder.contentItems?.toMutableList()
         notificationMsgList?.forEach {it->
@@ -507,13 +512,27 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
             // your notification message
             notification.put("to", topic)
-            notification.put("notification", notificationHeader)
+
+            val getDate = friendImageDB.getFriendImageByTokenID(orderMember.memberTokenID!!)
+            if(getDate!= null )
+            {
+                if(getDate.OSType?:"" == "iOS")
+                {
+                    notification.put("notification", notificationHeader)
+                }
+            }
+
             notification.put("data", notificationBody)
+
+            Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
         }
     }
 
     private fun sendNotifyShippingFcmMessage(userMenuOrder: USER_MENU_ORDER, shippingDateTime: String?, shippingLocation: String?, shippingNote: String?) {
+
+        val dbContext: MemoryDatabase = MemoryDatabase(context!!)
+        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
 
         val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
         val notificationShippingMsgList = userMenuOrder.contentItems?.toMutableList()
@@ -562,13 +581,27 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
             // your notification message
             notification.put("to", topic)
-            notification.put("notification", notificationHeader)
+
+            val getDate = friendImageDB.getFriendImageByTokenID(orderMember.memberTokenID!!)
+            if(getDate!= null)
+            {
+                if(getDate.OSType?:"" == "iOS")
+                {
+                    notification.put("notification", notificationHeader)
+                }
+            }
+
             notification.put("data", notificationBody)
+
+            Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
         }
     }
 
     private fun sendCallableFcmMessage(userMenuOrder: USER_MENU_ORDER) {
+
+        val dbContext: MemoryDatabase = MemoryDatabase(context!!)
+        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
 
         val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
         val callableList = userMenuOrder.contentItems?.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT }?.toMutableList()
@@ -611,8 +644,20 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
             // your notification message
             notification.put("to", topic)
-            notification.put("notification", notificationHeader)
+
+
+            val getDate = friendImageDB.getFriendImageByTokenID(orderMember.memberTokenID!!)
+            if(getDate!= null)
+            {
+                if(getDate.OSType?:"" == "iOS")
+                {
+                    notification.put("notification", notificationHeader)
+                }
+            }
+
             notification.put("data", notificationBody)
+
+            Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
 
         }
@@ -701,6 +746,9 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
                 } else {
 
+                    val dbContext: MemoryDatabase = MemoryDatabase(context!!)
+                    val friendImageDB: friendImageDAO = dbContext.friendImagedao()
+
                     userMenuOrder.dueTime = sDueTimeStamp
                     val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
                     val notificationChangeDueTimeList = userMenuOrder.contentItems?.toMutableList()
@@ -737,8 +785,20 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
                         // your notification message
                         notification.put("to", topic)
-                        notification.put("notification", notificationHeader)
+
+
+                        val getDate = friendImageDB.getFriendImageByTokenID(orderMember.memberTokenID!!)
+                        if(getDate!= null)
+                        {
+                            if(getDate.OSType?:"" == "iOS")
+                            {
+                                notification.put("notification", notificationHeader)
+                            }
+                        }
+
                         notification.put("data", notificationBody)
+
+                        Thread.sleep(100)
                         com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
 
                     }

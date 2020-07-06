@@ -20,6 +20,12 @@ interface notificationDAO {
     @Query("Select * FROM entityNotification")
     fun getAllNotify(): LiveData<List<entityNotification>>
 
+    @Query("Select * FROM entityNotification where replyStatus = 'INTERACTIVE'")
+    fun getInterActive(): List<entityNotification>
+
+    @Query("delete FROM entityNotification WHERE replyStatus = 'INTERACTIVE'")
+    fun deleteNotifyWithInteractive()
+
     @Query("Select * FROM entityNotification where notificationType = 'JOIN'")
     fun getAllInvite(): LiveData<List<entityNotification>>
 

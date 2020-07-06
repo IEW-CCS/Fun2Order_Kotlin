@@ -506,8 +506,20 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
 
             // your notification message
             notification.put("to", friendTokenID)
-            notification.put("notification", notificationHeader)
+
+
+            val getDate = friendImageDB.getFriendImageByTokenID(friendTokenID)
+            if(getDate!= null)
+            {
+                if(getDate.OSType?:"" == "iOS")
+                {
+                    notification.put("notification", notificationHeader)
+                }
+            }
+
             notification.put("data", notificationBody)
+
+            Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
 
     }
@@ -576,7 +588,9 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                                                 null,
                                                 value?.userID!!,
                                                 value?.userName!!,
-                                                value?.tokenID!!,bytesPrm
+                                                value?.tokenID!!,
+                                                value?.ostype,
+                                                bytesPrm
                                             )
                                             friendImageDB.insertRow(friendImage)
                                         } catch (ex: Exception) {

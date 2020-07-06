@@ -20,6 +20,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.friendDAO
+import com.iew.fun2order.db.dao.friendImageDAO
 import com.iew.fun2order.db.dao.groupDAO
 import com.iew.fun2order.db.dao.group_detailDAO
 import com.iew.fun2order.db.database.AppDatabase
@@ -32,6 +33,7 @@ import com.iew.fun2order.ui.my_setup.*
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
 import com.iew.fun2order.utility.NOTIFICATION_TYPE_ACTION_JOIN_ORDER
 import kotlinx.android.synthetic.main.alert_date_time_picker.view.*
+import kotlinx.coroutines.delay
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -577,6 +579,8 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
 
     private fun sendFcmMessage(userMenuOrder: USER_MENU_ORDER) {
         val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+        val dbContext: MemoryDatabase = MemoryDatabase(this)
+        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
 
         userMenuOrder.contentItems!!.forEach() {
 
@@ -606,44 +610,36 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
             notificationBody.put("messageID", "")      //Enter
             notificationBody.put("messageTitle", "團購邀請")   //Enter
             notificationBody.put("messageBody", "來自 ${userMenuOrder.orderOwnerName} 的團購邀請, 請點擊通知以查看詳細資訊.")    //Enter
-
             notificationBody.put("notificationType",NOTIFICATION_TYPE_ACTION_JOIN_ORDER )   //Enter
             notificationBody.put("receiveTime", timeStamp)   //Enter
             notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
             notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
             notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
-
-
             notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
             notificationBody.put("dueTime",    userMenuOrder.dueTime ?: "")   //Enter  20200515 addition
-
-
             notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
             notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())   //Enter
-
             notificationBody.put("messageDetail", msChuGroupDetailMsg?: "")   //Enter
             notificationBody.put("isRead", "N")   //Enter
             notificationBody.put("replyStatus", "")   //Enter
             notificationBody.put("replyTime", "")   //Enter
 
-
             // your notification message
             notification.put("to", topic)
-            notification.put("notification", notificationHeader)
+
+            val getDate = friendImageDB.getFriendImageByTokenID(orderMember.memberTokenID!!)
+            if(getDate!= null )
+            {
+                if(getDate.OSType?:"" == "iOS")
+                {
+                    notification.put("notification", notificationHeader)
+                }
+            }
             notification.put("data", notificationBody)
 
+
+            Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
-
-
         }
-
-
-
-
     }
-
-
-
-
-
 }

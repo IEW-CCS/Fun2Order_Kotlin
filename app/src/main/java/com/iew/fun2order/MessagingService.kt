@@ -41,12 +41,6 @@ class MessagingService : FirebaseMessagingService() {
         broadcast = LocalBroadcastManager.getInstance(this!!)
 
         Log.e("Firebase message", "OnMessageReceive From: ${msg.from}")
-        Log.e("Firebase message", msg?.notification?.body)
-
-        msg.notification?.let {
-            contentText = it.body.toString()
-            Log.d("Firebase", "Message Notification Body: ${it.body}")
-        }
 
         msg.data.isNotEmpty().let {
             Log.d("Firebase", "Message data payload: " + msg.data)
@@ -73,13 +67,24 @@ class MessagingService : FirebaseMessagingService() {
                     notification.shippingDate = msg.data["shippingDate"]?.toString()
                     notification.shippingLocation = msg.data["shippingLocation"]?.toString()
 
+                    //------ 發送System Tray 通知 -------
+                    sendNotificationchannel( notification.messageTitle,notification.messageBody)
+
+                    val notificationDB = AppDatabase(this).notificationdao()
+
+
                     if(notification.notificationType == NOTIFICATION_TYPE_ACTION_JOIN_NEW_FRIEND)
                     {
                         addFriend(notification)
+                        notification.replyStatus = MENU_ORDER_REPLY_STATUS_INTERACTIVE
+                        notificationDB.insertRow(notification)
                     }
                     else if(notification.notificationType == NOTIFICATION_TYPE_SHARE_MENU)
                     {
                         shareMenu(notification)
+                        notification.replyStatus = MENU_ORDER_REPLY_STATUS_INTERACTIVE
+                        notificationDB.insertRow(notification)
+
                     }
                     else if (notification.notificationType == NOTIFICATION_TYPE_ACTION_JOIN_ORDER ||
                              notification.notificationType == NOTIFICATION_TYPE_MESSAGE_DUETIME||
@@ -93,12 +98,14 @@ class MessagingService : FirebaseMessagingService() {
                         } else {
                             showAlert(contentText)
                         }
-                        val notificationDB = AppDatabase(this).notificationdao()
                         notificationDB.insertRow(notification)
                     }
                     else if(notification.notificationType == NOTIFICATION_TYPE_CHANGE_DUETIME)
                     {
+                        //----Change Due Time 直接處理掉就好 -----
                         changeDueTime(notification)
+                        notification.replyStatus = MENU_ORDER_REPLY_STATUS_INTERACTIVE
+                        notificationDB.insertRow(notification)
                     }
 
                   } catch (e: Exception) {
@@ -107,7 +114,7 @@ class MessagingService : FirebaseMessagingService() {
             }
         }
 
-      //  sendNotificationchannel("Test")
+
     }
 
 
@@ -153,7 +160,7 @@ class MessagingService : FirebaseMessagingService() {
         notificationManager.notify(1, notification)
     }
 
-    private fun sendNotificationchannel(messageBody: String) {
+    private fun sendNotificationchannel(messageTitle: String, messageBody: String) {
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(
@@ -165,9 +172,9 @@ class MessagingService : FirebaseMessagingService() {
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             // .setSmallIcon(R.drawable.ic_stat_ic_notification)
-            .setContentTitle("FCM Message")
+            .setContentTitle(messageTitle)
             .setContentText(messageBody)
-            .setSmallIcon(R.drawable.icon_cup)
+            .setSmallIcon(R.drawable.icon_notify_menu)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)

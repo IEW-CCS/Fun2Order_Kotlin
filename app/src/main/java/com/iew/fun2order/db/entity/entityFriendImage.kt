@@ -15,6 +15,8 @@ data class entityFriendImage (
     var displayname:String,
     @ColumnInfo(name = "tokenID")
     var tokenID:String,
+    @ColumnInfo(name = "OSType")
+    var OSType:String? = null,
     @ColumnInfo(name = "image")
     var image:ByteArray ) {
     override fun equals(other: Any?): Boolean {
@@ -27,6 +29,7 @@ data class entityFriendImage (
         if (name != other.name) return false
         if (displayname != other.displayname) return false
         if (tokenID != other.tokenID) return false
+        if (OSType != other.OSType) return false
         if (!image.contentEquals(other.image)) return false
 
         return true
@@ -37,7 +40,10 @@ data class entityFriendImage (
         result = 31 * result + name.hashCode()
         result = 31 * result + displayname.hashCode()
         result = 31 * result + tokenID.hashCode()
+        result = 31 * result + (OSType?.hashCode() ?: 0)
         result = 31 * result + image.contentHashCode()
         return result
     }
 }
+
+

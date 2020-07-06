@@ -25,6 +25,9 @@ interface friendImageDAO {
     @Query("Select * FROM entityFriendImage WHERE name = :imageName")
     fun getFriendImageByName(imageName:String) : entityFriendImage
 
+    @Query("Select * FROM entityFriendImage WHERE tokenID = :tokenID")
+    fun getFriendImageByTokenID(tokenID:String) : entityFriendImage
+
     @Query("Delete  FROM entityFriendImage")
     fun deleteall()
 
