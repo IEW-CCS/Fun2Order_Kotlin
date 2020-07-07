@@ -66,6 +66,8 @@ class AdapterRC_Candidate(
                         itemView.SelectFriendName.text = value?.userName
                         itemView.SelectFriendView.setImageDrawable(getImageDrawable(ItemsLV_AddMember.imageName))
                         ItemsLV_AddMember.tokenid = value?.tokenID.toString()
+                        ItemsLV_AddMember.ostype = value?.ostype?: ""
+
                         val photoURL = value?.photoURL
                         if (photoURL != null) {
                             val islandRef = Firebase.storage.reference.child(photoURL)

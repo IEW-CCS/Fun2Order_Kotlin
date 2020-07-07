@@ -474,6 +474,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
         val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
         val notificationMsgList = userMenuOrder.contentItems?.toMutableList()
+        ProgressDialogUtil.showProgressDialog(context, "處理中");
         notificationMsgList?.forEach {it->
             val orderMember = it as ORDER_MEMBER
             val topic = orderMember.memberTokenID
@@ -512,21 +513,19 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
             // your notification message
             notification.put("to", topic)
-
-            val getDate = friendImageDB.getFriendImageByTokenID(orderMember.memberTokenID!!)
-            if(getDate!= null )
-            {
-                if(getDate.OSType?:"" == "iOS")
-                {
-                    notification.put("notification", notificationHeader)
-                }
-            }
-
+            notification.put("notification", notificationHeader)
             notification.put("data", notificationBody)
+
+
+            if(orderMember.orderContent.ostype ?: "iOS" == "Android")
+            {
+                notification.remove("notification")
+            }
 
             Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
         }
+        ProgressDialogUtil.dismiss()
     }
 
     private fun sendNotifyShippingFcmMessage(userMenuOrder: USER_MENU_ORDER, shippingDateTime: String?, shippingLocation: String?, shippingNote: String?) {
@@ -536,6 +535,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
         val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
         val notificationShippingMsgList = userMenuOrder.contentItems?.toMutableList()
+        ProgressDialogUtil.showProgressDialog(context,"處理中");
         notificationShippingMsgList?.forEach {it->
             val orderMember = it as ORDER_MEMBER
             val topic = orderMember.memberTokenID
@@ -581,21 +581,18 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
             // your notification message
             notification.put("to", topic)
-
-            val getDate = friendImageDB.getFriendImageByTokenID(orderMember.memberTokenID!!)
-            if(getDate!= null)
-            {
-                if(getDate.OSType?:"" == "iOS")
-                {
-                    notification.put("notification", notificationHeader)
-                }
-            }
-
+            notification.put("notification", notificationHeader)
             notification.put("data", notificationBody)
+
+            if(orderMember.orderContent.ostype ?: "iOS" == "Android")
+            {
+                notification.remove("notification")
+            }
 
             Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
         }
+        ProgressDialogUtil.dismiss()
     }
 
     private fun sendCallableFcmMessage(userMenuOrder: USER_MENU_ORDER) {
@@ -605,6 +602,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
         val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
         val callableList = userMenuOrder.contentItems?.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT }?.toMutableList()
+        ProgressDialogUtil.showProgressDialog(context,"處理中");
         callableList?.forEach {it->
 
             val orderMember = it as ORDER_MEMBER
@@ -644,23 +642,19 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
             // your notification message
             notification.put("to", topic)
-
-
-            val getDate = friendImageDB.getFriendImageByTokenID(orderMember.memberTokenID!!)
-            if(getDate!= null)
-            {
-                if(getDate.OSType?:"" == "iOS")
-                {
-                    notification.put("notification", notificationHeader)
-                }
-            }
-
+            notification.put("notification", notificationHeader)
             notification.put("data", notificationBody)
+
+            if(orderMember.orderContent.ostype ?:"iOS" == "Android")
+            {
+                notification.remove("notification")
+            }
 
             Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
 
         }
+        ProgressDialogUtil.dismiss()
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -752,6 +746,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
                     userMenuOrder.dueTime = sDueTimeStamp
                     val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
                     val notificationChangeDueTimeList = userMenuOrder.contentItems?.toMutableList()
+                    ProgressDialogUtil.showProgressDialog(context, "處理中");
                     notificationChangeDueTimeList?.forEach {it->
 
                         val orderMember = it as ORDER_MEMBER
@@ -785,23 +780,19 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
                         // your notification message
                         notification.put("to", topic)
-
-
-                        val getDate = friendImageDB.getFriendImageByTokenID(orderMember.memberTokenID!!)
-                        if(getDate!= null)
-                        {
-                            if(getDate.OSType?:"" == "iOS")
-                            {
-                                notification.put("notification", notificationHeader)
-                            }
-                        }
-
+                        notification.put("notification", notificationHeader)
                         notification.put("data", notificationBody)
+
+                        if(orderMember.orderContent.ostype ?: "iOS" == "Android")
+                        {
+                            notification.remove("notification")
+                        }
 
                         Thread.sleep(100)
                         com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
 
                     }
+                    ProgressDialogUtil.dismiss()
 
                     val notifyAlert = AlertDialog.Builder(requireContext()).create()
                     notifyAlert.setTitle("訊息")

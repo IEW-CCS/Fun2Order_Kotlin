@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
@@ -18,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.iew.fun2order.ProgressDialogUtil
 import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.friendDAO
 import com.iew.fun2order.db.dao.friendImageDAO
@@ -28,6 +30,7 @@ import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.db.entity.entityGroup
 import com.iew.fun2order.db.firebase.ORDER_MEMBER
 import com.iew.fun2order.db.firebase.USER_MENU
+
 import com.iew.fun2order.db.firebase.USER_MENU_ORDER
 import com.iew.fun2order.ui.my_setup.*
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
@@ -50,6 +53,7 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
     var  txtGroupInfo : TextView? = null
     var  btnJoinGroupBuy : CheckBox? = null
 
+    var locations: MutableList<String> = mutableListOf()
 
     private lateinit var DBContext: AppDatabase
     private lateinit var MemoryDBContext: MemoryDatabase
@@ -74,6 +78,7 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
         super.onCreate(savedInstanceState)
         setContentView(com.iew.fun2order.R.layout.activity_setup_order)
         supportActionBar?.hide()
+        locations.clear()
 
         val context: Context = this@ActivitySetupOrder
 
@@ -141,7 +146,7 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
                 getfriend.forEach()
                 {
                     listGroupDetail.add(ItemsLV_Favourite(it, "image_default_member",""))
-                    List_Candidate.add(ItemsLV_Canditate(it, "image_default_member","", "",true))
+                    List_Candidate.add(ItemsLV_Canditate(it, "image_default_member","","", "",true))
                 }
             }
             else
@@ -272,6 +277,77 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
         }
 
 
+        //--- Setup up Location Information
+        val textViewAddLocation = findViewById<TextView>(R.id.textViewAddLocation)
+        // set on-click listener for ImageView
+        textViewAddLocation.setOnClickListener {
+            val item = LayoutInflater.from(this).inflate(R.layout.alert_input_location, null)
+
+            var alertDialog = AlertDialog.Builder(this)
+                .setView(item)
+                .setPositiveButton("確定", null)
+                .setNegativeButton("取消", null)
+                .show()
+
+            alertDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener {
+
+                    var editTextLocation = item.findViewById(R.id.editTextLocation) as EditText
+                    val textViewLocationItemCount = findViewById<TextView>(R.id.textViewLocationItemCount)
+
+                    if (TextUtils.isEmpty(editTextLocation.text.trim()))
+                    {
+                        editTextLocation.requestFocus()
+                        editTextLocation.error = "地點不能為空白!"
+                    }else {
+                        var bFOund = false
+                        locations.forEach {
+                            if(it.equals(editTextLocation.getText().toString().trim())){
+                                bFOund = true
+                            }
+                        }
+
+                        if(bFOund){
+                            editTextLocation.requestFocus()
+                            editTextLocation.error = "地點不能重覆!"
+                        }else{
+                            locations.add(editTextLocation.getText().toString())
+                            textViewLocationItemCount.setText(locations!!.size.toString() + " 項");
+                            alertDialog.dismiss()
+                        }
+
+                    }
+                }
+        }
+
+
+
+        val textViewLocationItemList = findViewById<LinearLayout>(R.id.textViewLocationItemList)
+        textViewLocationItemList.setOnClickListener {
+            getLocationListOfMenu(context)
+
+        }
+
+    }
+
+    private fun getLocationListOfMenu(context:Context) {
+
+        /*
+        val array = arrayListOf<String>()
+        locations.forEach {
+            array.add(it)
+        }
+
+        val values = arrayOfNulls<String>(array.size)
+        array.toArray(values)
+
+        val bound = Bundle();
+        bound.putString("TYPE", "LOCATION")
+        bound.putStringArray("ItemListData", values)
+        bound.putParcelable("USER_MENU", mFirebaseUserMenu)
+        var I =  Intent(context, ActivityItemList::class.java)
+        I.putExtras(bound);
+        startActivityForResult(I,ACTION_ADD_MENU_LOCATION_LIST_REQUEST_CODE)*/
     }
 
     private fun setTimePickerInterval(timePicker: TimePicker) {
@@ -378,6 +454,7 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
             orderMember.orderContent.payNumber = 0
             orderMember.orderContent.payTime = ""
             orderMember.orderContent.replyStatus = MENU_ORDER_REPLY_STATUS_WAIT
+            orderMember.orderContent.ostype = "Android"
             userMenuOrder.contentItems!!.add(orderMember)
         }
 
@@ -399,7 +476,8 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
                 orderMember.orderContent.payCheckedFlag = false
                 orderMember.orderContent.payNumber = 0
                 orderMember.orderContent.payTime = ""
-                orderMember.orderContent.replyStatus = "WAIT"
+                orderMember.orderContent.replyStatus = MENU_ORDER_REPLY_STATUS_WAIT
+                orderMember.orderContent.ostype = it.ostype
                 userMenuOrder.contentItems!!.add(orderMember)
             }
         }
@@ -453,7 +531,7 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
                         var groupmemberlist = groupdetailDB.getMemberByGroupID(SelectGroupID)
                         groupmemberlist.forEach() {
                             listGroupDetail.add(ItemsLV_Favourite(it, "image_default_member",""))
-                            List_Candidate.add(ItemsLV_Canditate(it, "image_default_member","","",true))
+                            List_Candidate.add(ItemsLV_Canditate(it, "image_default_member","","","",true))
                         }
                         RecycleViewRefresh()
 
@@ -582,11 +660,11 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
         val dbContext: MemoryDatabase = MemoryDatabase(this)
         val friendImageDB: friendImageDAO = dbContext.friendImagedao()
 
+        ProgressDialogUtil.showProgressDialog(this,"處理中");
         userMenuOrder.contentItems!!.forEach() {
 
             val orderMember = it as ORDER_MEMBER
             val topic = orderMember.memberTokenID
-
             val notification = JSONObject()
             val notificationHeader = JSONObject()
             val notificationBody = JSONObject()
@@ -626,20 +704,17 @@ class ActivitySetupOrder : AppCompatActivity(), IAdapterOnClick, IAdapterCheckBO
 
             // your notification message
             notification.put("to", topic)
-
-            val getDate = friendImageDB.getFriendImageByTokenID(orderMember.memberTokenID!!)
-            if(getDate!= null )
-            {
-                if(getDate.OSType?:"" == "iOS")
-                {
-                    notification.put("notification", notificationHeader)
-                }
-            }
+            notification.put("notification", notificationHeader)
             notification.put("data", notificationBody)
 
+            if(orderMember.orderContent.ostype ?: "iOS" =="Android")
+            {
+                notification.remove("notification")
+            }
 
             Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
         }
+        ProgressDialogUtil.dismiss()
     }
 }

@@ -37,7 +37,7 @@ class ActivityAddShareMeunMember : AppCompatActivity() , IAdapterCheckBOXChanged
 
             values?.forEach()
             {   it ->
-                lstCandidate.add(ItemsLV_Canditate(it, "image1","", "",false))
+                lstCandidate.add(ItemsLV_Canditate(it, "image1","", "","",false))
             }
         }
 

@@ -359,7 +359,8 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                                             prepareFriendListShow()
                                             sendOutaddFriendRequest(
                                                 friendInfo.userID,
-                                                friendInfo.tokenID
+                                                friendInfo.tokenID,
+                                                friendInfo.ostype
                                             )
 
                                         } catch (e: Exception) {
@@ -466,7 +467,7 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
     }
 
 
-    private fun sendOutaddFriendRequest(friendUUID: String, friendTokenID: String)
+    private fun sendOutaddFriendRequest(friendUUID: String, friendTokenID: String, friendOSType: String?)
     {
 
             var selfInfo = FirebaseAuth.getInstance().currentUser
@@ -506,18 +507,14 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
 
             // your notification message
             notification.put("to", friendTokenID)
+            notification.put("notification", notificationHeader)
+            notification.put("data", notificationBody)
 
-
-            val getDate = friendImageDB.getFriendImageByTokenID(friendTokenID)
-            if(getDate!= null)
+            if(friendOSType?:"iOS" == "Android")
             {
-                if(getDate.OSType?:"" == "iOS")
-                {
-                    notification.put("notification", notificationHeader)
-                }
+                notification.remove("notification")
             }
 
-            notification.put("data", notificationBody)
 
             Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)

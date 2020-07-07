@@ -87,16 +87,19 @@
             android:layout_marginTop="20dp"
             android:layout_marginRight="20dp"
             android:orientation="horizontal">
+
             <EditText
                 android:id="@+id/editTextChuGroupDetailMsg"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:padding="5dp"
 
-                android:textSize="18dp"
                 android:background="@drawable/corners_rect_gray"
                 android:ems="10"
                 android:gravity="start|top"
-                android:inputType="textMultiLine" />
+                android:hint="團購說明"
+                android:inputType="textMultiLine"
+                android:textSize="18dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -156,6 +159,97 @@
                 android:gravity="center"
                 android:text="參與此次採購" />
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
+            android:weightSum="1.0"
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textViewAddLocation"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="20dp"
+                android:layout_weight="0.25"
+                android:gravity="center_vertical"
+                android:text="新增地點"
+                android:textColor="@color/Blue"
+                android:textSize="18dp" />
+
+
+            <LinearLayout
+                android:id="@+id/textViewLocationItemList"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.75"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:weightSum="1.0">
+
+                <TextView
+                    android:id="@+id/textViewLocationItem"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dp"
+                    android:layout_weight="0.5"
+                    android:gravity="center_vertical"
+                    android:text="已加入"
+                    android:textColor="#000000"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/textViewLocationItemCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="0.4"
+                    android:gravity="center_vertical"
+                    android:text="0 項"
+                    android:textColor="#000000"
+                    android:textSize="18dp" />
+
+
+                <ImageView
+                    android:id="@+id/imageViewLocationItemList"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginEnd="20dp"
+                    android:background="@android:color/transparent"
+                    android:gravity="center_horizontal"
+                    android:scaleType="centerInside"
+                    android:tint="@android:color/tab_indicator_text"
+                    app:srcCompat="@drawable/icon_disclosure_indicator" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/checkBoxContactInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="參加者需提供郵寄或聯絡資訊"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="36dp"

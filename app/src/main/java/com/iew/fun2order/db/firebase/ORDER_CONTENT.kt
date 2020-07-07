@@ -21,7 +21,8 @@ data class ORDER_CONTENT(
     var payNumber: Int? = 0,
     var payTime: String? = "",
     var replyStatus: String? = "",
-    var userContactInfo:CONTENT_CONTACTINFO? = null
+    var userContactInfo:CONTENT_CONTACTINFO? = null,
+    var ostype:String? = null
 ): Parcelable {
     @Exclude
     fun toMap(): Map<String, Any?> {
@@ -38,7 +39,8 @@ data class ORDER_CONTENT(
             "payNumber" to payNumber,
             "payTime" to payTime,
             "replyStatus" to replyStatus,
-            "userContactInfo" to userContactInfo
+            "userContactInfo" to userContactInfo,
+            "ostype" to ostype
         )
     }
 }

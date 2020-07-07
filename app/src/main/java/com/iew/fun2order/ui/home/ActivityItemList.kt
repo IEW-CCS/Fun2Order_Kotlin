@@ -18,12 +18,6 @@ import com.iew.fun2order.db.firebase.USER_MENU
 class ActivityItemList : AppCompatActivity() {
 
     var listView: ListView? = null
-    var values = arrayOf(
-        "蘋果",
-        "香蕉",
-        "葡萄",
-        "水梨"
-    )
     private var mFirebaseUserMenu: USER_MENU = USER_MENU()
     private var mContext : Context ? = null
 
@@ -34,17 +28,6 @@ class ActivityItemList : AppCompatActivity() {
 
         mContext = this@ActivityItemList
 
-        /*
-        //listView = findViewById<View>(com.iew.fun2order.R.id.listViewItemList) as ListView
-        listView = findViewById(com.iew.fun2order.R.id.listViewItemList) as ListView
-        //val ladapter: ListAdapter =
-        //    ArrayAdapter<Any?>(this, R.layout.simple_list_item_1, values)
-
-        val myAdapter = ArrayAdapter<String>(this, R.layout.simple_list_item_1)
-        myAdapter.addAll("三個鉛筆", "四個腳踏車")
-
-        listView.adapter(myAdapter)
-*/
         val projects: Array<String> = intent.extras.getStringArray("ItemListData")
         mFirebaseUserMenu = intent.extras.get("USER_MENU") as USER_MENU
 
@@ -53,22 +36,7 @@ class ActivityItemList : AppCompatActivity() {
             array.add(it)
         }
 
-        /*
-        val values = arrayOfNulls<String>(array.size)
-        array.toArray(values)
 
-        if(values.isNullOrEmpty()){
-
-        }else{
-            projects = values
-        }
-
-         */
-
-
-        val mes ="diao#lou#test"
-
-        var strlist = mes.split("#")
 
         var arr_aAdapter: ArrayAdapter<String>? = null
 

@@ -32,6 +32,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.BuildConfig
+import com.iew.fun2order.ProgressDialogUtil
 import com.iew.fun2order.R
 import com.iew.fun2order.db.dao.MenuTypeDAO
 import com.iew.fun2order.db.dao.friendImageDAO
@@ -240,13 +241,15 @@ class HomeFragment : Fragment(), IAdapterOnClick {
                         val addMembersList = data.extras?.get("AddMembers") as ArrayList<*> ?: null
                         if(tmpMenu != null)
                         {
+                            ProgressDialogUtil.showProgressDialog(context,"處理中");
                             val Menu = tmpMenu as USER_MENU
                             addMembersList!!.forEach()
                             {
                                 var userProfile = friendImage.getFriendImageByName(it.toString())
                                 var tokenID = userProfile.tokenID
-                                sendShareMenuInfoToFCM(tokenID, Menu)
+                                sendShareMenuInfoToFCM(tokenID, Menu, userProfile.OSType)
                             }
+                            ProgressDialogUtil.dismiss()
                         }
                     }
 
@@ -629,7 +632,7 @@ class HomeFragment : Fragment(), IAdapterOnClick {
     }
 
 
-    private fun sendShareMenuInfoToFCM(tokenID:String, Menu:USER_MENU)
+    private fun sendShareMenuInfoToFCM(tokenID:String, Menu:USER_MENU, ostype:String?)
     {
         val dbContext: MemoryDatabase = MemoryDatabase(requireContext())
         val friendImageDB: friendImageDAO = dbContext.friendImagedao()
@@ -660,17 +663,13 @@ class HomeFragment : Fragment(), IAdapterOnClick {
 
         // your notification message
         notification.put("to", topic)
-
-        val getDate = friendImageDB.getFriendImageByTokenID(tokenID)
-        if(getDate!= null)
-        {
-            if(getDate.OSType?:"" == "iOS")
-            {
-                notification.put("notification", notificationHeader)
-            }
-        }
-
+        notification.put("notification", notificationHeader)
         notification.put("data", notificationBody)
+
+        if(ostype?:"iOS" == "Android")
+        {
+            notification.remove("notification")
+        }
 
         Thread.sleep(100)
         com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
