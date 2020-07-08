@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <LinearLayout android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        android:scrollbarAlwaysDrawVerticalTrack="true">
+    <DatePicker
+        android:id="@+id/dpPicker"
+        style="@android:style/Widget.DeviceDefault.DatePicker"
+        android:layout_width="332dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:calendarViewShown="false"
+        android:headerBackground="@drawable/shape_row_notification" />
+
+    <TimePicker
+        android:id="@+id/tpPicker"
+        style="@android:style/Widget.Material.Light.TimePicker"
+        android:layout_width="332dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/shape_row_timepicker"
+        android:numbersBackgroundColor="#FFFFFF"
+        android:timePickerMode="spinner" />
+
+    </LinearLayout>
+</ScrollView>

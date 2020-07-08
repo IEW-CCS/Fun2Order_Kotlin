@@ -57,22 +57,16 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
     private lateinit var menuOrderOwnerID: String
     private lateinit var menuOrderNumber: String
     private lateinit var menuLocation: String
-
     private lateinit var rcvSelectedProduct: RecyclerView
     private lateinit var menuOrderMessageID: String
     private lateinit var mSegmentedGroupLocation: SegmentedGroup
-
     private lateinit var gridLayoutBtnList: GridLayout
     private lateinit var txtjoinOrderDesc: TextView
     private lateinit var txtjoinOrderShowDetail: TextView
 
     private val lstLimitedProductList: MutableList<PRODUCT> = mutableListOf()
-
-
     private var basicCellHeight : Int = 202
-
     private var selfSelectmenuLocation: String = ""
-
     private var MenuImaegByteArray : MutableMap<String,ByteArray?> = mutableMapOf<String,ByteArray?>()
     private var brandImageStream: ByteArray? = null
 
@@ -372,8 +366,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                         }
 
                                         // 3. ----- 使否填寫聯絡資訊 -----
-
-                                        val needContactInfoFlag = mFirebaseUserMenu?.needContactInfoFlag ?: false
+                                        val needContactInfoFlag = mFirebaseUserMenuOrder?.needContactInfoFlag ?: false
                                         if (needContactInfoFlag) {
                                             val item = LayoutInflater.from(this@JoinOrderActivity).inflate(R.layout.alert_input_contact_information, null)
                                             var editTextName = item.findViewById(R.id.editTextName) as EditText
@@ -578,7 +571,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         return super.onCreateView(name, context, attrs)
     }
 
-
     private fun updateLimit(  updateLimitProductItems: MutableList<MENU_PRODUCT>?)
     {
         if(mFirebaseUserMenuOrderPath != "") {
@@ -651,7 +643,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                 }
             }
         }
-
         return replyProductItems
     }
 

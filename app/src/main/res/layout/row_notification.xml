@@ -2,49 +2,73 @@
 
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingTop="2dp"
     android:paddingBottom="2dp"
     >
+
     <LinearLayout
         android:id="@+id/notifylayout"
-        android:layout_width="fill_parent"
-        android:layout_height="150dp"
-        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="5dp"
         android:background="@drawable/shape_row_notification"
-        android:layout_margin="5dp"
+        android:orientation="vertical"
         android:weightSum="1.0">
 
-        <TextView
-            android:id="@+id/notifytitle"
+
+        <LinearLayout
+            android:id="@+id/notifyTitle"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-
-            android:layout_margin="2dp"
             android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
             android:layout_marginRight="5dp"
-            android:layout_weight="0.25"
+            android:layout_weight="0.3"
             android:gravity="center"
-            android:scaleType="centerInside"
-            android:text="來自 XXX 的團購訊息"
-            android:textColor="@color/Black"
-            android:textSize="18dp" />
+            android:orientation="horizontal"
+            android:weightSum="1.0">
+
+            <ImageView
+                android:id="@+id/notifytitleicon"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="2dp"
+                app:srcCompat="@drawable/icon_overduedate_original"/>
+
+            <TextView
+                android:id="@+id/notifytitle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:scaleType="centerInside"
+                android:text="來自 XXX 的團購訊息"
+                android:textColor="@color/Black"
+                android:textSize="18dp" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/notifyItem01"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:orientation="horizontal"
-            android:weightSum="1.0"
-            android:layout_weight="0.2"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp">
+            android:layout_marginRight="10dp"
+            android:layout_weight="0.35"
+            android:orientation="horizontal"
+            android:weightSum="1.0">
 
             <TextView
                 android:id="@+id/messageTitle"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.3"
                 android:gravity="center_vertical|left"
                 android:scaleType="centerInside"
@@ -56,7 +80,7 @@
             <TextView
                 android:id="@+id/brandName"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="0.4"
                 android:gravity="center"
@@ -84,20 +108,19 @@
             android:id="@+id/notifyItem02"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:orientation="horizontal"
-            android:weightSum="1.0"
-            android:layout_weight="0.2"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp">
-
+            android:layout_marginRight="10dp"
+            android:layout_weight="0.35"
+            android:orientation="horizontal"
+            android:weightSum="1.0">
 
 
             <TextView
                 android:id="@+id/notifydatetime"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.7"
                 android:layout_gravity="center_vertical"
+                android:layout_weight="0.7"
                 android:gravity="center_vertical|left"
                 android:scaleType="centerInside"
                 android:text="2020/03/04 19:51:26"
@@ -118,29 +141,6 @@
 
 
         </LinearLayout>
-
-        <EditText
-            android:id="@+id/notifdesc"
-            style="@style/Widget.AppCompat.EditText"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
-
-            android:layout_weight="0.35"
-
-            android:background="@android:color/background_light"
-            android:ems="10"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:gravity="start|top"
-            android:inputType="textMultiLine"
-            android:padding="6dp"
-            android:textColor="@android:color/secondary_text_light"
-            android:textSize="12dp" />
 
 
     </LinearLayout>

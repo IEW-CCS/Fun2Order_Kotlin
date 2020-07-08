@@ -22,7 +22,6 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -38,6 +37,7 @@ import com.iew.fun2order.db.firebase.PRODUCT
 import com.iew.fun2order.db.firebase.STORE_INFO
 import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.db.firebase.USER_PROFILE
+import com.iew.fun2order.utility.DATATIMEFORMAT_NORMAL
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import java.io.ByteArrayOutputStream
@@ -51,37 +51,24 @@ class ActivityAddMenu : AppCompatActivity() {
     private val ACTION_CAMERA_REQUEST_CODE = 100
     private val ACTION_ALBUM_REQUEST_CODE = 200
     private val ACTION_ADD_MENU_PROD_LIST_REQUEST_CODE = 300
-    private val ACTION_ADD_MENU_LOCATION_LIST_REQUEST_CODE = 400
     private val ACTION_ADD_RECIPE_REQUEST_CODE = 500
     private val ACTION_ADD_MENU_IMAGE_REQUEST_CODE = 600
 
-    private lateinit var mMenuTypeDB: MenuTypeDAO
-    //private lateinit var mUserMenuDB: UserMenuDAO
-    //private lateinit var mLocationDB: LocationDAO
-    //private lateinit var mProductDB: ProductDAO
+
     private lateinit var mDBContext: AppDatabase
-    private var mContext : Context? = null
+    private lateinit var mMenuTypeDB: MenuTypeDAO
+    private lateinit var mContext : Context
 
     private var bIsUpdateImage = false
+    private var menuImaegByteArray : MutableMap<String,ByteArray?> = mutableMapOf<String,ByteArray?>()
 
-    private var MenuImaegByteArray : MutableMap<String,ByteArray?> = mutableMapOf<String,ByteArray?>()
-
-    //private lateinit var mMenuImage: ImageButton
-    private lateinit var mMenuBitmap : Bitmap
-    // var mMenuImages: MutableList<Bitmap> = mutableListOf()
     private lateinit var mTextViewMenuPic: TextView
-    private lateinit var  mDialog : AlertDialog
+    private lateinit var mDialog : AlertDialog
 
     private var mbEdit = false
-    //private lateinit var mUserMenu:UserMenu
-    private lateinit var mbutton: Array<Button>
-    private var mCount_num: TextView? = null
-    //Firebase DB
-    private lateinit var mDatabase: DatabaseReference
+
     private var mFirebaseUserMenu: USER_MENU = USER_MENU()
     private var mFirebaseUserProfile: USER_PROFILE = USER_PROFILE()
-
-    private lateinit var mContactInfo :CheckBox
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,118 +76,55 @@ class ActivityAddMenu : AppCompatActivity() {
         setContentView(R.layout.activity_add_menu)
         supportActionBar?.hide()
 
-        val context: Context = this@ActivityAddMenu
-
         bIsUpdateImage = false
 
-        // [START initialize_database_ref]
-        mDatabase = Firebase.database.reference
-        mContext = this
-
-        // [END initialize_database_ref]
-
-        mDBContext = AppDatabase(context!!)
+        mContext = this@ActivityAddMenu
+        mDBContext = AppDatabase(mContext!!)
         mMenuTypeDB = mDBContext.menutyoedao()
-        //mUserMenuDB = mDBContext.usermenudao()
-        //mLocationDB = mDBContext.locationdao()
-        //mProductDB = mDBContext.productdao()
-        //mMenuImage  = findViewById(R.id.imageBtnMenuImage) as ImageButton
-        //mMenuImage.requestFocus()
-        mTextViewMenuPic = findViewById(R.id.textViewMenuPic) as TextView
 
-        mContactInfo = findViewById(R.id.checkBoxContactInfo) as CheckBox
-        var mAuth = FirebaseAuth.getInstance()
-        if (mAuth.currentUser != null) {
+        mTextViewMenuPic = findViewById<TextView>(R.id.textViewMenuPic)
 
-        }
 
-        val sEditFlag = intent.extras.getString("EDIT")
-        val sMenuID = intent.extras.getString("MENU_ID")
-        mFirebaseUserProfile = intent.extras.get("USER_PROFILE") as USER_PROFILE
+        val sEditFlag = intent.extras?.getString("EDIT")
+        mFirebaseUserProfile  = intent.extras?.get("USER_PROFILE") as USER_PROFILE
 
-        if(sEditFlag.equals("Y")) {
+        if(sEditFlag == "Y")
+        {
             mbEdit = true
-            mFirebaseUserMenu = intent.extras.get("USER_MENU") as USER_MENU
-
-        }else{
+            mFirebaseUserMenu = intent.extras?.get("USER_MENU") as USER_MENU
+        }
+        else
+        {
             val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
             mFirebaseUserMenu = USER_MENU()
-            mFirebaseUserMenu.userID=mAuth.currentUser!!.uid.toString()
-            mFirebaseUserMenu.menuNumber=mAuth.currentUser!!.uid.toString() + "-MENU-" + timeStamp
+            mFirebaseUserMenu.userID = FirebaseAuth.getInstance().currentUser!!.uid.toString()
+            mFirebaseUserMenu.menuNumber = FirebaseAuth.getInstance().currentUser!!.uid.toString() + "-MENU-" + timeStamp
         }
-
 
         if(mbEdit){
-            val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
-            val textViewCrMenuType = findViewById(R.id.textViewCrMenuType) as TextView
-            val editTextMenuDesc = findViewById(R.id.editTextMenuDesc) as EditText
-            val textViewLocationItemCount = findViewById(R.id.textViewLocationItemCount) as TextView
-            val textViewProductPriceItemCount = findViewById(R.id.textViewProductPriceItemCount) as TextView
-            editTextMenuID.setText(mFirebaseUserMenu.brandName)
-            textViewCrMenuType.setText(mFirebaseUserMenu.brandCategory)
-            editTextMenuDesc.setText(mFirebaseUserMenu.menuDescription)
 
-            mContactInfo.isChecked = mFirebaseUserMenu.needContactInfoFlag?: false
+            val editTextMenuID              = findViewById<EditText>(R.id.editTextMenuID)
+            val textViewCrMenuType          = findViewById<TextView>(R.id.textViewCrMenuType)
+            val editTextMenuDesc            = findViewById<EditText>(R.id.editTextMenuDesc)
+            val textViewLocationItemCount   = findViewById<TextView>(R.id.textViewLocationItemCount)
+            val textViewProductPriceItemCount= findViewById<TextView>(R.id.textViewProductPriceItemCount)
+
+            editTextMenuID.setText(mFirebaseUserMenu.brandName)
+            editTextMenuDesc.setText(mFirebaseUserMenu.menuDescription)
+            textViewCrMenuType.text = mFirebaseUserMenu.brandCategory
 
             setImageButton()
-            /*
-            if(mFirebaseUserMenu.menuImageURL != ""){
-                var islandRef = Firebase.storage.reference.child(mFirebaseUserMenu.menuImageURL!!)
-                val ONE_MEGABYTE = 1024 * 1024.toLong()
-                islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener { bytesPrm: ByteArray ->
-                    val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
-                    displayImage(bmp)
-                }
-            }
 
-             */
+            textViewLocationItemCount.text = "${mFirebaseUserMenu.locations!!.size.toString()} 項";
+            textViewProductPriceItemCount.text = "${mFirebaseUserMenu.menuItems!!.size.toString()} 項";
 
-            //displayImage(BitmapFactory.decodeByteArray(mUserMenu.image, 0, mUserMenu.image.size))
-            textViewLocationItemCount.setText(mFirebaseUserMenu.locations!!.size.toString() + " 項");
-            textViewProductPriceItemCount.setText(mFirebaseUserMenu.menuItems!!.size.toString()  + " 項");
-            /*
-             mUserMenu = mUserMenuDB.getMenuByID(sMenuID)
-            editTextMenuID.setText(mUserMenu.menu_id)
-            textViewCrMenuType.setText(mUserMenu.menu_type)
-            editTextMenuDesc.setText(mUserMenu.menu_desc)
-            displayImage(BitmapFactory.decodeByteArray(mUserMenu.image, 0, mUserMenu.image.size))
-            textViewLocationItemCount.setText(mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString()).count().toString() + " 項");
-            textViewProductPriceItemCount.setText(mProductDB.getProductByMenuID(editTextMenuID.getText().toString()).count().toString() + " 項");
-             */
 
-        }else{
-            /*
-            val bitmap  = BitmapFactory.decodeResource(getResources(),R.drawable.image_default_member);
-            displayImage(bitmap)
-
-             */
         }
+
+        //---- 以下用不到 ------
         val ImageButtonAction = arrayOf("相機/相簿","取消")
-
-
-/*
-        mMenuImage.setOnClickListener {
-            //Toast.makeText(activity, "TESTING BUTTON CLICK 1", Toast.LENGTH_SHORT).show()
-
-            val Alert =  AlertDialog.Builder(context!!)
-                .setTitle("選取照片來源")
-                .setItems(ImageButtonAction,  DialogInterface.OnClickListener { dialog, which ->
-
-                    when (which) {
-                        0 -> { takeImageFromAlbumWithCropImageLib()}
-                        else -> { // Note the block
-                            Toast.makeText(this, "選取到取消", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                })
-                .create()
-                .show()
-        }
-*/
         mTextViewMenuPic.setOnClickListener {
-            //Toast.makeText(activity, "TESTING BUTTON CLICK 1", Toast.LENGTH_SHORT).show()
-
-            val Alert =  AlertDialog.Builder(context!!)
+            val Alert =  AlertDialog.Builder(mContext)
                 .setTitle("選取照片來源")
                 .setItems(ImageButtonAction,  DialogInterface.OnClickListener { dialog, which ->
 
@@ -216,12 +140,11 @@ class ActivityAddMenu : AppCompatActivity() {
         }
 
 
-        val textViewEditStoreInfo = findViewById(R.id.textViewEditStoreInfo) as TextView
-        // set on-click listener for TextView
+        val textViewEditStoreInfo = findViewById<TextView>(R.id.textViewEditStoreInfo)
         textViewEditStoreInfo.setOnClickListener {
             val item = LayoutInflater.from(this).inflate(R.layout.alert_input_store_info, null)
-            var editTextStoreName = item.findViewById(R.id.editTextStoreName) as EditText
-            val editTextStoreAddress = item.findViewById(R.id.editTextStoreAddress) as EditText
+            val editTextStoreName        = item.findViewById(R.id.editTextStoreName) as EditText
+            val editTextStoreAddress     = item.findViewById(R.id.editTextStoreAddress) as EditText
             val editTextStorePhoneNumber = item.findViewById(R.id.editTextStorePhoneNumber) as EditText
             if(mFirebaseUserMenu.storeInfo != null) {
                 editTextStoreName.setText(mFirebaseUserMenu.storeInfo!!.storeName)
@@ -236,153 +159,46 @@ class ActivityAddMenu : AppCompatActivity() {
 
             alertDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener {
-                    var editTextStoreName = item.findViewById(R.id.editTextStoreName) as EditText
-                    val editTextStoreAddress = item.findViewById(R.id.editTextStoreAddress) as EditText
-                    val editTextStorePhoneNumber = item.findViewById(R.id.editTextStorePhoneNumber) as EditText
-
-/*
-                        Toast.makeText(
-                            applicationContext,
-                            "加入地點:" + editTextLocation.getText().toString(), Toast.LENGTH_SHORT
-                        ).show()
-
- */
-                        // Insert DB
-                        //val location: Location = Location(null, editTextMenuID.getText().toString(), editTextLocation.getText().toString())
-                        //mLocationDB.insertRow(location)
-                        //var fdlocation:LOCATION = LOCATION()
-                        //fdlocation.location =  editTextLocation.getText().toString()
-                        var storeInfo : STORE_INFO = STORE_INFO()
-                        storeInfo.storeName = editTextStoreName.getText().toString()
-                        storeInfo.storeAddress = editTextStoreAddress.getText().toString()
-                        storeInfo.storePhoneNumber = editTextStorePhoneNumber.getText().toString()
-
+                        val storeInfo : STORE_INFO = STORE_INFO()
+                        storeInfo.storeName = editTextStoreName.text.toString()
+                        storeInfo.storeAddress = editTextStoreAddress.text.toString()
+                        storeInfo.storePhoneNumber = editTextStorePhoneNumber.text.toString()
                         mFirebaseUserMenu.storeInfo = storeInfo
-
                         alertDialog.dismiss()
-
                 }
         }
 
-        //ProductPriceList
-        // get reference to ImageView
-        val imageViewProductPriceItemList = findViewById(R.id.imageViewProductPriceItemList) as ImageView
-        // set on-click listener for ImageView
+        //--- 編輯產品項目
+        val imageViewProductPriceItemList = findViewById<ImageView>(R.id.imageViewProductPriceItemList)
         imageViewProductPriceItemList.setOnClickListener {
-            getProductListOfMenu(context)
-
+            getProductListOfMenu(mContext)
         }
 
         // get reference to ImageView
-        val textViewProductPriceItem = findViewById(R.id.textViewProductPriceItem) as TextView
-        // set on-click listener for ImageView
+        val textViewProductPriceItem = findViewById<TextView>(R.id.textViewProductPriceItem)
         textViewProductPriceItem.setOnClickListener {
-            getProductListOfMenu(context)
-
+            getProductListOfMenu(mContext)
         }
 
         // get reference to ImageView
-        val textViewProductPriceItemCount = findViewById(R.id.textViewProductPriceItemCount) as TextView
-        // set on-click listener for ImageView
+        val textViewProductPriceItemCount = findViewById<TextView>(R.id.textViewProductPriceItemCount)
         textViewProductPriceItemCount.setOnClickListener {
-            getProductListOfMenu(context)
-
+            getProductListOfMenu(mContext)
         }
 
-        //ProductPriceList
-        // get reference to ImageView
-        val imageViewLocationItemList = findViewById(R.id.imageViewLocationItemList) as ImageView
-        // set on-click listener for ImageView
-        imageViewLocationItemList.setOnClickListener {
-            getLocationListOfMenu(context)
-        }
-
-        val textViewLocationItem = findViewById(R.id.textViewLocationItem) as TextView
-        // set on-click listener for ImageView
-        textViewLocationItem.setOnClickListener {
-            getLocationListOfMenu(context)
-        }
-
-        val textViewLocationItemCount = findViewById(R.id.textViewLocationItemCount) as TextView
-        // set on-click listener for ImageView
-        textViewLocationItemCount.setOnClickListener {
-            getLocationListOfMenu(context)
-        }
-
-
-        val textViewAddLocation = findViewById(R.id.textViewAddLocation) as TextView
-        // set on-click listener for ImageView
-        textViewAddLocation.setOnClickListener {
-            val item = LayoutInflater.from(this).inflate(R.layout.alert_input_location, null)
-
-            var alertDialog = AlertDialog.Builder(this)
-                .setView(item)
-                .setPositiveButton("確定", null)
-                .setNegativeButton("取消", null)
-                .show()
-
-            alertDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener {
-                    var editTextLocation = item.findViewById(R.id.editTextLocation) as EditText
-                    val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
-                    val textViewLocationItemCount = findViewById(R.id.textViewLocationItemCount) as TextView
-
-                    if (TextUtils.isEmpty(editTextLocation.text.trim()))
-                    {
-                        editTextLocation.requestFocus()
-                        editTextLocation.error = "地點不能為空白!"
-                    }else {
-/*
-                        Toast.makeText(
-                            applicationContext,
-                            "加入地點:" + editTextLocation.getText().toString(), Toast.LENGTH_SHORT
-                        ).show()
-
- */
-                        // Insert DB
-                        //val location: Location = Location(null, editTextMenuID.getText().toString(), editTextLocation.getText().toString())
-                        //mLocationDB.insertRow(location)
-                        //var fdlocation:LOCATION = LOCATION()
-                        //fdlocation.location =  editTextLocation.getText().toString()
-
-                        var bFOund = false
-                        mFirebaseUserMenu.locations!!.forEach {
-                            if(it.equals(editTextLocation.getText().toString().trim())){
-                                bFOund = true
-                            }
-                        }
-
-                        if(bFOund){
-                            editTextLocation.requestFocus()
-                            editTextLocation.error = "地點不能重覆!"
-                        }else{
-                            mFirebaseUserMenu.locations?.add(editTextLocation.getText().toString().toString())
-                            //mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString())
-
-                            //textViewLocationItemCount.setText(mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString()).count().toString() + " 項");
-                            textViewLocationItemCount.setText(mFirebaseUserMenu.locations!!.size.toString() + " 項");
-                            alertDialog.dismiss()
-                        }
-
-                    }
-                }
-        }
-
-        val textViewAddProductPrice = findViewById(R.id.textViewAddProductPrice) as TextView
-        // set on-click listener for ImageView
+        //---- 新增產品列表 ----
+        val textViewAddProductPrice = findViewById<TextView>(R.id.textViewAddProductPrice)
         textViewAddProductPrice.setOnClickListener {
             val item = LayoutInflater.from(this).inflate(R.layout.alert_input_product_price, null)
-
             val radioGroup =item.findViewById(R.id.radioGroup) as RadioGroup
-            val Radio1 =item.findViewById(R.id.radioLimit) as RadioButton
-            val Radio2  =item.findViewById(R.id.radioNoLimit) as RadioButton
-            var editLimitCount = item.findViewById(R.id.editLimitCount) as EditText
+            val radio1 =item.findViewById(R.id.radioLimit) as RadioButton
+            val radio2  =item.findViewById(R.id.radioNoLimit) as RadioButton
+            val editLimitCount = item.findViewById(R.id.editLimitCount) as EditText
 
             //------ Default 設定不限量 ----
-            radioGroup.check(Radio2.id)
+            radioGroup.check(radio2.id)
             editLimitCount.visibility = View.INVISIBLE
             editLimitCount.isClickable = false
-
 
             radioGroup.setOnCheckedChangeListener { group, checkedId ->
                 val radioButton: RadioButton = group.findViewById<RadioButton>(checkedId)
@@ -392,15 +208,10 @@ class ActivityAddMenu : AppCompatActivity() {
                     editLimitCount.visibility = View.INVISIBLE
                     editLimitCount.isClickable = false
                 }
-
-
             }
 
-            //-----------------------
-            var editTextProduct = item.findViewById(R.id.editTextProduct) as EditText
-            var editTextProductPrice = item.findViewById(R.id.editTextProductPrice) as EditText
 
-            var alertDialog = AlertDialog.Builder(this)
+            val alertDialog = AlertDialog.Builder(this)
                 .setView(item)
                 .setCancelable(false)
                 .setPositiveButton("確定",null)
@@ -409,10 +220,9 @@ class ActivityAddMenu : AppCompatActivity() {
 
                 alertDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener {
-                    var editTextProduct = item.findViewById(R.id.editTextProduct) as EditText
-                    var editTextProductPrice = item.findViewById(R.id.editTextProductPrice) as EditText
-                    val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
-                    val textViewProductPriceItemCount = findViewById(R.id.textViewProductPriceItemCount) as TextView
+                    val editTextProduct = item.findViewById(R.id.editTextProduct) as EditText
+                    val editTextProductPrice = item.findViewById(R.id.editTextProductPrice) as EditText
+                    val textViewProductPriceItemCount = findViewById<TextView>(R.id.textViewProductPriceItemCount)
 
                     if (TextUtils.isEmpty(editTextProduct.text.trim()))
                     {
@@ -420,10 +230,9 @@ class ActivityAddMenu : AppCompatActivity() {
                         editTextProduct.error = "產品名稱不能為空白!"
 
                     }else {
-
                         var bFound = false
                         mFirebaseUserMenu.menuItems!!.forEach {
-                            if(it.itemName.equals(editTextProduct.getText().toString().trim())){
+                            if(it.itemName.equals(editTextProduct.text.toString().trim())){
                                 bFound = true
                             }
                         }
@@ -433,42 +242,36 @@ class ActivityAddMenu : AppCompatActivity() {
                             editTextProduct.error = "產品名稱不能重覆!"
 
                         }else{
-
-                            if(Radio1.isChecked && editLimitCount.text.toString()== "")
+                            if(radio1.isChecked && editLimitCount.text.toString()== "")
                             {
                                 editLimitCount.requestFocus()
                                 editLimitCount.error = "限量數量必須填寫!"
                             }
                             else {
-
-                                //Firebase
-                                var fdproduct: PRODUCT = PRODUCT()
-                                fdproduct.itemName = editTextProduct.getText().toString().trim()
-
+                                val fdProduct: PRODUCT = PRODUCT()
+                                fdProduct.itemName = editTextProduct.text.toString().trim()
                                 try {
-                                    val parsedInt = editTextProductPrice.getText().toString().toInt()
-                                    fdproduct.itemPrice = parsedInt
-                                    if (Radio1.isChecked && editLimitCount.text.toString() != "") {
-                                        val LimitCount = editLimitCount.text.toString().toInt()
-                                        fdproduct.quantityLimitation = LimitCount
-                                        fdproduct.quantityRemained = LimitCount
+                                    val parsedInt = editTextProductPrice.text.toString().toInt()
+                                    fdProduct.itemPrice = parsedInt
+                                    if (radio1.isChecked && editLimitCount.text.toString() != "") {
+                                        val limitCount = editLimitCount.text.toString().toInt()
+                                        fdProduct.quantityLimitation = limitCount
+                                        fdProduct.quantityRemained = limitCount
                                     }
-                                    else if(Radio2.isChecked)
+                                    else if(radio2.isChecked)
                                     {
-                                        fdproduct.quantityLimitation = null
-                                        fdproduct.quantityRemained = null
-
+                                        fdProduct.quantityLimitation = null
+                                        fdProduct.quantityRemained = null
                                     }
 
                                 } catch (nfe: NumberFormatException) {
-                                    fdproduct.itemPrice = 0
+                                    fdProduct.itemPrice = 0
                                 }
 
-                                fdproduct.sequenceNumber = mFirebaseUserMenu.menuItems!!.size + 1
-                                //mLocationDB.getLocationByMenuID(editTextMenuID.getText().toString())
-                                mFirebaseUserMenu.menuItems!!.add(fdproduct)
-                                //textViewProductPriceItemCount.setText(mProductDB.getProductByMenuID(editTextMenuID.getText().toString()).count().toString() + " 項");
-                                textViewProductPriceItemCount.setText(mFirebaseUserMenu.menuItems!!.size.toString() + " 項");
+                                fdProduct.sequenceNumber = mFirebaseUserMenu.menuItems!!.size + 1
+                                mFirebaseUserMenu.menuItems!!.add(fdProduct)
+                                val strProductPriceItemCount = "${mFirebaseUserMenu.menuItems!!.size.toString()} 項"
+                                textViewProductPriceItemCount.text = strProductPriceItemCount
                                 alertDialog.dismiss()
                             }
                         }
@@ -476,191 +279,117 @@ class ActivityAddMenu : AppCompatActivity() {
                 }
         }
 
-        val textViewSelectBrandType = findViewById(R.id.textViewSelectBrandType) as TextView
-        // set on-click listener for ImageView
+
+        //---- 新增品牌分類 ----
+        val textViewSelectBrandType = findViewById<TextView>(R.id.textViewSelectBrandType)
         textViewSelectBrandType.setOnClickListener {
             val item = LayoutInflater.from(this).inflate(R.layout.alert_input_menu_type, null)
-            /*
-            var menuTypelist = mMenuTypeDB.getMenuTypeslist()
-            val array = arrayListOf<String>()
-            if (menuTypelist.count() > 0) {
-
-                menuTypelist.forEach()
-                {
-                    array.add(it.toString())
-                }
-            }
-
-             */
             val array = arrayListOf<String>()
             mFirebaseUserProfile.brandCategoryList!!.forEach(){
                 array.add(it)
             }
-            var values = arrayOf(
-                "台灣應材",
-                "默克",
-                "奇美材料"
-            )
 
+            var Adapter: ArrayAdapter<String>? = null
+            Adapter = ArrayAdapter(this, android.R.layout.simple_selectable_list_item, array)
+            val listView = item.findViewById(R.id.listViewMenuTypeListItems) as ListView
+            listView.setAdapter(Adapter)
 
-            var arr_aAdapter: ArrayAdapter<String>? = null
-
-            arr_aAdapter = ArrayAdapter(this, android.R.layout.simple_selectable_list_item, array)
-
-            var listView = item.findViewById(R.id.listViewMenuTypeListItems) as ListView
-
-            listView!!.setAdapter(arr_aAdapter)
-            for (i in 0 until listView.getChildCount()) {
+            for (i in 0 until listView.childCount) {
                 (listView.getChildAt(i) as TextView).setTextColor(Color.GREEN)
             }
 
             listView.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
-                // Get the selected item text from ListView
                 val selectedItem = parent.getItemAtPosition(position) as String
-
-                // Display the selected item text on TextView
-                Toast.makeText(
-                    this,
-                    "Your Choose: $selectedItem",
-                    Toast.LENGTH_LONG
-                ).show()
-                val textViewCrMenuType = findViewById(R.id.textViewCrMenuType) as TextView
-                textViewCrMenuType.setText(selectedItem);
+                val textViewCrMenuType = findViewById<TextView>(R.id.textViewCrMenuType)
+                textViewCrMenuType.text = selectedItem;
                 mDialog.dismiss()
             }
-            //listView.setCacheColorHint(Color.rgb(36, 33, 32));
 
-            var alertDialog = AlertDialog.Builder(this)
+            val alertDialog = AlertDialog.Builder(this)
                 .setView(item)
                 .setPositiveButton("加入菜單分類", null)
                 .setNegativeButton("取消", null)
-                //.show()
-            //val alertDialog = AlertDialog.Builder(this)
-            //alertDialog.setView(item)
-            //alertDialog.setPositiveButton("加入菜單分類",null)
-            //alertDialog.setNegativeButton("取消", null)
-            //alertDialog.show()
-            mDialog = alertDialog.show();
 
+            mDialog = alertDialog.show();
             mDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener {
-                    var editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
-                    val textViewCrMenuType = findViewById(R.id.textViewCrMenuType) as TextView
+                    val editTextMenuType = item.findViewById(R.id.editTextMenuType) as EditText
 
+                    val textViewCrMenuType = findViewById<TextView>(R.id.textViewCrMenuType)
 
                     if (TextUtils.isEmpty(editTextMenuType.text.toString().trim()))
                     {
                         editTextMenuType.requestFocus()
                         editTextMenuType.error = "類別不能為空白!"
                     }else {
-                        //Toast.makeText(applicationContext,
-                        //    "加入菜單分類:"+editTextMenuType.getText().toString(), Toast.LENGTH_SHORT).show()
-                        // Insert DB
-                        //val menutype: MenuType = MenuType(null, editTextMenuType.getText().toString())
-
-                        textViewCrMenuType.setText(editTextMenuType.getText().toString());
-                        //mMenuTypeDB.insertRow(menutype)
-                        addUserMenuFromFireBase(editTextMenuType.getText().toString())
+                        textViewCrMenuType.text = editTextMenuType.text.toString();
+                        addUserMenuFromFireBase(editTextMenuType.text.toString())
                         mDialog.dismiss()
                     }
                 }
         }
 
-        val textViewAddRecipe = findViewById(R.id.textViewAddRecipe) as TextView
-        // set on-click listener for textViewMakeMenu
-        textViewAddRecipe.setOnClickListener {
 
+        //---- 指定配方 ----
+        val textViewAddRecipe = findViewById<TextView>(R.id.textViewAddRecipe)
+        textViewAddRecipe.setOnClickListener {
             val bundle = Bundle()
-            //bundle.putString("EDIT", "N")
-            var I = Intent(context, ActivityAddRecipe::class.java)
+            val I = Intent(mContext, ActivityAddRecipe::class.java)
             bundle.putParcelable("USER_MENU", mFirebaseUserMenu)
             I.putExtras(bundle)
             startActivityForResult(I, ACTION_ADD_RECIPE_REQUEST_CODE)
         }
 
-        val textViewEditImageDesc = findViewById(R.id.textViewEditImageDesc) as TextView
-        // set on-click listener for textViewMakeMenu
+
+        //---- 編輯照片與敘述 ----
+        val textViewEditImageDesc = findViewById<TextView>(R.id.textViewEditImageDesc)
         textViewEditImageDesc.setOnClickListener {
-
             val bundle = Bundle()
-            var I = Intent(context, ActivityAddMenuImage::class.java)
+            val I = Intent(mContext, ActivityAddMenuImage::class.java)
             bundle.putParcelable("USER_MENU", mFirebaseUserMenu)
             I.putExtras(bundle)
             startActivityForResult(I, ACTION_ADD_MENU_IMAGE_REQUEST_CODE)
         }
 
-        val gridLayoutImageBtnList = findViewById(R.id.gridLayoutImageBtnList) as GridLayout
-        // set on-click listener for textViewMakeMenu
+
+        //---- 照片集合呈現處 ----
+        val gridLayoutImageBtnList = findViewById<GridLayout>(R.id.gridLayoutImageBtnList)
         gridLayoutImageBtnList.setOnClickListener {
-
             val bundle = Bundle()
-            //bundle.putString("EDIT", "N")
-            var I = Intent(context, ActivityAddMenuImage::class.java)
+            val I = Intent(mContext, ActivityAddMenuImage::class.java)
             bundle.putParcelable("USER_MENU", mFirebaseUserMenu)
             I.putExtras(bundle)
             startActivityForResult(I, ACTION_ADD_MENU_IMAGE_REQUEST_CODE)
         }
 
 
-        val textViewMakeMenu = findViewById(R.id.textViewMakeMenu) as TextView
-        // set on-click listener for textViewMakeMenu
+        //---- 產生菜單 ----
+        val textViewMakeMenu = findViewById<TextView>(R.id.textViewMakeMenu)
         textViewMakeMenu.setOnClickListener {
-            /*
-            val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
-            val editTextMenuDesc = findViewById(R.id.editTextMenuDesc) as EditText
-            val textViewCrMenuType = findViewById(R.id.textViewCrMenuType) as TextView
-            val baos = ByteArrayOutputStream()
-            mMenuBitmap.compress(Bitmap.CompressFormat.PNG, 50, baos)
 
-            val usermenu: UserMenu = UserMenu(null, editTextMenuID.getText().toString(), editTextMenuDesc.getText().toString(),
-                textViewCrMenuType.getText().toString(), baos.toByteArray())
-
-
-            if(mbEdit){
-                mUserMenu.menu_id=editTextMenuID.getText().toString()
-                mUserMenu.menu_desc=editTextMenuDesc.getText().toString()
-                mUserMenu.menu_type= textViewCrMenuType.getText().toString()
-                mUserMenu.image= baos.toByteArray()
-                mUserMenuDB.updateTodo(mUserMenu)
-            }else{
-                mUserMenuDB.insertRow(usermenu)
-            }
-*/
-            val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
+            val editTextMenuID = findViewById<EditText>(R.id.editTextMenuID)
             if (TextUtils.isEmpty(editTextMenuID.text.toString().trim()))
             {
                 editTextMenuID.requestFocus()
                 editTextMenuID.error = "品牌名不能為空白!"
             }else {
-
                 createNewMenu()
             }
-            //val bundle = Bundle()
-            //bundle.putString("Result", "OK")
-            //val intent = Intent().putExtras(bundle)
-            //setResult(Activity.RESULT_OK, intent)
-            //finish()
         }
     }
 
     private fun takeImageFromAlbumWithCropImageLib() {
-
         CropImage.activity().setCropShape(CropImageView.CropShape.RECTANGLE).start(this)
-
     }
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        println("收到 result code $requestCode")
         val context: Context = this@ActivityAddMenu
-
         when(requestCode) {
             ACTION_CAMERA_REQUEST_CODE -> {
                 if(resultCode == Activity.RESULT_OK && data != null){
-
                     displayImage(data.extras.get("data") as Bitmap)
-
                 }
             }
 
@@ -697,14 +426,6 @@ class ActivityAddMenu : AppCompatActivity() {
             ACTION_ADD_RECIPE_REQUEST_CODE -> {
                 if(resultCode == Activity.RESULT_OK && data != null){
                     mFirebaseUserMenu = data.extras.get("USER_MENU") as USER_MENU
-                }
-            }
-
-            ACTION_ADD_MENU_LOCATION_LIST_REQUEST_CODE -> {
-                if(resultCode == Activity.RESULT_OK && data != null){
-                    mFirebaseUserMenu = data.extras.get("USER_MENU") as USER_MENU
-                    val textViewLocationItemCount = findViewById(R.id.textViewLocationItemCount) as TextView
-                    textViewLocationItemCount.setText(mFirebaseUserMenu.locations!!.size.toString() + " 項");
                 }
             }
 
@@ -799,7 +520,7 @@ class ActivityAddMenu : AppCompatActivity() {
 
     private fun displayImage(bitmap: Bitmap) {
 
-/*
+/*      舊功能現在沒有使用了
         val resizedBitmap = bitmap.resizeByWidth(mMenuImage.layoutParams.height)
         //val roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, resizedBitmap)
         val roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, bitmap)
@@ -811,71 +532,35 @@ class ActivityAddMenu : AppCompatActivity() {
     }
 
     private fun createNewMenu() {
-        var userMenu: USER_MENU = mFirebaseUserMenu
+        val userMenu: USER_MENU = mFirebaseUserMenu
 
-        val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
-        val editTextMenuDesc = findViewById(R.id.editTextMenuDesc) as EditText
-        val textViewCrMenuType = findViewById(R.id.textViewCrMenuType) as TextView
-        val baos = ByteArrayOutputStream()
+        val editTextMenuID = findViewById<EditText>(R.id.editTextMenuID)
+        val editTextMenuDesc = findViewById<EditText>(R.id.editTextMenuDesc)
+        val textViewCrMenuType = findViewById<TextView>(R.id.textViewCrMenuType)
 
-        //mMenuBitmap.compress(Bitmap.CompressFormat.PNG, 50, baos)
 
-        //val usermenu: UserMenu = UserMenu(null, editTextMenuID.getText().toString(), editTextMenuDesc.getText().toString(),
-        //    textViewCrMenuType.getText().toString(), baos.toByteArray())
+        val mAuth = FirebaseAuth.getInstance()
+        val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
+        var userMenuID = userMenu.menuNumber.toString()
 
-/*
-        if(mbEdit){
-            mUserMenu.menu_id=editTextMenuID.getText().toString()
-            mUserMenu.menu_desc=editTextMenuDesc.getText().toString()
-            mUserMenu.menu_type= textViewCrMenuType.getText().toString()
-            mUserMenu.image= baos.toByteArray()
-            mUserMenuDB.updateTodo(mUserMenu)
-        }else{
-            mUserMenuDB.insertRow(usermenu)
-        }
- */
-
-        var mAuth = FirebaseAuth.getInstance()
-        if (mAuth.currentUser != null) {
-
-        }
-        //val sdf_Decode = SimpleDateFormat("yyyyMMddHHmmssSSS")
-        //var receiveDateTime = sdf_Decode.parse(LocalDateTime.now().toString())
-        val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
-        var userMenuID =""
-        if(mbEdit){
-            userMenuID = userMenu.menuNumber.toString()
-        }else{
-            //userMenuID = mAuth.currentUser!!.uid.toString() + "-MENU-" + timeStamp
-            userMenuID = userMenu.menuNumber.toString()
-        }
-
-        //Create USER_MENU_ORDER
-        userMenu.brandCategory = textViewCrMenuType.getText().toString()
-        userMenu.brandName=editTextMenuID.getText().toString().replace("\n","")
+        userMenu.brandCategory = textViewCrMenuType.text.toString()
+        userMenu.brandName=editTextMenuID.text.toString().replace("\n","")
         userMenu.createTime=timeStamp
-        //var location = LOCATION("FAB1")
-        //userMenu.locations.add(location)
-        //location.location="FAB2"
-        //userMenu.locations.add(location)
-        userMenu.menuDescription=editTextMenuDesc.getText().toString()
+        userMenu.menuDescription=editTextMenuDesc.text.toString()
         userMenu.menuImageURL=""
-        //userMenu.menuItems
         userMenu.menuNumber=userMenuID
-        //userMenu.menuRecipes
         userMenu.userID=mAuth.currentUser!!.uid
         userMenu.userName=mAuth.currentUser!!.displayName
         userMenu.multiMenuImageURL = mFirebaseUserMenu.multiMenuImageURL
-        userMenu.needContactInfoFlag = mContactInfo.isChecked
 
         //------ Upload Image  -------
-        if(bIsUpdateImage == true) {
+        if(bIsUpdateImage) {
             uploadImageToFirebase(userMenu.userID!!, userMenu.menuNumber!!, userMenu.multiMenuImageURL!!)
             saveMenuICONToDB(userMenu.userID!!, userMenu.menuNumber!!, userMenu.multiMenuImageURL!!)
             bIsUpdateImage = false
         }
 
-        mDatabase.child("USER_MENU_INFORMATION").child(mAuth.currentUser!!.uid).child(userMenuID).setValue(userMenu)
+        Firebase.database.reference.child("USER_MENU_INFORMATION").child(mAuth.currentUser!!.uid).child(userMenuID).setValue(userMenu)
             .addOnSuccessListener {
                 // Write was successful!
                 val bundle = Bundle()
@@ -883,10 +568,8 @@ class ActivityAddMenu : AppCompatActivity() {
                 val intent = Intent().putExtras(bundle)
                 setResult(Activity.RESULT_OK, intent)
                 finish()
-
             }
             .addOnFailureListener {
-                // Write failed
                 Toast.makeText(this, "建立菜單失敗!", Toast.LENGTH_SHORT).show()
             }
     }
@@ -894,7 +577,6 @@ class ActivityAddMenu : AppCompatActivity() {
 
     private fun uploadImageToFirebase(MenuUserID:String,  MenuNumber:String, MenuImageURL : MutableList<String>)
     {
-
         //---- 上傳之前先砍掉所有影像 -----
         if(MenuUserID!= "" && MenuNumber != "") {
             val ImageFolder = "Menu_Image/${MenuUserID}/${MenuNumber}"
@@ -959,13 +641,13 @@ class ActivityAddMenu : AppCompatActivity() {
 
         val dbContext = AppDatabase(this)
         val menuICON = dbContext.localImagedao()
-        val MemoryDBContext = MemoryDatabase(this!!)
-        val MenuImageDB = MemoryDBContext.menuImagedao()
-        val ICON_Image = MenuImageURL.firstOrNull()
-        if(ICON_Image != null)
+        val memoryDBContext = MemoryDatabase(this!!)
+        val menuImageDB = memoryDBContext.menuImagedao()
+        val iCON_Image = MenuImageURL.firstOrNull()
+        if(iCON_Image != null)
         {
-            val oldICONImage = menuICON.getMenuImageByName(ICON_Image)
-            val MenuImageObject = MenuImageDB.getMenuImageByName(ICON_Image)
+            val oldICONImage = menuICON.getMenuImageByName(iCON_Image)
+            val MenuImageObject = menuImageDB.getMenuImageByName(iCON_Image)
             if(MenuImageObject!=null)
             {
                 if(oldICONImage == null) {
@@ -997,18 +679,11 @@ class ActivityAddMenu : AppCompatActivity() {
             val uploadTask: UploadTask = islandRef.putBytes(data)
             uploadTask.addOnFailureListener(object : OnFailureListener {
                 override fun onFailure(p0: Exception) {
-                    Toast.makeText(this@ActivityAddMenu, "Upload Image Faild" + image_name, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ActivityAddMenu, "Upload Image Faild : $image_name", Toast.LENGTH_SHORT).show()
                 }
 
             }).addOnSuccessListener(object : OnSuccessListener<UploadTask.TaskSnapshot?> {
                 override fun onSuccess(p0: UploadTask.TaskSnapshot?) {
-                    //Toast.makeText(this@ActivityAddMenu, "Upload Image Success" + image_name, Toast.LENGTH_SHORT).show()
-                    /*
-                    var querypath = "USER_PROFILE/" +  mAuth.currentUser!!.uid.toString()
-                    val database = Firebase.database
-                    val myRef = database.getReference(querypath)
-                    myRef.child("photoURL").setValue(photoURL.toString());
-                     */
                 }
 
             })
@@ -1018,37 +693,14 @@ class ActivityAddMenu : AppCompatActivity() {
     }
 
     private fun getProductListOfMenu(context:Context) {
-        val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
-        //var productlist = mProductDB.getProductByMenuID(editTextMenuID.getText().toString())
-
         val bound = Bundle();
-        bound.putString("MENU_ID", editTextMenuID.getText().toString())
         bound.putParcelable("USER_MENU", mFirebaseUserMenu)
-
-        var I =  Intent(context, ActivityProductPriceList::class.java)
-        I.putExtras(bound);
-        startActivityForResult(I,ACTION_ADD_MENU_PROD_LIST_REQUEST_CODE)
+        val intent =  Intent(context, ActivityProductPriceList::class.java)
+        intent.putExtras(bound);
+        startActivityForResult(intent,ACTION_ADD_MENU_PROD_LIST_REQUEST_CODE)
     }
 
-    private fun getLocationListOfMenu(context:Context) {
-        val editTextMenuID = findViewById(R.id.editTextMenuID) as EditText
 
-        val array = arrayListOf<String>()
-        mFirebaseUserMenu.locations!!.forEach {
-            array.add(it)
-        }
-
-        val values = arrayOfNulls<String>(array.size)
-        array.toArray(values)
-
-        val bound = Bundle();
-        bound.putString("TYPE", "LOCATION")
-        bound.putStringArray("ItemListData", values)
-        bound.putParcelable("USER_MENU", mFirebaseUserMenu)
-        var I =  Intent(context, ActivityItemList::class.java)
-        I.putExtras(bound);
-        startActivityForResult(I,ACTION_ADD_MENU_LOCATION_LIST_REQUEST_CODE)
-    }
 
     private fun showUpdateImage() {
         val gridLayoutBtnList = findViewById(com.iew.fun2order.R.id.gridLayoutImageBtnList) as GridLayout
@@ -1115,8 +767,6 @@ class ActivityAddMenu : AppCompatActivity() {
     }
 
     private fun setImageButton() {
-        // AddImageItem()
-
         if(mFirebaseUserMenu!!.multiMenuImageURL!!.count() !=0) {
             DisplayMeunImageItem(mFirebaseUserMenu!!.multiMenuImageURL)
         }
@@ -1135,10 +785,10 @@ class ActivityAddMenu : AppCompatActivity() {
         var totalImageCount = multiMenuImageURL!!.filter { it != "" }.count()
         var MemoryDBContext = MemoryDatabase(this!!)
         var MenuImageDB = MemoryDBContext.menuImagedao()
-        MenuImaegByteArray.clear()
+        menuImaegByteArray.clear()
         multiMenuImageURL!!.forEach {
             if (it != "") {
-                MenuImaegByteArray.put(it, null)
+                menuImaegByteArray.put(it, null)
                 //----- 每次載入畫面都從FireBase抓取一次 -----
                 var menuImaeg = MenuImageDB.getMenuImageByName(it)
                 if (menuImaeg != null) {
@@ -1148,7 +798,7 @@ class ActivityAddMenu : AppCompatActivity() {
                 val ONE_MEGABYTE = 1024 * 1024.toLong()
                 islandRef.getBytes(ONE_MEGABYTE)
                     .addOnSuccessListener { bytesPrm: ByteArray ->
-                        MenuImaegByteArray[it] = bytesPrm.clone()
+                        menuImaegByteArray[it] = bytesPrm.clone()
                         try {
                             MenuImageDB.insertRow(entityMeunImage(null, it, "", bytesPrm.clone()!!))
                         } catch (e: Exception) {
@@ -1174,8 +824,8 @@ class ActivityAddMenu : AppCompatActivity() {
         var width: Int = 0
         var iCnt: Int = 1
         val gridLayoutBtnList = findViewById(com.iew.fun2order.R.id.gridLayoutImageBtnList) as GridLayout
-        val MenuImaegExist = MenuImaegByteArray.filter { it.value != null }
-        val MenuImaegFailed = MenuImaegByteArray.filter { it.value == null }
+        val MenuImaegExist = menuImaegByteArray.filter { it.value != null }
+        val MenuImaegFailed = menuImaegByteArray.filter { it.value == null }
 
         // val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
         if (MenuImaegExist.count() > 1) {

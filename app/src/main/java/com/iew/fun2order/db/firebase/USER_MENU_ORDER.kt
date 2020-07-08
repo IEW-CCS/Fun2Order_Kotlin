@@ -22,6 +22,7 @@ data class USER_MENU_ORDER(
     var orderTotalPrice: Int = 0,
     var orderTotalQuantity: Int = 0,
     var orderType: String? = "",
+    var needContactInfoFlag: Boolean? = null,
     var storeInfo: STORE_INFO? = STORE_INFO()
 
 ): Parcelable {
@@ -41,7 +42,9 @@ data class USER_MENU_ORDER(
             "orderStatus" to orderStatus,
             "orderTotalPrice" to orderTotalPrice,
             "orderTotalQuantity" to orderTotalQuantity,
-            "orderType" to orderType
+            "orderType" to orderType,
+            "needContactInfoFlag" to needContactInfoFlag,
+            "storeInfo" to storeInfo
         )
     }
 }

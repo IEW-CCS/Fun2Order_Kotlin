@@ -100,10 +100,10 @@ class AdapterRC_Notification(var context: Context, var lstItemsNotify:List<Items
             }
 
             itemView.notifydatetime.text = ItemsLV_Notify.notifydatetime
-            itemView.notifdesc.setText ( ItemsLV_Notify.desc)
+            /*itemView.notifdesc.setText ( ItemsLV_Notify.desc)
             itemView.notifdesc.setOnClickListener(View.OnClickListener {
                 IAdapterOnClick.onClick("Notify", adapterPosition,0)
-                })
+                })*/
 
             
 

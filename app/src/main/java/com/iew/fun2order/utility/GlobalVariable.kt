@@ -1,5 +1,8 @@
 package com.iew.fun2order.utility
 
+import android.annotation.SuppressLint
+import java.text.SimpleDateFormat
+
 const val ACTION_CAMERA_REQUEST_CODE = 100
 const val ACTION_ALBUM_REQUEST_CODE  = 200
 
@@ -40,4 +43,10 @@ const val  LOCALBROADCASE_JOIN:String ="JOIN_ORDER"
 const val  LOCALBROADCASE_FRIEND:String ="ADD_FRIEND"
 const val  LOCALBROADCASE_SHAREMENU:String ="SHARE_MENU"
 const val  LOCALBROADCASE_CHANGEDUETIME:String ="CHANGE_DUETIME"
+
+
+@SuppressLint("SimpleDateFormat")
+val DATATIMEFORMAT_NORMAL = SimpleDateFormat("yyyyMMddHHmmssSSS")
+@SuppressLint("SimpleDateFormat")
+val DATATIMEFORMAT_CHINESE_TYPE1 = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
 

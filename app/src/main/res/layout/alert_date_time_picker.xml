@@ -42,7 +42,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:calendarViewShown="false"
-                        android:headerBackground="@drawable/shape_row_notification" />
+                        android:headerBackground="@drawable/shape_row_datepicker" />
 
                 </LinearLayout>
 

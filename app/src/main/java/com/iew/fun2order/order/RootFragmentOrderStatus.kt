@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
+import android.graphics.Typeface
 import android.net.ParseException
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -98,9 +99,6 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             textCallable = it.findViewById<TextView>(R.id.orderStatusCallableText)
 
             broadcast = LocalBroadcastManager.getInstance(it)
-
-
-
         }
 
         layoutRefresh.setOnClickListener{
@@ -111,21 +109,13 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             val dialog = BottomSheetDialog(requireContext())
             val bottomSheet = layoutInflater.inflate(R.layout.bottom_sheet_duetime_notice, null)
             bottomSheet.buttonCallable.setOnClickListener {
-
                 dialog.dismiss()
                 sendCallableFcmMessage(menuorder)
-                val notifyAlert = AlertDialog.Builder( requireContext()).create()
-                notifyAlert.setTitle("訊息")
-                notifyAlert.setMessage("已經對尚未回覆者發出催訂通知")
-                notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _, i ->
-                }
-                notifyAlert.show()
+                showNoticeAlert("訊息","已經對尚未回覆者發出催訂通知")
             }
             bottomSheet.buttonChangeduetime.setOnClickListener {
-
                 dialog.dismiss()
-                sendChangeDueTimeFcmMessage(menuorder)
-
+                changeDueTimeRequest(menuorder)
             }
             bottomSheet.buttonSubmit.setOnClickListener { dialog.dismiss() }
             dialog.setContentView(bottomSheet)
@@ -138,13 +128,12 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             val bottomSheet = layoutInflater.inflate(R.layout.bottom_sheet_shipping_notice, null)
             bottomSheet.buttonNormalNotice.setOnClickListener {
                 dialog.dismiss()
-                sendNotify(menuorder)
+                sendMessageNotice(menuorder)
+
             }
             bottomSheet.buttonShippingNotice.setOnClickListener {
-
                 dialog.dismiss()
                 sendShippingNotice(menuorder)
-
             }
             bottomSheet.buttonSubmit.setOnClickListener { dialog.dismiss() }
             dialog.setContentView(bottomSheet)
@@ -152,26 +141,38 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
         }
 
-        checkOrdeStatus()
+        checkOrderStatus()
     }
 
+    private fun checkOrderStatus() {
+        if (menuorder != null) {
+            val timeExpired = checkDueTime(menuorder.dueTime)
+            layoutCallable.isClickable = true
+            layoutCallable.isEnabled = true
+            if (timeExpired) {
+                //--- 關閉催訂通知 -----
+                layoutCallable.isClickable = false
+                layoutCallable.isEnabled = false
+                textCallable.setTextColor(Color.GRAY)
+                txtOrderEndTime.setTextColor(requireContext().resources.getColor(R.color.red))
+            }
+        }
+        setOrderInfo()
+    }
 
     fun setOrderInfo() {
 
         txtOrderBrand.text = menuorder.brandName
         txtOrderJoinCount.text = menuorder.contentItems?.count().toString()
+        txtOrderStartTime.text = ""
 
-        val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
-        val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
+        val sdfDecode = DATATIMEFORMAT_NORMAL
+        val sdfEncode = DATATIMEFORMAT_CHINESE_TYPE1
 
         if(menuorder.createTime!= "") {
             val startDateTime = sdfDecode.parse(menuorder.createTime)
             val formatStartDatetime = sdfEncode.format(startDateTime).toString()
             txtOrderStartTime.text = formatStartDatetime
-        }
-        else
-        {
-            txtOrderStartTime.text = ""
         }
 
         if(menuorder.dueTime!= "") {
@@ -232,9 +233,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
         data.setValueTextSize(18f)
         data.setValueTextColor(Color.WHITE)
-
         data.setValueFormatter(DefaultValueFormatter(0))
-
 
         pieChart.data = data
         pieChart.highlightValues(null)
@@ -251,29 +250,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
     }
 
-    private fun checkOrdeStatus() {
 
-        if (menuorder != null) {
-            if (menuorder.dueTime != null) {
-                var timeExpired = false
-                if (menuorder.dueTime!! != "") {
-                    timeExpired = timeCompare(menuorder.dueTime!!)
-                }
-
-                layoutCallable.isClickable = true
-                layoutCallable.isEnabled = true
-                if (timeExpired) {
-                    //--- 關閉催訂通知 -----
-                    layoutCallable.isClickable = false
-                    layoutCallable.isEnabled = false
-                    textCallable.setTextColor(Color.GRAY)
-                    txtOrderEndTime.setTextColor(requireContext().resources.getColor(R.color.red))
-                }
-            }
-
-            setOrderInfo()
-        }
-    }
 
     private fun refreshMenuOrder()
     {
@@ -284,106 +261,93 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val menuOrder = dataSnapshot.getValue(USER_MENU_ORDER::class.java)
-                if(menuOrder!= null) {
-                    if (menuOrder.dueTime != null) {
-                        var timeExpired = false
-                        if(menuOrder.dueTime!! != "") {
-                            timeExpired = timeCompare(menuOrder.dueTime!!)
+                if (menuOrder != null) {
+                    val timeExpired = checkDueTime(menuorder.dueTime)
+                    layoutCallable.isClickable = true
+                    layoutCallable.isEnabled = true
+                    if (timeExpired) {
+                        layoutCallable.isClickable = false
+                        layoutCallable.isEnabled = false
+                        textCallable.setTextColor(Color.GRAY)
+                        txtOrderEndTime.setTextColor(requireContext().resources.getColor(R.color.red))
+                        var checkContentExpireStatus = false
+                        menuOrder.contentItems?.forEach {
+                            if (it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT) {
+                                it.orderContent.replyStatus = MENU_ORDER_REPLY_STATUS_EXPIRE
+                                checkContentExpireStatus = true
+                            }
                         }
-
-                        layoutCallable.isClickable = true
-                        layoutCallable.isEnabled = true
-                        if (timeExpired) {
-                            //--- 關閉催訂通知 -----
-                            layoutCallable.isClickable = false
-                            layoutCallable.isEnabled = false
-                            textCallable.setTextColor(Color.GRAY)
-                            txtOrderEndTime.setTextColor(requireContext().resources.getColor(R.color.red))
-                            var needUpdate = false
-                            menuOrder.contentItems?.forEach {
-                                if (it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT) {
-                                    it.orderContent.replyStatus = MENU_ORDER_REPLY_STATUS_EXPIRE
-                                    needUpdate = true
-                                }
-                            }
-                            if(needUpdate) {
-                                myRef.setValue(menuOrder)
-                            }
+                        if (checkContentExpireStatus) {
+                            myRef.setValue(menuOrder)
                         }
                     }
                     menuorder = menuOrder.copy()
                     setOrderInfo()
-                    sendMenuOrderRefresh(menuOrder.copy())
+                    sendMenuOrderRefresh(menuOrder.copy())   //廣播更新資料通知其他fragment
                     ProgressDialogUtil.dismiss();
-                    //------ 廣播更新資料 ------
                 }
                 else
                 {
                     ProgressDialogUtil.dismiss();
                 }
             }
-
             override fun onCancelled(error: DatabaseError) {
                 ProgressDialogUtil.dismiss();
             }
         })
-
     }
 
-    @SuppressLint("SimpleDateFormat")
-    private fun timeCompare(compareDatetime: String): Boolean {
-        val currentTime = SimpleDateFormat("yyyyMMddHHmmssSSS")
-        return try {
-            val beginTime: Date = currentTime.parse(compareDatetime)
-            val endTime: Date = Date()
-            //判斷是否大於兩天
-            (endTime.time - beginTime.time) > 0
-        } catch (e: ParseException) {
+    private fun checkDueTime(dueDatetime: String?): Boolean {
+        return if(dueDatetime == null) {
             false
+        } else {
+            try {
+                val beginTime: Date = DATATIMEFORMAT_NORMAL.parse(dueDatetime)
+                val endTime: Date = Date()
+                (endTime.time - beginTime.time) > 0
+            } catch (e: ParseException) {
+                false
+            }
         }
     }
 
 
-    private fun sendNotify( userMenuOrder: USER_MENU_ORDER)
+    private fun sendMessageNotice(userMenuOrder: USER_MENU_ORDER)
     {
         val alert = AlertDialog.Builder(requireContext())
         var editTextNote: EditText? = null
-
         with (alert) {
             setTitle("請輸入訊息")
             editTextNote = EditText(requireContext())
-
             setPositiveButton("確定") { dialog, _ ->
-                sendNotifyFcmMessage(userMenuOrder,editTextNote?.text.toString())
+                sendMessageNotifyFcmMessage(userMenuOrder,editTextNote?.text.toString())
                 dialog.dismiss()
-
             }
             setNegativeButton("取消") {
                     dialog, _ ->
                 dialog.dismiss()
             }
         }
-
         val dialog = alert.create()
         dialog.setView(editTextNote,  50 ,10, 50 , 10)
         dialog.show()
     }
 
-
-    private fun sendShippingNotice( userMenuOrder: USER_MENU_ORDER)
+    private fun sendShippingNotice(userMenuOrder: USER_MENU_ORDER)
     {
 
         //--- 填寫Shipping 資料 ---
-        val ShippingNoticeitem = LayoutInflater.from(requireContext()).inflate(R.layout.alert_input_shipping_information, null)
-        var txtSelectSelectShippingDateTime = ShippingNoticeitem.findViewById(R.id.txtSelectShippingTime) as TextView
-        var txtSelectShippingDateTime = ShippingNoticeitem.findViewById(R.id.txtShippingTime) as TextView
-        var editTextShippingLoc = ShippingNoticeitem.findViewById(R.id.editShippingLocation) as EditText
-        var editTextShippingNotice = ShippingNoticeitem.findViewById(R.id.editShippingNotice) as EditText
+        val shippingNoticeItem = LayoutInflater.from(requireContext()).inflate(R.layout.alert_input_shipping_information, null)
+        val txtSelectSelectShippingDateTime = shippingNoticeItem.findViewById(R.id.txtSelectShippingTime) as TextView
+        val txtSelectShippingDateTime = shippingNoticeItem.findViewById(R.id.txtShippingTime) as TextView
+        val editTextShippingLoc = shippingNoticeItem.findViewById(R.id.editShippingLocation) as EditText
+        val editTextShippingNotice = shippingNoticeItem.findViewById(R.id.editShippingNotice) as EditText
 
         txtSelectSelectShippingDateTime.setOnClickListener {
 
             val item = LayoutInflater.from(requireContext()).inflate(R.layout.alert_date_time_picker, null)
             val mTabHost = item.tab_host
+
             mTabHost.setup()
             val mDateTab: TabHost.TabSpec = mTabHost.newTabSpec("date")
             mDateTab.setIndicator("日期");
@@ -394,6 +358,13 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             mTimeTab.setIndicator("時間");
             mTimeTab.setContent(R.id.time_content);
             mTabHost.addTab(mTimeTab)
+
+            //-----  Change 屬性 -----
+            for (i in 0 until mTabHost.tabWidget.childCount) {
+                val tv = mTabHost.tabWidget.getChildAt(i).findViewById(android.R.id.title) as TextView //Unselected Tabs
+                tv.textSize = 18F
+                tv.typeface = Typeface.DEFAULT_BOLD;
+            }
 
             val picker = item.findViewById(R.id.tpPicker) as TimePicker
             picker.setIs24HourView(true)
@@ -409,39 +380,44 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
                     val dpPicker = item.findViewById(R.id.dpPicker) as DatePicker
                     val tpPicker = item.findViewById(R.id.tpPicker) as TimePicker
+
                     var sDay = "01"
                     var sMonth = "01"
                     var sYear = "2099"
                     var sHour = "12";
                     var sMin = "00"
 
-                    if (dpPicker.getDayOfMonth() < 10) {
-                        sDay = "0" + dpPicker.getDayOfMonth().toString()
+                    //-- 處理年月日---
+                    sDay = if (dpPicker.dayOfMonth < 10) {
+                        "0" + dpPicker.dayOfMonth.toString()
                     } else {
-                        sDay = dpPicker.getDayOfMonth().toString();
-                    }
-                    var month = dpPicker.getMonth() + 1;
-
-                    if (month < 10) {
-                        sMonth = "0" + month.toString()
-                    } else {
-                        sMonth = month.toString();
+                        dpPicker.dayOfMonth.toString();
                     }
 
-                    sYear = dpPicker.getYear().toString();
-
-                    if (tpPicker.getHour() < 10) {
-                        sHour = "0" + tpPicker.getHour().toString()
+                    val month = dpPicker.month + 1;
+                    sMonth = if (month < 10) {
+                        "0$month"
                     } else {
-                        sHour = tpPicker.getHour().toString();
+                        month.toString();
                     }
 
-                    if (tpPicker.getMinute() < 10) {
-                        sMin = "0" + tpPicker.getMinute().toString()
+                    sYear = dpPicker.year.toString();
+
+                    //-------處理時分秒 ----
+                    sHour = if (tpPicker.hour < 10) {
+                        "0" + tpPicker.hour.toString()
                     } else {
-                        sMin = tpPicker.getMinute().toString();
+                        tpPicker.hour.toString();
                     }
-                    txtSelectShippingDateTime.text = "${sYear}年${sMonth}月${sDay}日 ${sHour}:${sMin}"
+
+                    sMin = if (tpPicker.minute < 10) {
+                        "0" + tpPicker.minute.toString()
+                    } else {
+                        tpPicker.minute.toString();
+                    }
+
+                    val selectDateTime = "${sYear}年${sMonth}月${sDay}日 ${sHour}:${sMin}"
+                    txtSelectShippingDateTime.text = selectDateTime
                 }
                 .show()
         }
@@ -449,12 +425,12 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
         val alert = AlertDialog.Builder(requireContext())
         with(alert) {
             setTitle("到貨通知")
-            setView(ShippingNoticeitem)
+            setView(shippingNoticeItem)
             setPositiveButton("確定") { dialog, _ ->
                 dialog.dismiss()
                 val shippingDateTime = txtSelectShippingDateTime.text.toString()
                 val shippingLocation = editTextShippingLoc.text.toString()
-                val shippingNotice = editTextShippingNotice.text.toString()
+                val shippingNotice   = editTextShippingNotice.text.toString()
                 sendNotifyShippingFcmMessage(userMenuOrder, shippingDateTime, shippingLocation, shippingNotice)
             }
             setNegativeButton("取消") { dialog, _ ->
@@ -467,61 +443,52 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
 
 
-    private fun sendNotifyFcmMessage(userMenuOrder: USER_MENU_ORDER, message: String) {
+    private fun sendMessageNotifyFcmMessage(userMenuOrder: USER_MENU_ORDER, message: String) {
 
-        val dbContext: MemoryDatabase = MemoryDatabase(context!!)
-        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
-
-        val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+        val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
         val notificationMsgList = userMenuOrder.contentItems?.toMutableList()
         ProgressDialogUtil.showProgressDialog(context, "處理中");
         notificationMsgList?.forEach {it->
             val orderMember = it as ORDER_MEMBER
+
             val topic = orderMember.memberTokenID
             val notification = JSONObject()
             val notificationHeader = JSONObject()
             val notificationBody = JSONObject()
 
+            val title = "團購訊息"
             val body = "來自團購主的訂單訊息，請點擊通知以查看詳細資訊。"
 
-            notificationHeader.put("title", "團購訊息")
-            notificationHeader.put("body", body ?: "")   //Enter your notification message
+            notificationHeader.put("title",title )
+            notificationHeader.put("body", body )
 
-            notificationBody.put("messageID", "")      //Enter
-            notificationBody.put("messageTitle", "團購訊息")   //Enter
-            notificationBody.put("messageBody", body ?: "")    //Enter
+            notificationBody.put("messageID", "")
+            notificationBody.put("messageTitle", title)
+            notificationBody.put("messageBody", body )
 
-            notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_INFORMATION)   //Enter
-            notificationBody.put("receiveTime", timeStamp)   //Enter
-            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
-            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
-            notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
-
-            notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
-            notificationBody.put("dueTime", userMenuOrder.dueTime)   //Enter
-
-            notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
-            notificationBody.put(
-                "attendedMemberCount",
-                userMenuOrder.contentItems!!.count().toString()
-            )   //Enter
-
-            notificationBody.put("messageDetail", message)   //Enter  //
-            notificationBody.put("isRead", "N")   //Enter
-            notificationBody.put("replyStatus", "N")   //Enter
-            notificationBody.put("replyTime", "N")   //Enter
+            notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_INFORMATION)
+            notificationBody.put("receiveTime", timeStamp)
+            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
+            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
+            notificationBody.put("menuNumber", userMenuOrder.menuNumber)
+            notificationBody.put("orderNumber", userMenuOrder.orderNumber)
+            notificationBody.put("dueTime", userMenuOrder.dueTime)
+            notificationBody.put("brandName", userMenuOrder.brandName)
+            notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
+            notificationBody.put("messageDetail", message)
+            notificationBody.put("isRead", "N")
+            notificationBody.put("replyStatus", "N")
+            notificationBody.put("replyTime", "N")
 
             // your notification message
             notification.put("to", topic)
             notification.put("notification", notificationHeader)
             notification.put("data", notificationBody)
 
-
             if(orderMember.orderContent.ostype ?: "iOS" == "Android")
             {
                 notification.remove("notification")
             }
-
             Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
         }
@@ -530,60 +497,47 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
     private fun sendNotifyShippingFcmMessage(userMenuOrder: USER_MENU_ORDER, shippingDateTime: String?, shippingLocation: String?, shippingNote: String?) {
 
-        val dbContext: MemoryDatabase = MemoryDatabase(context!!)
-        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
-
-        val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+        val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
         val notificationShippingMsgList = userMenuOrder.contentItems?.toMutableList()
         ProgressDialogUtil.showProgressDialog(context,"處理中");
         notificationShippingMsgList?.forEach {it->
             val orderMember = it as ORDER_MEMBER
+
             val topic = orderMember.memberTokenID
             val notification = JSONObject()
             val notificationHeader = JSONObject()
             val notificationBody = JSONObject()
 
+            val title = "到貨通知"
             val body = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單發出了到貨通知"
 
-            notificationHeader.put("title", "到貨通知")
-            notificationHeader.put("body", body ?: "")   //Enter your notification message
+            notificationHeader.put("title", title)
+            notificationHeader.put("body", body)
 
-            notificationBody.put("messageID", "")      //Enter
-            notificationBody.put("messageTitle", "到貨通知")   //Enter
-            notificationBody.put("messageBody", body ?: "")    //Enter
+            notificationBody.put("messageID", "")
+            notificationBody.put("messageTitle", title)
+            notificationBody.put("messageBody", body )
 
-            notificationBody.put("notificationType", NOTIFICATION_TYPE_SHIPPING_NOTICE)   //Enter
-            notificationBody.put("receiveTime", timeStamp)   //Enter
-            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
-            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
-            notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
-
-            notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
-            notificationBody.put("dueTime", userMenuOrder.dueTime)   //Enter
-
-            notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
-            notificationBody.put(
-                "attendedMemberCount",
-                userMenuOrder.contentItems!!.count().toString()
-            )   //Enter
-
-            notificationBody.put("messageDetail", shippingNote ?: "")   //Enter  //
-            notificationBody.put("isRead", "N")   //Enter
-            notificationBody.put("replyStatus", "N")   //Enter
-            notificationBody.put("replyTime", "N")   //Enter
-
-            if(shippingDateTime != null) {
-                notificationBody.put("shippingDate", shippingDateTime.toString())   //Enter
-            }
-            if(shippingLocation != null) {
-                notificationBody.put("shippingLocation", shippingLocation.toString())   //Enter
-            }
+            notificationBody.put("notificationType", NOTIFICATION_TYPE_SHIPPING_NOTICE)
+            notificationBody.put("receiveTime", timeStamp)
+            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
+            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
+            notificationBody.put("menuNumber", userMenuOrder.menuNumber)
+            notificationBody.put("orderNumber", userMenuOrder.orderNumber)
+            notificationBody.put("dueTime", userMenuOrder.dueTime)
+            notificationBody.put("brandName", userMenuOrder.brandName)
+            notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
+            notificationBody.put("messageDetail", shippingNote ?: "")
+            notificationBody.put("isRead", "N")
+            notificationBody.put("replyStatus", "N")
+            notificationBody.put("replyTime", "N")
+            notificationBody.put("shippingDate", shippingDateTime)
+            notificationBody.put("shippingLocation", shippingLocation)
 
             // your notification message
             notification.put("to", topic)
             notification.put("notification", notificationHeader)
             notification.put("data", notificationBody)
-
             if(orderMember.orderContent.ostype ?: "iOS" == "Android")
             {
                 notification.remove("notification")
@@ -597,10 +551,7 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
     private fun sendCallableFcmMessage(userMenuOrder: USER_MENU_ORDER) {
 
-        val dbContext: MemoryDatabase = MemoryDatabase(context!!)
-        val friendImageDB: friendImageDAO = dbContext.friendImagedao()
-
-        val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+        val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
         val callableList = userMenuOrder.contentItems?.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT }?.toMutableList()
         ProgressDialogUtil.showProgressDialog(context,"處理中");
         callableList?.forEach {it->
@@ -611,34 +562,28 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             val notificationHeader = JSONObject()
             val notificationBody = JSONObject()
 
+            val title = "團購催訂"
             val body = "團購訂單的訂購時間即將截止，請儘速決定是否參與團購，謝謝"
 
-            notificationHeader.put("title", "團購催訂")
-            notificationHeader.put("body", body ?: "")   //Enter your notification message
+            notificationHeader.put("title", title)
+            notificationHeader.put("body", body)
 
-            notificationBody.put("messageID", "")      //Enter
-            notificationBody.put("messageTitle", "團購催訂")   //Enter
-            notificationBody.put("messageBody", body ?: "")    //Enter
-
-            notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_DUETIME)   //Enter
-            notificationBody.put("receiveTime", timeStamp)   //Enter
-            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
-            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
-            notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
-
-            notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
-            notificationBody.put("dueTime", userMenuOrder.dueTime)   //Enter
-
-            notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
-            notificationBody.put(
-                "attendedMemberCount",
-                userMenuOrder.contentItems!!.count().toString()
-            )   //Enter
-
-            notificationBody.put("messageDetail", "")   //Enter
-            notificationBody.put("isRead", "N")   //Enter
-            notificationBody.put("replyStatus", "N")   //Enter
-            notificationBody.put("replyTime", "N")   //Enter
+            notificationBody.put("messageID", "")
+            notificationBody.put("messageTitle", title)
+            notificationBody.put("messageBody", body)
+            notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_DUETIME)
+            notificationBody.put("receiveTime", timeStamp)
+            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
+            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
+            notificationBody.put("menuNumber", userMenuOrder.menuNumber)
+            notificationBody.put("orderNumber", userMenuOrder.orderNumber)
+            notificationBody.put("dueTime", userMenuOrder.dueTime)
+            notificationBody.put("brandName", userMenuOrder.brandName)
+            notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
+            notificationBody.put("messageDetail", "")
+            notificationBody.put("isRead", "N")
+            notificationBody.put("replyStatus", "N")
+            notificationBody.put("replyTime", "N")
 
             // your notification message
             notification.put("to", topic)
@@ -652,17 +597,14 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
 
             Thread.sleep(100)
             com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
-
         }
         ProgressDialogUtil.dismiss()
     }
 
-    @SuppressLint("SimpleDateFormat")
-    private fun sendChangeDueTimeFcmMessage(userMenuOrder: USER_MENU_ORDER) {
+    private fun changeDueTimeRequest(userMenuOrder: USER_MENU_ORDER) {
 
 
-        var dateFormat = SimpleDateFormat("yyyyMMddHHmmssSSS")
-        val sCrTimeStamp: String = userMenuOrder.dueTime ?: SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+        val sCrTimeStamp: String = userMenuOrder.dueTime ?: DATATIMEFORMAT_NORMAL.format(Date())
 
         val item = LayoutInflater.from(requireContext()).inflate(R.layout.alert_date_time_picker, null)
         val mTabHost = item.tab_host
@@ -676,6 +618,13 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
         mTimeTab.setIndicator("時間");
         mTimeTab.setContent(R.id.time_content);
         mTabHost.addTab(mTimeTab)
+
+        //-----  Change 屬性 -----
+        for (i in 0 until mTabHost.tabWidget.childCount) {
+            val tv = mTabHost.tabWidget.getChildAt(i).findViewById(android.R.id.title) as TextView //Unselected Tabs
+            tv.textSize = 18F
+            tv.typeface = Typeface.DEFAULT_BOLD;
+        }
 
         val picker = item.findViewById(R.id.tpPicker) as TimePicker
         picker.setIs24HourView(true)
@@ -696,111 +645,107 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
                 var sDay = "01"
                 var sMonth = "01"
                 var sYear = "2099"
-                var sHour = "12";
+                var sHour = "12"
                 var sMin = "00"
 
-                if (dpPicker.getDayOfMonth() < 10) {
-                    sDay = "0" + dpPicker.getDayOfMonth().toString()
+                //-- 處理年月日---
+                sDay = if (dpPicker.dayOfMonth < 10) {
+                    "0" + dpPicker.dayOfMonth.toString()
                 } else {
-                    sDay = dpPicker.getDayOfMonth().toString();
-                }
-                var month = dpPicker.getMonth() + 1;
-
-                if (month < 10) {
-                    sMonth = "0" + month.toString()
-                } else {
-                    sMonth = month.toString();
+                    dpPicker.dayOfMonth.toString();
                 }
 
-                sYear = dpPicker.getYear().toString();
-
-                if (tpPicker.getHour() < 10) {
-                    sHour = "0" + tpPicker.getHour().toString()
+                val month = dpPicker.month + 1;
+                sMonth = if (month < 10) {
+                    "0$month"
                 } else {
-                    sHour = tpPicker.getHour().toString();
+                    month.toString();
                 }
 
-                if (tpPicker.getMinute() < 10) {
-                    sMin = "0" + tpPicker.getMinute().toString()
+                sYear = dpPicker.year.toString();
+
+                //-------處理時分秒 ----
+                sHour = if (tpPicker.hour < 10) {
+                    "0" + tpPicker.hour.toString()
                 } else {
-                    sMin = tpPicker.getMinute().toString();
+                    tpPicker.hour.toString();
                 }
 
-                val sDueTimeStamp: String = sYear + sMonth + sDay + sHour + sMin +"00"+"000"
-                val oldDueTime: Date = dateFormat.parse(sCrTimeStamp)
-                val newDueTime: Date = dateFormat.parse(sDueTimeStamp)
+                sMin = if (tpPicker.minute < 10) {
+                    "0" + tpPicker.minute.toString()
+                } else {
+                    tpPicker.minute.toString();
+                }
+
+                val sDueTimeStamp: String = "${sYear}${sMonth}${sDay}${sHour}${sMin}00000"
+                val oldDueTime: Date = DATATIMEFORMAT_NORMAL.parse(sCrTimeStamp)
+                val newDueTime: Date = DATATIMEFORMAT_NORMAL.parse(sDueTimeStamp)
                 val diff = newDueTime.time - oldDueTime.time
-
                 if (diff<0) {
                     val notifyAlert = AlertDialog.Builder(requireContext()).create()
                     notifyAlert.setTitle("錯誤訊息")
                     notifyAlert.setMessage("新的截止時間不得早於之前設定的截止時間")
                     notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "確定"){_,_->}
                     notifyAlert.show()
-
                 } else {
-
-                    val dbContext: MemoryDatabase = MemoryDatabase(context!!)
-                    val friendImageDB: friendImageDAO = dbContext.friendImagedao()
-
-                    userMenuOrder.dueTime = sDueTimeStamp
-                    val timeStamp: String = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
-                    val notificationChangeDueTimeList = userMenuOrder.contentItems?.toMutableList()
-                    ProgressDialogUtil.showProgressDialog(context, "處理中");
-                    notificationChangeDueTimeList?.forEach {it->
-
-                        val orderMember = it as ORDER_MEMBER
-                        val topic = orderMember.memberTokenID
-                        val notification = JSONObject()
-                        val notificationHeader = JSONObject()
-                        val notificationBody = JSONObject()
-
-                        val body = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單截止時間已更動"
-                        val detail = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單截止時間已更動\n按下確定後將更新相關資料"
-
-                        notificationHeader.put("title", "團購相關訊息")
-                        notificationHeader.put("body", body ?: "")
-
-                        notificationBody.put("messageID", "")      //Enter
-                        notificationBody.put("messageTitle", "團購相關訊息")   //Enter
-                        notificationBody.put("messageBody", body ?: "")    //Enter
-                        notificationBody.put("notificationType", NOTIFICATION_TYPE_CHANGE_DUETIME)   //Enter
-                        notificationBody.put("receiveTime", timeStamp)   //Enter
-                        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
-                        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
-                        notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
-                        notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
-                        notificationBody.put("dueTime", userMenuOrder.dueTime)   //Enter
-                        notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
-                        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())   //Enter
-                        notificationBody.put("messageDetail", detail)   //Enter
-                        notificationBody.put("isRead", "Y")   //Enter
-                        notificationBody.put("replyStatus", "N")   //Enter
-                        notificationBody.put("replyTime", "N")   //Enter
-
-                        // your notification message
-                        notification.put("to", topic)
-                        notification.put("notification", notificationHeader)
-                        notification.put("data", notificationBody)
-
-                        if(orderMember.orderContent.ostype ?: "iOS" == "Android")
-                        {
-                            notification.remove("notification")
-                        }
-
-                        Thread.sleep(100)
-                        com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
-
-                    }
-                    ProgressDialogUtil.dismiss()
-
-                    val notifyAlert = AlertDialog.Builder(requireContext()).create()
-                    notifyAlert.setTitle("訊息")
-                    notifyAlert.setMessage("已對所有參與者發出更改截止日的通知")
-                    notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "確定"){_,_->}
-                    notifyAlert.show()
+                    sendChangeDueTimeFcmMessage(userMenuOrder, sDueTimeStamp)
+                    showNoticeAlert("訊息","已對所有參與者發出更改截止日的通知")
                 }
             }
+    }
+
+
+    private fun sendChangeDueTimeFcmMessage(userMenuOrder: USER_MENU_ORDER, newDueTime:String ) {
+
+        userMenuOrder.dueTime = newDueTime
+        val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
+        val notificationChangeDueTimeList = userMenuOrder.contentItems?.toMutableList()
+        ProgressDialogUtil.showProgressDialog(context, "處理中");
+        notificationChangeDueTimeList?.forEach {it->
+            val orderMember = it as ORDER_MEMBER
+            val topic = orderMember.memberTokenID
+            val notification = JSONObject()
+            val notificationHeader = JSONObject()
+            val notificationBody = JSONObject()
+
+            val title = "團購相關訊息"
+            val body = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單截止時間已更動"
+            val detail = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單截止時間已更動\n按下確定後將更新相關資料"
+
+            notificationHeader.put("title", title)
+            notificationHeader.put("body", body)
+
+            notificationBody.put("messageID", "")      //Enter
+            notificationBody.put("messageTitle", title)   //Enter
+            notificationBody.put("messageBody", body)    //Enter
+            notificationBody.put("notificationType", NOTIFICATION_TYPE_CHANGE_DUETIME)   //Enter
+            notificationBody.put("receiveTime", timeStamp)   //Enter
+            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
+            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
+            notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
+            notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
+            notificationBody.put("dueTime", userMenuOrder.dueTime)   //Enter
+            notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
+            notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())   //Enter
+            notificationBody.put("messageDetail", detail)   //Enter
+            notificationBody.put("isRead", "Y")   //Enter
+            notificationBody.put("replyStatus", "N")   //Enter
+            notificationBody.put("replyTime", "N")   //Enter
+
+            // your notification message
+            notification.put("to", topic)
+            notification.put("notification", notificationHeader)
+            notification.put("data", notificationBody)
+
+            if(orderMember.orderContent.ostype ?: "iOS" == "Android")
+            {
+                notification.remove("notification")
+            }
+
+            Thread.sleep(100)
+            com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
+        }
+        ProgressDialogUtil.dismiss()
     }
 
     private fun sendMenuOrderRefresh(userMenuOrder: USER_MENU_ORDER) {
@@ -831,6 +776,17 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
         } catch (e: Exception) {
             // Log.e(FragmentActivity.TAG, "Exception: $e")
         }
+    }
+
+
+
+    private fun showNoticeAlert(title:String, Message:String)
+    {
+        val notifyAlert = AlertDialog.Builder( requireContext()).create()
+        notifyAlert.setTitle(title)
+        notifyAlert.setMessage(Message)
+        notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _, i -> }
+        notifyAlert.show()
     }
 }
 

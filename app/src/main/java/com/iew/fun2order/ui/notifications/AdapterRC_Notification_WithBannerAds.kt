@@ -5,10 +5,10 @@ package com.iew.fun2order.ui.notifications
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
@@ -18,6 +18,7 @@ import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.ui.my_setup.listen
 import com.iew.fun2order.utility.*
 import kotlinx.android.synthetic.main.row_notification.view.*
+
 
 class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNotify:List<Any>, val IAdapterOnClick: IAdapterOnClick)  : RecyclerView.Adapter<AdapterRC_Notification_WithBannerAds.BaseViewHolder<*>>()
 {
@@ -85,6 +86,7 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
         @SuppressLint("SimpleDateFormat")
         override fun bindModel(ItemsLV_Notify: ItemsLV_Notify){
             itemView.notifytitle.text = "來自 ${ItemsLV_Notify.orderOwnerName} 的團購訊息"
+
             itemView.brandName.text = "[ ${ItemsLV_Notify.brandName} ]"
             when(ItemsLV_Notify.msgType)
             {
@@ -146,10 +148,11 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
             }
 
             itemView.notifydatetime.text = ItemsLV_Notify.notifydatetime
-            itemView.notifdesc.setText ( ItemsLV_Notify.desc)
+
+            /*itemView.notifdesc.setText ( ItemsLV_Notify.desc)
             itemView.notifdesc.setOnClickListener(View.OnClickListener {
                 IAdapterOnClick.onClick("Notify", adapterPosition,0)
-            })
+            })*/
 
             if(ItemsLV_Notify.read == "N")
             {

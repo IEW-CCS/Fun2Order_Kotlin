@@ -17,31 +17,24 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
 import com.iew.fun2order.R
-import com.iew.fun2order.db.dao.ProductDAO
-import com.iew.fun2order.db.database.AppDatabase
-import com.iew.fun2order.db.entity.Product
 import com.iew.fun2order.db.firebase.PRODUCT
 import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.ui.home.adapter.ProductPriceItemAdapter
 import com.iew.fun2order.ui.home.adapter.SwipeAndDragHelper
 import com.iew.fun2order.ui.home.data.ProductPriceListData
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
-import com.iew.fun2order.utility.RecyclerItemClickListenr
 import com.iew.fun2order.utility.SpacesItemDecoration
 import kotlinx.android.synthetic.main.row_product_item.view.*
 
 
 class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
 
-    var mRecyclerViewProductList: RecyclerView? = null
+    private lateinit var titleroductList: LinearLayout
+    private lateinit var mRecyclerViewProductList: RecyclerView
 
-    lateinit var titleroductList: LinearLayout
-    var mItemList: MutableList<ProductPriceListData> = mutableListOf()
     private var mFirebaseUserMenu: USER_MENU = USER_MENU()
-    //private lateinit var mProductDB: ProductDAO
-    //private lateinit var mDBContext: AppDatabase
+    var mItemList: MutableList<ProductPriceListData> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +42,7 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
         supportActionBar?.hide()
 
         val context: Context = this@ActivityProductPriceList
-
+        val decorationSpace = 30
 
         val itemView = LayoutInflater.from(this).inflate(R.layout.row_product_item, null)
         itemView.textViewName.text = "產品名稱"
@@ -66,44 +59,34 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
         titleroductList = findViewById<LinearLayout>(R.id.titleProductList)
         titleroductList.addView(itemView)
 
-        //mDBContext = AppDatabase(context!!)
-        //mProductDB = mDBContext.productdao()
 
-        val sMenuID = intent.extras.getString("MENU_ID")
-        mFirebaseUserMenu = intent.extras.get("USER_MENU") as USER_MENU
+        mFirebaseUserMenu = intent.extras?.get("USER_MENU") as USER_MENU
 
-        mRecyclerViewProductList = findViewById(com.iew.fun2order.R.id.recyclerViewProductList) as RecyclerView
-        //activity!!.findViewById<View>(R.id.recyclerViewMenuItems) as RecyclerView
+        mRecyclerViewProductList = findViewById<RecyclerView>(R.id.recyclerViewProductList)
+
         val adapter = ProductPriceItemAdapter(mItemList, this)
-
 
         val swipeAndDragHelper = SwipeAndDragHelper(adapter)
         val touchHelper = ItemTouchHelper(swipeAndDragHelper)
         adapter.setTouchHelper(touchHelper)
 
-        mRecyclerViewProductList!!.setHasFixedSize(true)
-        mRecyclerViewProductList!!.layoutManager = LinearLayoutManager(context)
-        mRecyclerViewProductList!!.adapter = adapter
+        mRecyclerViewProductList.setHasFixedSize(true)
+        mRecyclerViewProductList.layoutManager = LinearLayoutManager(context)
+        mRecyclerViewProductList.adapter = adapter
 
         touchHelper.attachToRecyclerView(mRecyclerViewProductList)
 
-        mRecyclerViewProductList!!.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-        val space = 30
-        mRecyclerViewProductList!!.addItemDecoration(SpacesItemDecoration(space))
-        //var list : List<Product> = mProductDB.getProductByMenuID(sMenuID)
+        mRecyclerViewProductList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+
+        mRecyclerViewProductList.addItemDecoration(SpacesItemDecoration(decorationSpace))
 
 
         mItemList.clear()
-        mFirebaseUserMenu!!.menuItems!!.forEach() {
-
+        mFirebaseUserMenu.menuItems!!.forEach() {
             mItemList.add(ProductPriceListData(it.itemName, it.itemPrice.toString(), it.quantityLimitation?.toString()))
         }
-            //---------------------------------------
 
-        mRecyclerViewProductList!!.adapter!!.notifyDataSetChanged()
-
-
-
+        mRecyclerViewProductList.adapter!!.notifyDataSetChanged()
     }
 
     override fun onBackPressed() {
@@ -115,7 +98,6 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
         super.onBackPressed()
     }
 
-
     override fun onClick(sender: String, pos: Int, type: Int) {
         val buttonActions = arrayOf("刪除項目", "編輯項目", "複製項目")
         AlertDialog.Builder(this)
@@ -123,8 +105,8 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
             .setItems(buttonActions,  DialogInterface.OnClickListener { dialog, which ->
                 when (which) {
                     0 -> { checkRemoveItems(pos)}
-                    1 -> { CheckModifyItems(pos)}
-                    2 -> { CheckCopyItems(pos)}
+                    1 -> { checkModifyItems(pos)}
+                    2 -> { checkCopyItems(pos)}
                 }
             })
             .setNegativeButton("關閉", null)
@@ -132,18 +114,18 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
             .show()
     }
 
-    private fun CheckModifyItems(position: Int) {
+    private fun checkModifyItems(position: Int) {
 
         val str = mItemList.get(position).getItemName()
-        var getItems = mFirebaseUserMenu.menuItems!!.filter { it.itemName == str }.firstOrNull()
+        val getItems = mFirebaseUserMenu.menuItems!!.filter { it.itemName == str }.firstOrNull()
         if (getItems != null) {
             val item = LayoutInflater.from(this).inflate(R.layout.alert_input_product_price, null)
-            val radioGroup = item.findViewById(R.id.radioGroup) as RadioGroup
-            val Radio1 = item.findViewById(R.id.radioLimit) as RadioButton
-            val Radio2 = item.findViewById(R.id.radioNoLimit) as RadioButton
-            var editLimitCount = item.findViewById(R.id.editLimitCount) as EditText
-            var editTextProduct = item.findViewById(R.id.editTextProduct) as EditText
-            var editTextProductPrice = item.findViewById(R.id.editTextProductPrice) as EditText
+            val radioGroup  = item.findViewById(R.id.radioGroup) as RadioGroup
+            val radio1      = item.findViewById(R.id.radioLimit) as RadioButton
+            val radio2      = item.findViewById(R.id.radioNoLimit) as RadioButton
+            val editLimitCount = item.findViewById(R.id.editLimitCount) as EditText
+            val editTextProduct = item.findViewById(R.id.editTextProduct) as EditText
+            val editTextProductPrice = item.findViewById(R.id.editTextProductPrice) as EditText
 
             //---- 填入正確的數值 -----------
             editTextProduct.text = Editable.Factory.getInstance().newEditable(getItems.itemName)
@@ -153,13 +135,13 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
                 Editable.Factory.getInstance().newEditable(getItems.itemPrice.toString())
 
             if (getItems.quantityLimitation != null) {
-                radioGroup.check(Radio1.id)
+                radioGroup.check(radio1.id)
                 editLimitCount.visibility = View.VISIBLE
                 editLimitCount.isClickable = true
                 editLimitCount.text = Editable.Factory.getInstance()
                     .newEditable(getItems.quantityLimitation.toString())
             } else {
-                radioGroup.check(Radio2.id)
+                radioGroup.check(radio2.id)
                 editLimitCount.visibility = View.INVISIBLE
                 editLimitCount.isClickable = false
             }
@@ -184,35 +166,35 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
             alertDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener {
 
-                    if (Radio1.isChecked && editLimitCount.text.toString() == "") {
+                    if (radio1.isChecked && editLimitCount.text.toString() == "") {
                         editLimitCount.requestFocus()
                         editLimitCount.error = "限量數量必須填寫!"
                     } else {
-                        var fdproduct: PRODUCT = PRODUCT()
-                        fdproduct.itemName = editTextProduct.getText().toString().trim()
+                        val fdProduct: PRODUCT = PRODUCT()
+                        fdProduct.itemName = editTextProduct.getText().toString().trim()
                         try {
                             val parsedInt =
                                 editTextProductPrice.getText().toString().toInt()
-                            fdproduct.itemPrice = parsedInt
-                            if (Radio1.isChecked && editLimitCount.text.toString() != "") {
+                            fdProduct.itemPrice = parsedInt
+                            if (radio1.isChecked && editLimitCount.text.toString() != "") {
                                 val LimitCount = editLimitCount.text.toString().toInt()
-                                fdproduct.quantityLimitation = LimitCount
-                                fdproduct.quantityRemained = LimitCount
-                            } else if (Radio2.isChecked) {
-                                fdproduct.quantityLimitation = null
-                                fdproduct.quantityRemained = null
+                                fdProduct.quantityLimitation = LimitCount
+                                fdProduct.quantityRemained = LimitCount
+                            } else if (radio2.isChecked) {
+                                fdProduct.quantityLimitation = null
+                                fdProduct.quantityRemained = null
                             }
 
                         } catch (nfe: NumberFormatException) {
-                            fdproduct.itemPrice = 0
+                            fdProduct.itemPrice = 0
                         }
 
                         //------ Real Update
-                        getItems.quantityRemained = fdproduct.quantityRemained
-                        getItems.quantityLimitation = fdproduct.quantityLimitation
-                        getItems.itemName = fdproduct.itemName
-                        getItems.itemPrice = fdproduct.itemPrice
-                        getItems.sequenceNumber = fdproduct.sequenceNumber
+                        getItems.quantityRemained = fdProduct.quantityRemained
+                        getItems.quantityLimitation = fdProduct.quantityLimitation
+                        getItems.itemName = fdProduct.itemName
+                        getItems.itemPrice = fdProduct.itemPrice
+                        getItems.sequenceNumber = fdProduct.sequenceNumber
 
                         mItemList.clear()
                         mFirebaseUserMenu!!.menuItems!!.forEach() {
@@ -232,20 +214,20 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
         }
     }
 
-    private fun CheckCopyItems(position: Int) {
+    private fun checkCopyItems(position: Int) {
 
         val str = mItemList.get(position).getItemName()
         val addPosition = position + 1
-        var getItems = mFirebaseUserMenu.menuItems!!.filter { it.itemName == str }.firstOrNull()
+        val getItems = mFirebaseUserMenu.menuItems!!.filter { it.itemName == str }.firstOrNull()
         if (getItems != null) {
             val item = LayoutInflater.from(this).inflate(R.layout.alert_input_product_price, null)
             val radioGroup = item.findViewById(R.id.radioGroup) as RadioGroup
-            val Radio1 = item.findViewById(R.id.radioLimit) as RadioButton
-            val Radio2 = item.findViewById(R.id.radioNoLimit) as RadioButton
+            val radio1 = item.findViewById(R.id.radioLimit) as RadioButton
+            val radio2 = item.findViewById(R.id.radioNoLimit) as RadioButton
 
-            var editLimitCount = item.findViewById(R.id.editLimitCount) as EditText
-            var editTextProduct = item.findViewById(R.id.editTextProduct) as EditText
-            var editTextProductPrice = item.findViewById(R.id.editTextProductPrice) as EditText
+            val editLimitCount = item.findViewById(R.id.editLimitCount) as EditText
+            val editTextProduct = item.findViewById(R.id.editTextProduct) as EditText
+            val editTextProductPrice = item.findViewById(R.id.editTextProductPrice) as EditText
 
             //---- 填入正確的數值 -----------
             editTextProduct.hint = getItems.itemName
@@ -253,13 +235,13 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
                 Editable.Factory.getInstance().newEditable(getItems.itemPrice.toString())
 
             if (getItems.quantityLimitation != null) {
-                radioGroup.check(Radio1.id)
+                radioGroup.check(radio1.id)
                 editLimitCount.visibility = View.VISIBLE
                 editLimitCount.isClickable = true
                 editLimitCount.text = Editable.Factory.getInstance().newEditable(getItems.quantityLimitation.toString())
 
             } else {
-                radioGroup.check(Radio2.id)
+                radioGroup.check(radio2.id)
                 editLimitCount.visibility = View.INVISIBLE
                 editLimitCount.isClickable = false
             }
@@ -298,38 +280,34 @@ class ActivityProductPriceList: AppCompatActivity(), IAdapterOnClick {
                             editTextProduct.requestFocus()
                             editTextProduct.error = "產品名稱不能重覆!"
                         } else {
-                            if (Radio1.isChecked && editLimitCount.text.toString() == "") {
+                            if (radio1.isChecked && editLimitCount.text.toString() == "") {
                                 editLimitCount.requestFocus()
                                 editLimitCount.error = "限量數量必須填寫!"
                             } else {
 
-                                //Firebase
-                                var fdproduct: PRODUCT = PRODUCT()
-                                fdproduct.itemName = editTextProduct.getText().toString().trim()
-
+                                val fdProduct: PRODUCT = PRODUCT()
+                                fdProduct.itemName = editTextProduct.getText().toString().trim()
                                 try {
-                                    val parsedInt =
-                                        editTextProductPrice.getText().toString().toInt()
-                                    fdproduct.itemPrice = parsedInt
-                                    if (Radio1.isChecked && editLimitCount.text.toString() != "") {
+                                    val parsedInt = editTextProductPrice.getText().toString().toInt()
+                                    fdProduct.itemPrice = parsedInt
+                                    if (radio1.isChecked && editLimitCount.text.toString() != "") {
                                         val LimitCount = editLimitCount.text.toString().toInt()
-                                        fdproduct.quantityLimitation = LimitCount
-                                        fdproduct.quantityRemained = LimitCount
-                                    } else if (Radio2.isChecked) {
-                                        fdproduct.quantityLimitation = null
-                                        fdproduct.quantityRemained = null
-
+                                        fdProduct.quantityLimitation = LimitCount
+                                        fdProduct.quantityRemained = LimitCount
+                                    } else if (radio2.isChecked) {
+                                        fdProduct.quantityLimitation = null
+                                        fdProduct.quantityRemained = null
                                     }
                                 } catch (nfe: NumberFormatException) {
-                                    fdproduct.itemPrice = 0
+                                    fdProduct.itemPrice = 0
                                 }
-                                fdproduct.sequenceNumber = mFirebaseUserMenu.menuItems!!.size + 1
-                                mFirebaseUserMenu.menuItems!!.add(addPosition,fdproduct)
+                                fdProduct.sequenceNumber = mFirebaseUserMenu.menuItems!!.size + 1
+                                mFirebaseUserMenu.menuItems!!.add(addPosition,fdProduct)
                                 mItemList.add(addPosition,
                                     ProductPriceListData(
-                                        fdproduct.itemName,
-                                        fdproduct.itemPrice.toString(),
-                                        fdproduct.quantityLimitation?.toString()
+                                        fdProduct.itemName,
+                                        fdProduct.itemPrice.toString(),
+                                        fdProduct.quantityLimitation?.toString()
                                     )
                                 )
                                 alertDialog.dismiss()
