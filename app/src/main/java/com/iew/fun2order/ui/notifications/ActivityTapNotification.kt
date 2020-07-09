@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
+import android.text.Editable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -111,8 +112,8 @@ class ActivityTapNotification : AppCompatActivity() {
             if (values.dueTime != "" ) {
                 val timeExpired = timeCompare(values.dueTime)
                 if (timeExpired) {
-                    txtDescription.text = "團購邀請--團購單已逾期"
-                    txtDescription.setTextColor(Color.rgb(255, 0, 0))
+                    txtTitle.text = "團購邀請--團購單已逾期"
+                    txtTitle.setTextColor(Color.rgb(255, 0, 0))
                     btnCheckNotifyOK.isEnabled = false
                     btnCheckNotifyCancel.isEnabled = false
                     btnCheckNotifyOK.isClickable = false
@@ -123,7 +124,9 @@ class ActivityTapNotification : AppCompatActivity() {
             txtDrafter.text = values.orderOwnerName ?: ""
             txtBrand.text = values.brandName ?: ""
             txtAttendance.text = values.attendedMemberCount ?: ""
+            txtDetailNotice.text = Editable.Factory.getInstance().newEditable(values.messageDetail ?: "")
             messageID = values.messageID ?: ""
+
 
 
             try {

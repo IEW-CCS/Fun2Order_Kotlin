@@ -5,6 +5,7 @@ package com.iew.fun2order.ui.notifications
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.net.ParseException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +19,7 @@ import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.ui.my_setup.listen
 import com.iew.fun2order.utility.*
 import kotlinx.android.synthetic.main.row_notification.view.*
+import java.util.*
 
 
 class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNotify:List<Any>, val IAdapterOnClick: IAdapterOnClick)  : RecyclerView.Adapter<AdapterRC_Notification_WithBannerAds.BaseViewHolder<*>>()
@@ -85,7 +87,21 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
 
         @SuppressLint("SimpleDateFormat")
         override fun bindModel(ItemsLV_Notify: ItemsLV_Notify){
+
+            val expired = checkDueTime(ItemsLV_Notify.duetime)
+
             itemView.notifytitle.text = "來自 ${ItemsLV_Notify.orderOwnerName} 的團購訊息"
+
+            if(expired)
+            {
+                itemView.notifytitle.setTextColor(Color.rgb(177, 0, 28))
+                itemView.notifytitleicon.visibility = View.VISIBLE
+            }
+            else
+            {
+                itemView.notifytitle.setTextColor(context.resources.getColor(R.color.black))
+                itemView.notifytitleicon.visibility = View.GONE
+            }
 
             itemView.brandName.text = "[ ${ItemsLV_Notify.brandName} ]"
             when(ItemsLV_Notify.msgType)
@@ -161,6 +177,20 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
             else if(ItemsLV_Notify.read == "Y")
             {
                 itemView.notifylayout.setBackgroundResource(R.drawable.shape_rectangle_red)
+            }
+        }
+
+        private fun checkDueTime(dueDatetime: String?): Boolean {
+            return if(dueDatetime == null) {
+                false
+            } else {
+                try {
+                    val beginTime: Date = DATATIMEFORMAT_NORMAL.parse(dueDatetime)
+                    val endTime: Date = Date()
+                    (endTime.time - beginTime.time) > 0
+                } catch (e: ParseException) {
+                    false
+                }
             }
         }
     }

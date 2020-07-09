@@ -77,7 +77,8 @@ class RootFragmentShipping() : Fragment() ,IAdapterOnClick  {
                         it.brandName,
                         formatReceiveDatetime,
                         it.messageBody,
-                        it.isRead
+                        it.isRead,
+                        it.dueTime
                     )
                 )
             }

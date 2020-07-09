@@ -84,7 +84,7 @@
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:layout_marginRight="20dp"
             android:orientation="horizontal">
 
@@ -93,7 +93,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/corners_rect_gray"
-
                 android:ems="10"
                 android:gravity="start|top"
                 android:hint="團購說明"
@@ -106,7 +105,7 @@
             android:layout_width="match_parent"
             android:layout_height="36dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="10dp"
             android:layout_marginRight="20dp"
             android:orientation="horizontal"
             android:background="@drawable/corners_rect_blue">
@@ -144,27 +143,11 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:gravity="center">
-
-            <CheckBox
-                android:id="@+id/checkBoxJoinGroupBuy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="#0051FF"
-
-                android:textSize="16dp"
-                android:gravity="center"
-                android:text="參與此次採購" />
-        </LinearLayout>
-
-        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="32dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="20dp"
             android:weightSum="1.0"
             android:layout_gravity="center_vertical"
             android:orientation="horizontal">
@@ -173,11 +156,11 @@
                 android:id="@+id/textViewAddLocation"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="20dp"
                 android:layout_weight="0.25"
                 android:gravity="center_vertical"
+                android:layout_marginLeft="5dp"
                 android:text="新增地點"
-                android:textColor="@color/Blue"
+                android:textColor="#0051FF"
                 android:textSize="18dp" />
 
 
@@ -192,20 +175,19 @@
 
                 <TextView
                     android:id="@+id/textViewLocationItem"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="2dp"
-                    android:layout_weight="0.3"
+                    android:layout_weight="0.4"
                     android:gravity="center_vertical"
                     android:text="已加入"
                     android:textColor="#000000"
                     android:textSize="18dp" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="2dp"
-                    android:layout_weight="0.2"
+                    android:layout_weight="0.3"
                     android:gravity="center_vertical"
                     android:text="(選填資訊)"
                     android:textColor="@color/red"
@@ -213,10 +195,10 @@
 
                 <TextView
                     android:id="@+id/textViewLocationItemCount"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:layout_weight="0.4"
+                    android:layout_weight="0.2"
                     android:gravity="center_vertical"
                     android:text="0 項"
                     android:textColor="#000000"
@@ -225,10 +207,10 @@
 
                 <ImageView
                     android:id="@+id/imageViewLocationItemList"
-                    android:layout_width="20dp"
+                    android:layout_width="0dp"
                     android:layout_height="20dp"
+                    android:layout_weight="0.1"
                     android:layout_alignParentRight="true"
-                    android:layout_marginEnd="20dp"
                     android:background="@android:color/transparent"
                     android:gravity="center_horizontal"
                     android:scaleType="centerInside"
@@ -238,21 +220,40 @@
             </LinearLayout>
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="20dp"
+            android:layout_gravity="center_vertical"
+            >
 
+            <CheckBox
+                android:id="@+id/checkBoxJoinGroupBuy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="#0051FF"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="參與此次採購"
+                android:textSize="18sp" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="32dp"
             android:layout_gravity="center_vertical"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="20dp"
             android:orientation="horizontal">
 
             <CheckBox
                 android:id="@+id/checkBoxContactInfo"
+                android:buttonTint="#0051FF"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
                 android:text="參加者需提供郵寄或聯絡資訊"

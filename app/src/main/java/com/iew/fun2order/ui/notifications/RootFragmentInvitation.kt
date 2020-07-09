@@ -4,6 +4,7 @@ package com.iew.fun2order.ui.notifications
 
 import android.app.Activity
 import android.content.Intent
+import android.net.ParseException
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -48,8 +49,8 @@ class RootFragmentInvitation() : Fragment() ,IAdapterOnClick  {
         notificationsViewModel = ViewModelProviders.of(this).get(NotificationsViewModel::class.java)
 
         val root = inflater.inflate(R.layout.fragment_notify_invite, container, false)
-        val sdfDecode = SimpleDateFormat("yyyyMMddHHmmssSSS")
-        val sdfEncode = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
+        val sdfDecode = DATATIMEFORMAT_NORMAL
+        val sdfEncode = DATATIMEFORMAT_CHINESE_TYPE1
 
         broadcast = LocalBroadcastManager.getInstance(requireContext())
         rcvNotification = root.findViewById<RecyclerView>(R.id.rcvNotification)
@@ -76,7 +77,8 @@ class RootFragmentInvitation() : Fragment() ,IAdapterOnClick  {
                         it.brandName,
                         formatReceiveDatetime,
                         it.messageBody,
-                        it.isRead
+                        it.isRead,
+                        it.dueTime
                     )
                 )
             }
