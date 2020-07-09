@@ -251,6 +251,7 @@ class OrderNoteBookActivity : AppCompatActivity() {
 
         tablemain.removeAllViews()
         tableheader.removeAllViews()
+        tableaddress.removeAllViews()
         shareContext = ""
         var reportIndex: Int = 0
 

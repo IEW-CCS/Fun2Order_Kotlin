@@ -63,6 +63,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
     private lateinit var gridLayoutBtnList: GridLayout
     private lateinit var txtjoinOrderDesc: TextView
     private lateinit var txtjoinOrderShowDetail: TextView
+    private lateinit var mInflater: LayoutInflater
 
     private val lstLimitedProductList: MutableList<PRODUCT> = mutableListOf()
     private var basicCellHeight : Int = 202
@@ -173,7 +174,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         txtjoinOrderShowDetail  = findViewById(R.id.joinOrderShowDetail)
         lstSelectedProduct.clear()
 
-        val mInflater: LayoutInflater? = LayoutInflater.from(this);
+        mInflater = LayoutInflater.from(this);
         val lstOrderProducts: ArrayList<ItemsLV_OrderProduct> = ArrayList<ItemsLV_OrderProduct>()
         val lstOrderRecipes: ArrayList<RECIPE> = ArrayList<RECIPE>()
 
@@ -186,7 +187,8 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
 
             //預先載入自己選擇的產品
             mFirebaseUserMenuOrderPath = "USER_MENU_ORDER/${menuOrderOwnerID}/${menuOrderNumber}"
-            loadSelfOrder(menuOrderOwnerID, menuOrderNumber)
+            mSegmentedGroupLocation.removeAllViews()
+            loadSelfOrder(mFirebaseUserMenuOrderPath)
 
             val menuPath = "USER_MENU_INFORMATION/${values.orderOwnerID}/${values.menuNumber}"
             mFirebaseUserMenuPath = menuPath
@@ -198,14 +200,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
 
                     if (mFirebaseUserMenu != null) {
                         txtBrandName.text = mFirebaseUserMenu?.brandName
-                        mSegmentedGroupLocation.removeAllViews()
-                        mFirebaseUserMenu?.locations?.forEach { location ->
-                            addRadioButton(
-                                mInflater!!,
-                                mSegmentedGroupLocation,
-                                location.toString()
-                            )
-                        }
                         mFirebaseUserMenu?.menuItems?.forEach { product ->
                             lstOrderProducts.add(
                                 ItemsLV_OrderProduct(
@@ -225,21 +219,6 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                                     recipe.sequenceNumber
                                 )
                             )
-                        }
-
-
-                        //---- Load Default Location -----
-                        if (selfSelectmenuLocation != "") {
-                            var segmentedDefaultSetting: RadioButton
-                            if (mSegmentedGroupLocation.childCount > 0) {
-                                for (i in 0 until mSegmentedGroupLocation.childCount) {
-                                    segmentedDefaultSetting =
-                                        mSegmentedGroupLocation.getChildAt(i) as RadioButton
-                                    if (segmentedDefaultSetting.text == selfSelectmenuLocation) {
-                                        segmentedDefaultSetting.isChecked = true
-                                    }
-                                }
-                            }
                         }
 
                         txtjoinOrderDesc.text = mFirebaseUserMenu!!.menuDescription
@@ -843,13 +822,16 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
         dialog.show()
     }
 
-    private fun loadSelfOrder(menuOrderOwnerID: String, menuOrderNumber: String) {
-        val menuPath = "USER_MENU_ORDER/${menuOrderOwnerID}/${menuOrderNumber}"
+    private fun loadSelfOrder(menuPath: String) {
         val database = Firebase.database
         val myRef = database.getReference(menuPath)
         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 mFirebaseUserMenuOrder = dataSnapshot.getValue(USER_MENU_ORDER::class.java)
+                mFirebaseUserMenuOrder?.locations?.forEach { location ->
+                    addRadioButton(mInflater, mSegmentedGroupLocation, location.toString())
+                }
+
                 mFirebaseUserMenuOrder?.contentItems?.forEach { orderMember ->
                     if (orderMember.memberID == FirebaseAuth.getInstance().currentUser!!.uid.toString() && orderMember.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_ACCEPT) {
                         val refProductItems = orderMember.orderContent.menuProductItems?.toMutableList() ?: mutableListOf()
@@ -868,8 +850,7 @@ class JoinOrderActivity : AppCompatActivity(), IAdapterOnClick {
                             var segmentedDefaultSetting: RadioButton
                             if (mSegmentedGroupLocation.childCount > 0) {
                                 for (i in 0 until mSegmentedGroupLocation.childCount) {
-                                    segmentedDefaultSetting =
-                                        mSegmentedGroupLocation.getChildAt(i) as RadioButton
+                                    segmentedDefaultSetting = mSegmentedGroupLocation.getChildAt(i) as RadioButton
                                     if (segmentedDefaultSetting.text == refLocation) {
                                         segmentedDefaultSetting.isChecked = true
                                     }
