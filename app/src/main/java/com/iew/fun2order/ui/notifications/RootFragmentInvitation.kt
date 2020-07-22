@@ -4,7 +4,6 @@ package com.iew.fun2order.ui.notifications
 
 import android.app.Activity
 import android.content.Intent
-import android.net.ParseException
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,14 +16,22 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.iew.fun2order.ProgressDialogUtil
-import com.iew.fun2order.order.JoinOrderActivity
 import com.iew.fun2order.R
 import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.entity.entityNotification
+import com.iew.fun2order.db.firebase.USER_MENU
+import com.iew.fun2order.db.firebase.USER_MENU_ORDER
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
+import com.iew.fun2order.ui.shop.ActivityJoinOrderCustom
+import com.iew.fun2order.ui.shop.ActivityJoinOrderDetail
+import com.iew.fun2order.ui.shop.ActivityJoinOrderStandard
 import com.iew.fun2order.utility.*
-import java.text.SimpleDateFormat
 import java.util.*
 
 class RootFragmentInvitation() : Fragment() ,IAdapterOnClick  {
@@ -166,16 +173,110 @@ class RootFragmentInvitation() : Fragment() ,IAdapterOnClick  {
             ACTION_NOTIFYACTION_REQUEST_CODE -> {
 
                 val notificationDB = AppDatabase(requireContext()).notificationdao()
-                val currentNotify = notificationDB.getNotifybyMsgID(objIntentNotify!!.messageID)
-                if(currentNotify!= null) {
+                val notifyInfo = notificationDB.getNotifybyMsgID(objIntentNotify!!.messageID)
+                if(notifyInfo!= null) {
                     if (resultCode == Activity.RESULT_OK) {
-                        val bundle = Bundle()
-                        bundle.putParcelable("InviteOrderInfo", currentNotify.copy())
-                        val I = Intent(context, JoinOrderActivity::class.java)
-                        I.putExtras(bundle)
-                        startActivity(I)
 
-                    } else if (resultCode == Activity.RESULT_CANCELED) { }
+                        ProgressDialogUtil.showProgressDialog(context);
+                        //------ 先下載 order Info 在跳轉畫面 ----
+                        val mFirebaseUserMenuOrderPath = "USER_MENU_ORDER/${notifyInfo.orderOwnerID}/${notifyInfo.orderNumber}"
+                        val database = Firebase.database
+                        val myRef = database.getReference(mFirebaseUserMenuOrderPath)
+                        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                val mFirebaseUserMenuOrder = dataSnapshot.getValue(USER_MENU_ORDER::class.java)
+                                if(mFirebaseUserMenuOrder!= null) {
+
+                                    if(mFirebaseUserMenuOrder.orderType == "M") {
+
+                                        val menuPath = "USER_MENU_INFORMATION/${mFirebaseUserMenuOrder.orderOwnerID}/${mFirebaseUserMenuOrder.menuNumber}"
+                                        val myRefMenu = database.getReference(menuPath)
+                                        myRefMenu.addListenerForSingleValueEvent(object : ValueEventListener {
+                                            override fun onDataChange(dataSnapshotMenu: DataSnapshot) {
+                                                val mFirebaseUserMenuInfo = dataSnapshotMenu.getValue(USER_MENU::class.java)
+                                                if(mFirebaseUserMenuInfo != null)
+                                                {
+                                                    if(mFirebaseUserMenuInfo.menuItems?.count()!! == 0 )
+                                                    {
+                                                        //---- 馬上去抓 Menu Info以後再判斷 ---
+                                                        ProgressDialogUtil.dismiss()
+                                                        val bundle = Bundle()
+                                                        bundle.putParcelable("InviteOrderInfo", mFirebaseUserMenuOrder.copy())
+                                                        bundle.putParcelable("InviteMenuInfo", mFirebaseUserMenuInfo.copy())
+                                                        bundle.putParcelable("InviteNotifyInfo", notifyInfo.copy())
+                                                        val I = Intent(context, ActivityJoinOrderCustom::class.java)
+                                                        I.putExtras(bundle)
+                                                        startActivity(I)
+
+                                                    }
+                                                    else
+                                                    {
+
+                                                        //---- 馬上去抓 Menu Info以後再判斷 ---
+                                                        ProgressDialogUtil.dismiss()
+                                                        val bundle = Bundle()
+                                                        bundle.putParcelable("InviteOrderInfo", mFirebaseUserMenuOrder.copy())
+                                                        bundle.putParcelable("InviteMenuInfo", mFirebaseUserMenuInfo.copy())
+                                                        bundle.putParcelable("InviteNotifyInfo", notifyInfo.copy())
+                                                        val I = Intent(context, ActivityJoinOrderStandard::class.java)
+                                                        I.putExtras(bundle)
+                                                        startActivity(I)
+
+                                                    }
+                                                }
+                                            }
+
+                                            override fun onCancelled(error: DatabaseError) {
+                                                ProgressDialogUtil.dismiss()
+                                                val notifyAlert = AlertDialog.Builder(requireContext()).create()
+                                                notifyAlert.setTitle("訊息通知")
+                                                notifyAlert.setCancelable(false)
+                                                notifyAlert.setMessage("產品資訊不存在\n請聯繫訂單發起人: ${mFirebaseUserMenuOrder.orderOwnerName} \n品牌名稱: ${mFirebaseUserMenuOrder.brandName}")
+                                                notifyAlert.setButton(
+                                                    AlertDialog.BUTTON_POSITIVE,
+                                                    "OK"
+                                                ) { _, i -> }
+                                                notifyAlert.show()
+                                            }
+                                        })
+                                    }
+
+                                    else if (mFirebaseUserMenuOrder.orderType == "F")
+                                    {
+                                        ProgressDialogUtil.dismiss()
+                                        val bundle = Bundle()
+                                        val messageID = notifyInfo.messageID ?: ""
+                                        bundle.putParcelable("MenuOrderInfo", mFirebaseUserMenuOrder.copy())
+                                        bundle.putString("NotifyMessageID", messageID)
+                                        val I = Intent(context, ActivityJoinOrderDetail::class.java)
+                                        I.putExtras(bundle)
+                                        startActivity(I)
+                                    }
+                                }
+                                else {
+                                    ProgressDialogUtil.dismiss()
+                                    val notifyAlert = AlertDialog.Builder(requireContext()).create()
+                                    notifyAlert.setTitle("訊息通知")
+                                    notifyAlert.setCancelable(false)
+                                    notifyAlert.setMessage("訂單資訊不存在\n請聯繫訂單發起人: ${notifyInfo.orderOwnerName} \n品牌名稱: ${notifyInfo.brandName} ")
+                                    notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _, i -> }
+                                    notifyAlert.show()
+                                }
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                ProgressDialogUtil.dismiss()
+                                val notifyAlert = AlertDialog.Builder(requireContext()).create()
+                                notifyAlert.setTitle("訊息通知")
+                                notifyAlert.setCancelable(false)
+                                notifyAlert.setMessage("產品資訊不存在\n請聯繫訂單發起人: ${notifyInfo.orderOwnerName} \n品牌名稱: ${notifyInfo.brandName} ")
+                                notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _, i -> }
+                                notifyAlert.show()
+                            }
+                        })
+                    } else if (resultCode == Activity.RESULT_CANCELED) {
+
+                    }
                 }
                 else
                 {

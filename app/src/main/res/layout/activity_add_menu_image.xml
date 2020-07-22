@@ -120,7 +120,7 @@
                 android:background="@android:color/transparent"
                 android:text="取消"
                 android:textColor="@android:color/holo_blue_dark"
-                android:textSize="18sp" />
+                android:textSize="18dp" />
 
             <android.widget.Button
                 android:id="@+id/btnAddImageOK"
@@ -131,7 +131,7 @@
                 android:background="@android:color/transparent"
                 android:text="確定"
                 android:textColor="@android:color/holo_blue_dark"
-                android:textSize="18sp" />
+                android:textSize="18dp" />
                 />
         </LinearLayout>
 

@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.annotation.Nullable
+import java.util.*
 
 class HorizontalNumberPicker(context: Context?, @Nullable attrs: AttributeSet?) :
     LinearLayout(context, attrs) {
@@ -41,7 +42,7 @@ class HorizontalNumberPicker(context: Context?, @Nullable attrs: AttributeSet?) 
         btn_more.setOnClickListener(AddHandler(1))
     }
 
-    private inner class AddHandler(val diff: Int) : OnClickListener {
+    inner class AddHandler(val diff: Int) : OnClickListener {
         override fun onClick(v: View?) {
             var newValue = value + diff
             if (newValue < min) {

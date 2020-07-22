@@ -204,7 +204,7 @@
             android:layout_marginRight="20dp"
             android:text="已訂購的產品列表"
             android:textColor="@android:color/primary_text_light"
-            android:textSize="18sp" />
+            android:textSize="18dp" />
 
         <LinearLayout
 

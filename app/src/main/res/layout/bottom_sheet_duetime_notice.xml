@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:text="截止日期相關選項"
         android:textAlignment="center"
-        android:textSize="18sp" />
+        android:textSize="18dp" />
 
     <android.widget.Button
 
@@ -23,7 +23,7 @@
         android:layout_marginTop="10dp"
         android:background="@android:color/transparent"
         android:text="發出催定通知"
-        android:textSize="18sp" />
+        android:textSize="18dp" />
 
     <android.widget.Button
         android:id="@+id/buttonChangeduetime"
@@ -32,7 +32,7 @@
         android:layout_marginTop="10dp"
         android:background="@android:color/transparent"
         android:text="變更逾期時間"
-        android:textSize="18sp" />
+        android:textSize="18dp" />
 
     <Button
         android:id="@+id/buttonSubmit"
@@ -40,5 +40,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="取消"
-        android:textSize="18sp"/>
+        android:textSize="18dp"/>
 </LinearLayout>

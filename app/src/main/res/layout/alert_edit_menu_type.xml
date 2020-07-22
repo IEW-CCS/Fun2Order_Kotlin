@@ -39,7 +39,7 @@
             android:background="@android:color/transparent"
             android:text="刪除"
             android:textColor="@android:color/holo_blue_dark"
-            android:textSize="18sp" />
+            android:textSize="18dp" />
 
         <android.widget.Button
             android:id="@+id/btnAddMenuType"
@@ -50,7 +50,7 @@
             android:background="@android:color/transparent"
             android:text="新增"
             android:textColor="@android:color/holo_blue_dark"
-            android:textSize="18sp" />
+            android:textSize="18dp" />
         />
     </LinearLayout>
     <ListView

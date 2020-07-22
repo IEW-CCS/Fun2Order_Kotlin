@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.shop.ActivityJoinOrderStandard">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/brandName"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:gravity="center_vertical"
+            android:text=""
+            android:textColor="@color/Blue"
+            android:textSize="24dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnDetailInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="20dp"
+            android:text="詳細資訊"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutGroupLoc"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:layout_weight="0.4"
+            android:paddingStart="20dp"
+            android:text="選擇地點"
+            android:textColor="#000000"
+            android:textSize="18dp" />
+
+        <HorizontalScrollView
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_gravity="left|center_vertical"
+            android:layout_margin="10dp"
+            android:layout_weight="0.6">
+
+            <info.hoang8f.android.segmented.SegmentedGroup
+                android:id="@+id/SegmentedGroupLocation"
+                ads:sc_border_width="2dp"
+                ads:sc_corner_radius="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_gravity="left|center_vertical"
+                android:orientation="horizontal">
+
+            </info.hoang8f.android.segmented.SegmentedGroup>
+
+        </HorizontalScrollView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/joinOrderReference"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:layout_weight="0.9"
+            android:paddingStart="20dp"
+            android:text="看看大家都訂了什麼？"
+            android:textColor="#0000ff"
+            android:textSize="18dp" />
+
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginEnd="20dp"
+            android:layout_weight="0.1"
+            android:background="@android:color/transparent"
+            android:scaleType="centerInside"
+            android:tint="@android:color/tab_indicator_text"
+            app:srcCompat="@drawable/icon_disclosure_indicator" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:layout_weight="0.9"
+            android:paddingStart="20dp"
+            android:text="新增自訂產品"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+
+
+        <ImageView
+            android:id="@+id/customProduct"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginEnd="20dp"
+            android:layout_weight="0.1"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/add_icon" />
+
+    </LinearLayout>
+
+
+    <TextView
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_horizontal"
+        android:layout_marginTop="20dp"
+        android:background="@color/AliceBlue"
+        android:paddingStart="20dp"
+        android:text="產品列表"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/brandItemsTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:orientation="vertical">
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcv_brandItems"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        >
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+</LinearLayout>

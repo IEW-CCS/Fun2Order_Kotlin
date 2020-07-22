@@ -124,6 +124,48 @@
             android:name=".ui.notifications.ActivityTapShipping"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".ui.shop.ActivityDetailMenu"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.shop.ActivitySetupDetailOrder"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.shop.ActivitySetupDetailOrderNext"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.shop.ActivityJoinOrderDetail"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.shop.ActivityJoinOrderDetailSelectItems"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.shop.ActivityJoinOrderStandard"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.shop.ActivityJoinOrderCustom"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.shop.ActivityShoppingCart"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.shop.ActivityJoinOrderStandSelectItems"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.shop.ActivityShoppingCartWithLimit"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.shop.ActivitySuggest"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.home.ActivitySetupNewOrder"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.home.ActivitySetupNewOrderNext"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".MessagingService"

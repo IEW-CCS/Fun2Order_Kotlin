@@ -21,6 +21,6 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:text="自助團購不求人!!"
-        android:textSize="24sp" />
+        android:textSize="24dp" />
 
 </LinearLayout>

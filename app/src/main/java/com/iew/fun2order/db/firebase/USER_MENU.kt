@@ -8,7 +8,7 @@ import kotlinx.android.parcel.Parcelize
 
 @IgnoreExtraProperties
 @Parcelize
-class USER_MENU (
+data class USER_MENU (
     var brandCategory: String? = "",
     var brandName: String? = "",
     var createTime: String? = "",

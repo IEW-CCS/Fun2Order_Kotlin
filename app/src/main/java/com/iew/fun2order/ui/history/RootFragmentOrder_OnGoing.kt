@@ -69,7 +69,7 @@ class RootFragmentOrder_OnGoing() : Fragment(), IAdapterOnClick {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 dataSnapshot.children.forEach()
                 {
-                    it->
+                        it->
                     val userOrder =  it.getValue(USER_MENU_ORDER::class.java)
                     if (userOrder != null) {
                         try {

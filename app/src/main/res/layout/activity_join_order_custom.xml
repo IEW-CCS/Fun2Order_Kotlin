@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.shop.ActivityJoinOrderCustom">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/brandName"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:gravity="center_vertical"
+            android:text=""
+            android:textColor="@color/Blue"
+            android:textSize="24dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnDetailInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="20dp"
+            android:text="詳細資訊"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutGroupLoc"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:layout_weight="0.4"
+            android:paddingStart="20dp"
+            android:text="選擇地點"
+            android:textColor="#000000"
+            android:textSize="18dp" />
+
+        <HorizontalScrollView
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_gravity="left|center_vertical"
+            android:layout_margin="10dp"
+            android:layout_weight="0.6">
+
+            <info.hoang8f.android.segmented.SegmentedGroup
+                android:id="@+id/SegmentedGroupLocation"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_gravity="left|center_vertical"
+                android:orientation="horizontal"
+                ads:sc_border_width="2dp"
+                ads:sc_corner_radius="10dp">
+
+            </info.hoang8f.android.segmented.SegmentedGroup>
+
+        </HorizontalScrollView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/joinOrderReference"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:paddingStart="20dp"
+            android:layout_weight="0.9"
+            android:text="看看大家都訂了什麼？"
+            android:textColor="#0000ff"
+            android:textSize="18dp" />
+
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginEnd="20dp"
+            android:layout_weight="0.1"
+            android:background="@android:color/transparent"
+            android:scaleType="centerInside"
+            android:tint="@android:color/tab_indicator_text"
+            app:srcCompat="@drawable/icon_disclosure_indicator" />
+    </LinearLayout>
+
+
+    <TextView
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_horizontal"
+        android:layout_marginTop="20dp"
+        android:paddingStart="20dp"
+        android:text="新增產品"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="4dp"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:text="品名"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+
+        <EditText
+            android:id="@+id/editItemName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:inputType="text|textAutoComplete"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="4dp"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0.2"
+            android:text="數量"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+
+        <com.iew.fun2order.HorizontalNumberPicker
+            android:id="@+id/productCount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="4dp"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:text="單價"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+
+        <EditText
+            android:id="@+id/editItemPrice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:inputType="numberDecimal"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="4dp"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:text="備註"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+
+        <EditText
+            android:id="@+id/editItemComment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:inputType="textMultiLine|text|textAutoComplete"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="4dp">
+
+        <Button
+            android:id="@+id/btnAddToShoppingCar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="新增產品至購物車" />
+    </LinearLayout>
+
+</LinearLayout>

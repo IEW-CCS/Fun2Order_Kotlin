@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="請輸入自訂的產品資訊"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:layout_marginLeft="40dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginRight="40dp"
+    android:layout_marginBottom="4dp"
+    android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:text="品名"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+
+        <EditText
+            android:id="@+id/editItemName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:inputType="text|textAutoComplete"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+   </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginBottom="4dp"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:layout_gravity="center_vertical"
+            android:text="數量"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+
+        <com.iew.fun2order.HorizontalNumberPicker
+            android:id="@+id/productCount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginBottom="4dp"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:text="單價"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+
+        <EditText
+            android:id="@+id/editItemPrice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:inputType="numberDecimal"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginBottom="4dp"
+        android:weightSum="1.0">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:text="備註"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+
+        <EditText
+            android:id="@+id/editItemComment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:inputType="textMultiLine|text|textAutoComplete"
+            android:textColor="@color/Black"
+            android:textSize="18dp" />
+    </LinearLayout>
+
+
+</LinearLayout>

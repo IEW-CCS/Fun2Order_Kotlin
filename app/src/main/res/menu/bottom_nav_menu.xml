@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/navigation_home"
@@ -9,6 +9,14 @@
         app:actionViewClass="com.tooltip.TooltipActionView"
         app:showAsAction="ifRoom"
         />
+
+    <item
+        android:id="@+id/navigation_my_shop"
+        android:icon="@drawable/tabbaritem_shop"
+        android:title="@string/title_shop"
+        app:actionViewClass="com.tooltip.TooltipActionView"
+        app:showAsAction="ifRoom"/>
+
 
     <item
         android:id="@+id/navigation_notifications"
@@ -32,10 +40,13 @@
         android:title="@string/title_setup"
         app:actionViewClass="com.tooltip.TooltipActionView"
         app:showAsAction="ifRoom"/>
-       <!--
-        android:orderInCategory="100"
-        app:actionViewClass="com.tooltip.TooltipActionView"
-        app:showAsAction="always"/> -->
+
+
+
+    <!--
+     android:orderInCategory="100"
+     app:actionViewClass="com.tooltip.TooltipActionView"
+     app:showAsAction="always"/> -->
 
 
 </menu>

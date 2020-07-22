@@ -1,7 +1,10 @@
 package com.iew.fun2order.order
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Typeface
@@ -79,6 +82,28 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
         menuorder = _menuorder.copy()
 
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(messageReceiver_maintain, IntentFilter("UpdateMessage"))
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(messageReceiver_maintain)
+
+    }
+
+    private var messageReceiver_maintain = object: BroadcastReceiver(){
+        override fun onReceive(p0: Context?, p1: Intent?) {
+            val  tmpmunuOrder = p1?.getParcelableExtra<USER_MENU_ORDER>("userMenuOrder")
+            if(tmpmunuOrder!= null) {
+                menuorder = tmpmunuOrder.copy()
+                checkOrderStatus()
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -1,10 +1,11 @@
 <resources>
-    <string name="app_name">揪Fun</string>
+    <string name="app_name">揪FunTest</string>
 
     <string name="title_home">首頁</string>
     <string name="title_notification">通知</string>
     <string name="title_history">紀錄</string>
     <string name="title_setup">設定</string>
+    <string name="title_shop">品牌</string>
 
     <string name="privacy_policy">www.iew-pro.com</string>
 
@@ -146,9 +147,9 @@
     <string name="admob_app_id">ca-app-pub-6672968234138119~3507792835</string>
 
 
-              <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
-              <string name="interstitial_ad_unit_id">ca-app-pub-3940256099942544/8691691433</string>
-              <string name="native_ad_unit_id">ca-app-pub-3940256099942544/1044960115</string>
+    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="interstitial_ad_unit_id">ca-app-pub-3940256099942544/8691691433</string>
+    <string name="native_ad_unit_id">ca-app-pub-3940256099942544/1044960115</string>
 
 
     <!-- 真正用 Unit ID
@@ -157,4 +158,4 @@
         <string name="native_ad_unit_id">ca-app-pub-6672968234138119/2070588086</string>
      -->
 
-            </resources>
+</resources>

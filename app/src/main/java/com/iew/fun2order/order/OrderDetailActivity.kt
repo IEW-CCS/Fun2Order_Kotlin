@@ -35,6 +35,7 @@ class OrderDetailActivity : AppCompatActivity() {
         // viewPager
         viewPager =  findViewById(R.id.layout_orderDetail_viewPager)
         viewPager.adapter = adapterOrderDetailFragMamager
+        viewPager.offscreenPageLimit = 3  //這一行一定要寫
 
         // tabLayout
         tabLayout = findViewById(R.id.layout_orderDetail_tabLayout)

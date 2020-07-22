@@ -95,7 +95,7 @@
                         android:layout_weight="0.7"
                         android:text="2020/04/07 10:54:30"
                         android:textColor="@android:color/primary_text_light"
-                        android:textSize="14sp" />
+                        android:textSize="14dp" />
                 </LinearLayout>
 
                 <LinearLayout

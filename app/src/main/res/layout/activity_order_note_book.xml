@@ -33,7 +33,7 @@
             android:text="複製訂單內容"
 
             android:textColor="#2196F3"
-            android:textSize="16sp" />
+            android:textSize="16dp" />
 
 
         <LinearLayout

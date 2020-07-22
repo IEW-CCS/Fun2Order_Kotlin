@@ -26,6 +26,7 @@ import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.ui.history.ItemsLV_Order
 import com.iew.fun2order.ui.home.ActivityAddMenu
+import com.iew.fun2order.ui.home.ActivitySetupNewOrder
 import com.iew.fun2order.ui.home.ActivitySetupOrder
 import com.iew.fun2order.ui.home.data.MenuItemListData
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
@@ -79,12 +80,20 @@ class MenuItemAdapter(var context: Context, var listdata: MutableList<MenuItemLi
 
             itemView.btnChuGroup.setOnClickListener { view ->
                 val bundle = Bundle()
+
+
+                bundle.putParcelable("USER_MENU", MenuItem.getUserMenu())
+                var I = Intent(view.context, ActivitySetupNewOrder::class.java)
+                I.putExtras(bundle)
+                view.context.startActivity(I)
+
+               /*
                 bundle.putString("MENU_ID", MenuItem.getItemName())
                 bundle.putParcelable("USER_MENU", MenuItem.getUserMenu())
                 bundle.putParcelable("USER_PROFILE", MenuItem.getUserProfile())
                 var I = Intent(view.context, ActivitySetupOrder::class.java)
                 I.putExtras(bundle)
-                view.context.startActivity(I)
+                view.context.startActivity(I)*/
             }
         }
     }

@@ -47,6 +47,15 @@
                 android:textColor="@drawable/text_color_selector_ok"
                 android:textSize="18dp" />
 
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="8dp"
+                android:layout_weight="0.05"
+                android:visibility="invisible"
+                />
+
             <TextView
                 android:id="@+id/txtBrand"
                 android:layout_width="0dp"

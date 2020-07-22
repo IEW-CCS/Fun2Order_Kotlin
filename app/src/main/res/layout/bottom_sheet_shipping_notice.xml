@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:text="發出通知訊息"
         android:textAlignment="center"
-        android:textSize="18sp" />
+        android:textSize="18dp" />
 
     <android.widget.Button
 
@@ -23,7 +23,7 @@
         android:layout_marginTop="10dp"
         android:background="@android:color/transparent"
         android:text="發出一般通知"
-        android:textSize="18sp" />
+        android:textSize="18dp" />
 
     <android.widget.Button
         android:id="@+id/buttonShippingNotice"
@@ -32,7 +32,7 @@
         android:layout_marginTop="10dp"
         android:background="@android:color/transparent"
         android:text="到貨通知"
-        android:textSize="18sp" />
+        android:textSize="18dp" />
 
     <Button
         android:id="@+id/buttonSubmit"
@@ -40,5 +40,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="取消"
-        android:textSize="18sp"/>
+        android:textSize="18dp"/>
 </LinearLayout>

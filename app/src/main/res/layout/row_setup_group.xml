@@ -26,6 +26,6 @@
         android:layout_marginTop="4dp"
         android:text="Item Title"
         android:textColor="@android:color/primary_text_light"
-        android:textSize="14sp"
+        android:textSize="14dp"
         android:textStyle="bold" />
 </RelativeLayout>

@@ -108,7 +108,7 @@ class ActivityTapNotification : AppCompatActivity() {
             }
 
 
-           // ---------------------------------------
+            // ---------------------------------------
             if (values.dueTime != "" ) {
                 val timeExpired = timeCompare(values.dueTime)
                 if (timeExpired) {
@@ -294,7 +294,7 @@ class ActivityTapNotification : AppCompatActivity() {
 
                     lstSelectedProduct.forEach()
                     {
-                        menuProduct ->
+                            menuProduct ->
                         val itemView = LayoutInflater.from(this).inflate(R.layout.row_selectedproduct, null)
 
                         var recipeItems = ""

@@ -12,6 +12,12 @@
         tools:layout="@layout/fragment_home_main" />
 
     <fragment
+        android:id="@+id/navigation_my_shop"
+        android:name="com.iew.fun2order.ui.shop.ShopFragment"
+        android:label="@string/title_shop"
+        tools:layout="@layout/fragment_shop" />
+
+    <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.iew.fun2order.ui.notifications.NotificationsFragment"
         android:label="@string/title_notification"
@@ -28,6 +34,7 @@
         android:name="com.iew.fun2order.ui.my_setup.MySetupFragment"
         android:label="@string/title_setup"
         tools:layout="@layout/fragment_my_setup" />
+
 
 
 </navigation>
