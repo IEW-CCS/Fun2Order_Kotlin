@@ -122,7 +122,7 @@ class AdapterRC_Notification_WithBannerAds(var context: Context, var lstItemsNot
 
                 NOTIFICATION_TYPE_MESSAGE_DUETIME->
                 {
-                    itemView.messageTitle.text = "催定通知"
+                    itemView.messageTitle.text = "催訂通知"
                     itemView.messageTitle.setTextColor(Color.rgb(177, 0, 28))
                 }
 

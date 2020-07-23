@@ -12,7 +12,7 @@
 
     <item
         android:id="@+id/navigation_my_shop"
-        android:icon="@drawable/tabbaritem_shop"
+        android:icon="@drawable/tabbarItem"
         android:title="@string/title_shop"
         app:actionViewClass="com.tooltip.TooltipActionView"
         app:showAsAction="ifRoom"/>
