@@ -52,6 +52,8 @@ class AdapterRC_Candidate(
             {
                 itemView.SelectFriendName.text = friendInfo.displayname
                 ItemsLV_AddMember.tokenid = friendInfo.tokenID
+                ItemsLV_AddMember.ostype = friendInfo.OSType ?: ""
+                ItemsLV_AddMember.displayName = friendInfo.displayname ?: ""
                 val bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
                 itemView.SelectFriendView.setImageBitmap(bmp)
             }
@@ -65,8 +67,10 @@ class AdapterRC_Candidate(
                         val value = dataSnapshot.getValue(USER_PROFILE::class.java)
                         itemView.SelectFriendName.text = value?.userName
                         itemView.SelectFriendView.setImageDrawable(getImageDrawable(ItemsLV_AddMember.imageName))
+
                         ItemsLV_AddMember.tokenid = value?.tokenID.toString()
                         ItemsLV_AddMember.ostype = value?.ostype?: ""
+                        ItemsLV_AddMember.displayName = value?.userName ?: ""
 
                         val photoURL = value?.photoURL
                         if (photoURL != null) {
