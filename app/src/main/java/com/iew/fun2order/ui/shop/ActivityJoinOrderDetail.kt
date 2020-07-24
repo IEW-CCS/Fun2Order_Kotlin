@@ -13,6 +13,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.InterstitialAd
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -56,7 +59,7 @@ class ActivityJoinOrderDetail : AppCompatActivity(), IAdapterOnClick {
     private  lateinit var detailMenuInfo : DETAIL_MENU_INFORMATION
     private  var productItemInfo : MutableList<ItemsLV_Products> = mutableListOf()
     private  var productPriceSequence : MutableList<String> = mutableListOf()
-
+    private var mInterstitialAd: InterstitialAd? = null
 
     private  lateinit var  selectProductCategory : String
 
@@ -65,6 +68,17 @@ class ActivityJoinOrderDetail : AppCompatActivity(), IAdapterOnClick {
         setContentView(R.layout.activity_join_order_detail)
         supportActionBar?.title = "加入團購單"
         menuExist = false
+
+        mInterstitialAd = InterstitialAd(this)
+        mInterstitialAd!!.adUnitId = this.getString(R.string.interstitial_ad_unit_id)
+        requestNewInterstitial()
+
+        mInterstitialAd!!.adListener = object : AdListener() {
+            override fun onAdLoaded() {
+                mInterstitialAd!!.show()
+            }
+        }
+
 
         val tmpMenuOrderInfo = intent.extras?.get("MenuOrderInfo")
         menuOrderMessageID = intent.extras?.getString("NotifyMessageID","") ?: ""
@@ -245,6 +259,11 @@ class ActivityJoinOrderDetail : AppCompatActivity(), IAdapterOnClick {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun requestNewInterstitial() {
+        val adRequest: AdRequest = AdRequest.Builder().build()
+        mInterstitialAd!!.loadAd(adRequest)
     }
 
     private fun setupBadge() {

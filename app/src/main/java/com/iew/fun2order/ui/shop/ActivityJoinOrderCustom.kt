@@ -13,6 +13,9 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.InterstitialAd
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -47,6 +50,7 @@ class ActivityJoinOrderCustom : AppCompatActivity() {
     private var selectBrandName: String = ""
     private var menuOrderMessageID: String = ""
     private var provideContactInfo: Boolean = false
+    private var mInterstitialAd: InterstitialAd? = null
 
 
 
@@ -55,6 +59,15 @@ class ActivityJoinOrderCustom : AppCompatActivity() {
         setContentView(R.layout.activity_join_order_custom)
         supportActionBar?.title = "加入團購單"
 
+        mInterstitialAd = InterstitialAd(this)
+        mInterstitialAd!!.adUnitId = this.getString(R.string.interstitial_ad_unit_id)
+        requestNewInterstitial()
+
+        mInterstitialAd!!.adListener = object : AdListener() {
+            override fun onAdLoaded() {
+                mInterstitialAd!!.show()
+            }
+        }
 
         val tmpMenuOrderInfo = intent.extras?.get("InviteOrderInfo")
         val tmpMenuInfo      = intent.extras?.get("InviteMenuInfo")
@@ -225,6 +238,11 @@ class ActivityJoinOrderCustom : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun requestNewInterstitial() {
+        val adRequest: AdRequest = AdRequest.Builder().build()
+        mInterstitialAd!!.loadAd(adRequest)
     }
 
     private fun showAlertWithDataCheck(title:String, message:String)

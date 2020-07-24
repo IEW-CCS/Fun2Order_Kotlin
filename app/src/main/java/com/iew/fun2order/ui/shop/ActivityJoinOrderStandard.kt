@@ -13,6 +13,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.InterstitialAd
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
@@ -51,6 +54,7 @@ class ActivityJoinOrderStandard : AppCompatActivity(), IAdapterOnClick {
     private lateinit var childEventListener: ChildEventListener
     private lateinit var menuInfo: USER_MENU
     private lateinit var menuOrderInfo: USER_MENU_ORDER
+    private var mInterstitialAd: InterstitialAd? = null
 
     override fun onStart() {
         super.onStart()
@@ -93,6 +97,17 @@ class ActivityJoinOrderStandard : AppCompatActivity(), IAdapterOnClick {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_join_order_standard)
         supportActionBar?.title = "加入團購單"
+
+        mInterstitialAd = InterstitialAd(this)
+        mInterstitialAd!!.adUnitId = this.getString(R.string.interstitial_ad_unit_id)
+        requestNewInterstitial()
+
+        mInterstitialAd!!.adListener = object : AdListener() {
+            override fun onAdLoaded() {
+                mInterstitialAd!!.show()
+            }
+        }
+
 
         val tmpMenuOrderInfo = intent.extras?.get("InviteOrderInfo")
         val tmpMenuInfo      = intent.extras?.get("InviteMenuInfo")
@@ -332,6 +347,11 @@ class ActivityJoinOrderStandard : AppCompatActivity(), IAdapterOnClick {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun requestNewInterstitial() {
+        val adRequest: AdRequest = AdRequest.Builder().build()
+        mInterstitialAd!!.loadAd(adRequest)
     }
 
     private fun setupBadge() {

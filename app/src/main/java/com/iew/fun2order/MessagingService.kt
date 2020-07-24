@@ -176,7 +176,6 @@ class MessagingService : FirebaseMessagingService() {
             .setContentText(messageBody)
             .setSmallIcon(R.drawable.icon_notify_menu)
             .setAutoCancel(true)
-            .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
 
         val notificationManager =
