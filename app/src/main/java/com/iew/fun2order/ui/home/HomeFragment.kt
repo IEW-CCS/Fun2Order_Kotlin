@@ -157,13 +157,7 @@ class HomeFragment : Fragment(), IAdapterOnClick {
         imageAboutInfo.setOnClickListener {
             // your code here
 
-            val betaInfo = if(BuildConfig.VERSION_CODE == 99) {
-                ""
-            } else {
-                " - Beta ${ com.iew.fun2order.BuildConfig.VERSION_CODE }"
-            }
-
-            val versionInfo = "Version: ${BuildConfig.VERSION_NAME}${betaInfo}"
+            val versionInfo = "Version: ${BuildConfig.VERSION_NAME}"
             val item = LayoutInflater.from(this.context).inflate(R.layout.alert_about_us, null)
             val version = item.findViewById<TextView>(R.id.textViewVersion)
             val welcome =  item.findViewById<TextView>(R.id.textViewWelcome)
