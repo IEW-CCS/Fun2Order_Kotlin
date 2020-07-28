@@ -15,16 +15,31 @@
         android:layout_margin="5dp"
         android:weightSum="1.0">
 
-
-        <TextView
-            android:id="@+id/itemName"
-            android:layout_gravity="center_vertical|left"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|left"
+            android:orientation="vertical"
             android:layout_weight="0.5"
-            android:text="TextView"
-            android:textColor="@color/Black"
-            android:textSize="16dp" />
+            android:weightSum="1.0">
+            <TextView
+                android:id="@+id/itemName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@color/Black"
+                android:textSize="16dp" />
+
+
+            <TextView
+                android:id="@+id/itemDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@color/gray"
+                android:textSize="10dp" />
+
+        </LinearLayout>
 
         <TableLayout
             android:id="@+id/itemAttribute"
@@ -32,6 +47,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.4"
+            android:layout_gravity="center_vertical"
             android:stretchColumns="*"
             android:shrinkColumns="*"
 >

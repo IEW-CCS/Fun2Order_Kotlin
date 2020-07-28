@@ -6,11 +6,14 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -60,6 +63,14 @@ class ActivityDetailMenu : AppCompatActivity() {
         menuExist = false
         selectBrandName = intent.extras?.getString("BRAND_NAME")
         selectBrandImageURL = intent.extras?.getString("BRAND_IMAGE_URL")
+
+        val request: AdRequest = AdRequest.Builder().build()
+        adView.loadAd(request)
+        adView.adListener = object : AdListener() {
+            override fun onAdFailedToLoad(errorCode: Int) {
+                adView.visibility = View.GONE
+            }
+        }
 
 
         segmentedItemCategory.removeAllViews()
@@ -112,7 +123,9 @@ class ActivityDetailMenu : AppCompatActivity() {
 
                     //---------- Setup Body ------
                     selectProductCategory.productItems?.forEach {
-                        productItemInfo.add(ItemsLV_Products(it.productName,it.priceList, selectProductCategory?.priceTemplate.standAloneProduct))
+
+                        val productDesc = it.productDescription ?: ""
+                        productItemInfo.add(ItemsLV_Products(it.productName,it.priceList, selectProductCategory?.priceTemplate.standAloneProduct, productDesc))
                     }
                     rcv_brandItems.adapter?.notifyDataSetChanged()
                 }

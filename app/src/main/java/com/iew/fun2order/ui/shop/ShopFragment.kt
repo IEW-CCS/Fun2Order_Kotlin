@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -35,6 +37,16 @@ class ShopFragment : Fragment(), IAdapterOnClick {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mInflater = inflater
         root = inflater.inflate(R.layout.fragment_shop, container, false)
+
+        val request: AdRequest = AdRequest.Builder().build()
+        root.adView.loadAd(request)
+        root.adView.adListener = object : AdListener() {
+            override fun onAdFailedToLoad(errorCode: Int) {
+                root.adView.visibility = View.GONE
+            }
+        }
+
+
         //root.mSearchView.onActionViewExpanded()
         root.mSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -77,7 +89,6 @@ class ShopFragment : Fragment(), IAdapterOnClick {
 
         root.rcvShopMenuItems!!.layoutManager =  GridLayoutManager(requireContext(), numberOfColumns)
         root.rcvShopMenuItems!!.adapter = AdapterRC_Brand( requireContext(), lstBrand , this)
-
 
         lstBrand.clear()
         mapBrandInfo.clear()

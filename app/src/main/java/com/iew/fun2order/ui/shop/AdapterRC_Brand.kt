@@ -1,11 +1,13 @@
 package com.iew.fun2order.ui.shop
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -54,19 +56,27 @@ class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Bran
                 val menuImageInfo =   menuImageDB.getMenuImageByName(Items.ImageURL.toString())
                 if (menuImageInfo != null) {
                     var bmp = BitmapFactory.decodeByteArray(menuImageInfo.image, 0, menuImageInfo.image.size)
-                    itemView.BrandView.setImageBitmap(bmp)
+                    val roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(context.resources, bmp)
+                    roundedBitmapDrawable.cornerRadius =  30F
+                    itemView.BrandView.setImageDrawable(roundedBitmapDrawable)
+
                 } else {
 
                     val islandRef = Firebase.storage.reference.child(Items.ImageURL)
                     val ONE_MEGABYTE = 1024 * 1024.toLong()
                     islandRef.getBytes(ONE_MEGABYTE)
                         .addOnSuccessListener { bytesPrm: ByteArray ->
-                            val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
-                            itemView.BrandView.setImageBitmap(bmp)
                             try {
                                 val menuImage: entityMeunImage = entityMeunImage(null, Items.ImageURL.toString(), "", bytesPrm)
                                 menuImageDB.insertRow(menuImage)
+
+                                val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
+                                val roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(context.resources, bmp)
+                                roundedBitmapDrawable.cornerRadius =  30F
+                                itemView.BrandView.setImageDrawable(roundedBitmapDrawable)
+
                             } catch (ex: Exception) {
+                                itemView.BrandView.setImageBitmap(null)
                             }
                         }
                         .addOnFailureListener {

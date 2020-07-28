@@ -11,9 +11,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.iew.fun2order.R
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
-import kotlinx.android.synthetic.main.row_detail_productitems.view.*
-import kotlinx.android.synthetic.main.row_detail_productitems.view.itemAttribute
-import kotlinx.android.synthetic.main.row_detail_productitems.view.itemName
 import kotlinx.android.synthetic.main.row_detail_productitems_with_carts.view.*
 
 
@@ -39,6 +36,19 @@ class AdapterRC_Items_with_carts(var context: Context, var lstProductItems : Lis
         fun bindModel(Items: ItemsLV_Products, priceSequence : List<String> ) {
             itemView.itemName.text = Items.Name
             itemView.itemName.textSize = 16F
+
+            if(Items.ItemDesc == "")
+            {
+                itemView.itemDesc.text = ""
+                itemView.itemDesc.visibility = View.GONE
+            }
+            else
+            {
+                itemView.itemDesc.text = Items.ItemDesc
+                itemView.itemDesc.visibility = View.VISIBLE
+            }
+
+
             itemView.itemAttribute.removeAllViews()
 
             val lp2: TableRow.LayoutParams = TableRow.LayoutParams(

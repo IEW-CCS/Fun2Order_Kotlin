@@ -17,5 +17,7 @@ data class DETAIL_MENU_INFO_PRODUCT_ITEM(
     @SerializedName("productName")
     var productName:   String = "",
     @SerializedName("recipeRelation")
-    var recipeRelation:List<DETAIL_MENU_INFO_RECIPE_RELATION>? = listOf<DETAIL_MENU_INFO_RECIPE_RELATION>()
+    var recipeRelation:List<DETAIL_MENU_INFO_RECIPE_RELATION>? = listOf<DETAIL_MENU_INFO_RECIPE_RELATION>(),
+    @SerializedName("productDescription")
+    var productDescription:   String? = null
 ) : Parcelable

@@ -35,6 +35,19 @@ class AdapterRC_Items(var context: Context, var lstProductItems : List<ItemsLV_P
         fun bindModel(Items: ItemsLV_Products, priceSequence : List<String> ) {
             itemView.itemName.text = Items.Name
             itemView.itemName.textSize = 16F
+
+            if(Items.ItemDesc == "")
+            {
+                itemView.itemDesc.text = ""
+                itemView.itemDesc.visibility = View.GONE
+            }
+            else
+            {
+                itemView.itemDesc.text = Items.ItemDesc
+                itemView.itemDesc.visibility = View.VISIBLE
+            }
+
+
             itemView.itemAttribute.removeAllViews()
 
             val lp2: TableRow.LayoutParams = TableRow.LayoutParams(

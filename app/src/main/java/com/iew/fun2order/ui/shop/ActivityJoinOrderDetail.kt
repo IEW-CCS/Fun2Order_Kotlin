@@ -176,7 +176,8 @@ class ActivityJoinOrderDetail : AppCompatActivity(), IAdapterOnClick {
 
                     //---------- Setup Body ------
                     selectProductCategory.productItems?.forEach {
-                        productItemInfo.add(ItemsLV_Products(it.productName,it.priceList, selectProductCategory.priceTemplate?.standAloneProduct))
+                        var productDesc = it.productDescription ?: ""
+                        productItemInfo.add(ItemsLV_Products(it.productName,it.priceList, selectProductCategory.priceTemplate?.standAloneProduct, productDesc))
                     }
                     rcv_brandItems.adapter?.notifyDataSetChanged()
                 }
