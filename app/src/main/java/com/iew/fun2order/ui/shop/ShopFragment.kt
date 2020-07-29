@@ -2,6 +2,7 @@ package com.iew.fun2order.ui.shop
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,11 +16,13 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
 import com.iew.fun2order.db.firebase.BRAND_CATEGORY_ITEM
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import info.hoang8f.android.segmented.SegmentedGroup
 import kotlinx.android.synthetic.main.fragment_shop.view.*
+import java.util.*
 
 
 class ShopFragment : Fragment(), IAdapterOnClick {
@@ -92,18 +95,15 @@ class ShopFragment : Fragment(), IAdapterOnClick {
         root.rcvShopMenuItems!!.setHasFixedSize(true)
         root.rcvShopMenuItems!!.setItemViewCacheSize(200)
 
-
         lstBrand.clear()
         mapBrandInfo.clear()
         lstTmpBrand.clear()
 
         root.segmentedShopMenuType.removeAllViews()
         root.segmentedShopMenuType.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { group, checkedId ->
-
             val radioButton: RadioButton = group.findViewById<RadioButton>(checkedId)
             val selectBrandCategory = radioButton.text.toString()
             val selectBrandCategoryList = mapSortedBrandInfo[selectBrandCategory]
-
             lstBrand.clear()
             selectBrandCategoryList?.forEach {
                lstBrand.add(ItemsLV_Brand(it!!.brandName,null, it!!.brandIconImage))
@@ -111,8 +111,6 @@ class ShopFragment : Fragment(), IAdapterOnClick {
             lstTmpBrand = lstBrand.toMutableList()
             root.rcvShopMenuItems!!.adapter!!.notifyDataSetChanged()
         })
-
-
 
         val menuPath = "BRAND_CATEGORY"
         val database = Firebase.database
@@ -182,3 +180,5 @@ class ShopFragment : Fragment(), IAdapterOnClick {
         group.updateBackground()
     }
 }
+
+

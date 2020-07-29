@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +21,8 @@ import com.iew.fun2order.db.entity.entityMeunImage
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.ui.my_setup.listen
 import kotlinx.android.synthetic.main.row_shop_branditem.view.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Brand>, val IAdapterOnClick: IAdapterOnClick) : RecyclerView.Adapter<AdapterRC_Brand.ViewHolder>()
@@ -44,10 +47,8 @@ class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Bran
 
     // view
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
         val dbContext: MemoryDatabase = MemoryDatabase(context)
         private val menuImageDB: menuImageDAO = dbContext.menuImagedao()
-
         fun bindModel(Items: ItemsLV_Brand) {
             itemView.BrandName.text = Items.Name
             itemView.BrandView.setImageBitmap(null)
@@ -59,8 +60,8 @@ class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Bran
                     val roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(context.resources, bmp)
                     roundedBitmapDrawable.cornerRadius =  30F
                     itemView.BrandView.setImageDrawable(roundedBitmapDrawable)
-
                 } else {
+
                     val islandRef = Firebase.storage.reference.child(Items.ImageURL)
                     val ONE_MEGABYTE = 1024 * 1024.toLong()
                     islandRef.getBytes(ONE_MEGABYTE)
@@ -68,6 +69,7 @@ class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Bran
                             try {
                                 val menuImage: entityMeunImage = entityMeunImage(null, Items.ImageURL.toString(), "", bytesPrm)
                                 menuImageDB.insertRow(menuImage)
+
                             } catch (ex: Exception) {
                                 itemView.BrandView.setImageBitmap(null)
                             }
