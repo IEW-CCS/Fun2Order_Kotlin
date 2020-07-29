@@ -61,7 +61,6 @@ class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Bran
                     itemView.BrandView.setImageDrawable(roundedBitmapDrawable)
 
                 } else {
-
                     val islandRef = Firebase.storage.reference.child(Items.ImageURL)
                     val ONE_MEGABYTE = 1024 * 1024.toLong()
                     islandRef.getBytes(ONE_MEGABYTE)
@@ -69,15 +68,10 @@ class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Bran
                             try {
                                 val menuImage: entityMeunImage = entityMeunImage(null, Items.ImageURL.toString(), "", bytesPrm)
                                 menuImageDB.insertRow(menuImage)
-
-                                val bmp = BitmapFactory.decodeByteArray(bytesPrm, 0, bytesPrm.size)
-                                val roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(context.resources, bmp)
-                                roundedBitmapDrawable.cornerRadius =  30F
-                                itemView.BrandView.setImageDrawable(roundedBitmapDrawable)
-
                             } catch (ex: Exception) {
                                 itemView.BrandView.setImageBitmap(null)
                             }
+                            notifyItemChanged(adapterPosition)
                         }
                         .addOnFailureListener {
                             itemView.BrandView.setImageBitmap(null)

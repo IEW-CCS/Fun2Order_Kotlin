@@ -89,6 +89,9 @@ class ShopFragment : Fragment(), IAdapterOnClick {
 
         root.rcvShopMenuItems!!.layoutManager =  GridLayoutManager(requireContext(), numberOfColumns)
         root.rcvShopMenuItems!!.adapter = AdapterRC_Brand( requireContext(), lstBrand , this)
+        root.rcvShopMenuItems!!.setHasFixedSize(true)
+        root.rcvShopMenuItems!!.setItemViewCacheSize(200)
+
 
         lstBrand.clear()
         mapBrandInfo.clear()
@@ -102,11 +105,9 @@ class ShopFragment : Fragment(), IAdapterOnClick {
             val selectBrandCategoryList = mapSortedBrandInfo[selectBrandCategory]
 
             lstBrand.clear()
-
             selectBrandCategoryList?.forEach {
                lstBrand.add(ItemsLV_Brand(it!!.brandName,null, it!!.brandIconImage))
             }
-
             lstTmpBrand = lstBrand.toMutableList()
             root.rcvShopMenuItems!!.adapter!!.notifyDataSetChanged()
         })
