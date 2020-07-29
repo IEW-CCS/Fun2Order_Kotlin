@@ -12,6 +12,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.firebase.database.DataSnapshot
@@ -27,6 +31,7 @@ import com.iew.fun2order.db.firebase.DETAIL_MENU_INFORMATION
 import info.hoang8f.android.segmented.SegmentedGroup
 import kotlinx.android.synthetic.main.activity_detail_menu.*
 import kotlinx.android.synthetic.main.row_detail_productitems.view.*
+import kotlinx.android.synthetic.main.row_shop_branditem.view.*
 
 
 /*
@@ -133,13 +138,12 @@ class ActivityDetailMenu : AppCompatActivity() {
         })
 
         brandName.text = selectBrandName
-        downloadBrandImageFromFireBase(selectBrandImageURL)
+        downloadBrandImageFromFireBaseGlide(selectBrandImageURL)
         downloadBrandProfileInfoFromFireBase(selectBrandName)
 
         rcv_brandItems.layoutManager =  LinearLayoutManager(this)
         rcv_brandItems.adapter = AdapterRC_Items( this, productItemInfo,productPriceSequence)
         rcv_brandItems.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-
 
         btnGroupBuyInvite.setOnClickListener {
 
@@ -181,6 +185,25 @@ class ActivityDetailMenu : AppCompatActivity() {
         }
     }
 
+
+    private fun downloadBrandImageFromFireBaseGlide(ImageURL:String?)
+    {
+        if (ImageURL != null) {
+            brandImage.setImageBitmap(null)
+            val islandRef = Firebase.storage.reference.child(ImageURL)
+            var requestOptions = RequestOptions()
+            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(30))
+            islandRef.downloadUrl.addOnSuccessListener {
+                Glide.with(this)
+                    .load(it)
+                    .apply(requestOptions)
+                    .into(brandImage)
+
+            }.addOnFailureListener {
+                brandImage.setImageBitmap(null)
+            }
+        }
+    }
 
     private fun downloadBrandProfileInfoFromFireBase(BrandName:String?)
     {

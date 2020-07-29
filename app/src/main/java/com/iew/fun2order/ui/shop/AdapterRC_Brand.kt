@@ -1,28 +1,25 @@
 package com.iew.fun2order.ui.shop
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
-import com.iew.fun2order.db.dao.friendImageDAO
 import com.iew.fun2order.db.dao.menuImageDAO
 import com.iew.fun2order.db.database.MemoryDatabase
-import com.iew.fun2order.db.entity.entityFriendImage
-import com.iew.fun2order.db.entity.entityMeunImage
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.ui.my_setup.listen
 import kotlinx.android.synthetic.main.row_shop_branditem.view.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 
 class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Brand>, val IAdapterOnClick: IAdapterOnClick) : RecyclerView.Adapter<AdapterRC_Brand.ViewHolder>()
@@ -53,6 +50,20 @@ class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Bran
             itemView.BrandName.text = Items.Name
             itemView.BrandView.setImageBitmap(null)
 
+            val islandRef = Firebase.storage.reference.child(Items.ImageURL)
+            var requestOptions = RequestOptions()
+            requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(30))
+            islandRef.downloadUrl.addOnSuccessListener {
+                Glide.with(context)
+                    .load(it)
+                    .apply(requestOptions)
+                    .into(itemView.BrandView)
+
+            }.addOnFailureListener {
+                itemView.BrandView.setImageBitmap(null)
+            }
+
+            /*
             if (Items.ImageURL != null) {
                 val menuImageInfo =   menuImageDB.getMenuImageByName(Items.ImageURL.toString())
                 if (menuImageInfo != null) {
@@ -61,7 +72,6 @@ class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Bran
                     roundedBitmapDrawable.cornerRadius =  30F
                     itemView.BrandView.setImageDrawable(roundedBitmapDrawable)
                 } else {
-
                     val islandRef = Firebase.storage.reference.child(Items.ImageURL)
                     val ONE_MEGABYTE = 1024 * 1024.toLong()
                     islandRef.getBytes(ONE_MEGABYTE)
@@ -79,12 +89,7 @@ class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Bran
                             itemView.BrandView.setImageBitmap(null)
                         }
                 }
-            }
-        }
-
-        private fun getImageDrawable(imageName: String): Drawable {
-            val id = context.resources.getIdentifier(imageName, "drawable", context.packageName)
-            return context.resources.getDrawable(id)
+            }*/
         }
     }
 }
