@@ -9,7 +9,8 @@ data class BRAND_CATEGORY_ITEM(
     var brandIconImage  : String = "",
     var brandName       : String = "",
     var brandSubCategory: String = "",
-    var updateDateTime  : String = ""
+    var updateDateTime  : String = "",
+    var imageDownloadUrl: String? = null
 
 ){
     @Exclude
@@ -19,7 +20,8 @@ data class BRAND_CATEGORY_ITEM(
             "brandIconImage" to brandIconImage,
             "brandName" to brandName,
             "brandSubCategory" to brandSubCategory,
-            "updateDateTime" to updateDateTime
+            "updateDateTime" to updateDateTime,
+            "imageDownloadUrl" to imageDownloadUrl
         )
     }
 }

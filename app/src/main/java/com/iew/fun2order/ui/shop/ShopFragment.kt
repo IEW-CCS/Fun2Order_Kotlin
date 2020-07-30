@@ -53,19 +53,14 @@ class ShopFragment : Fragment(), IAdapterOnClick {
         //root.mSearchView.onActionViewExpanded()
         root.mSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-
                     lstBrand.clear()
-                    val lstMatch =
-                        mapBrandInfo.values.filter { it -> it!!.brandName!!.contains(query!!) }
+                    val lstMatch = mapBrandInfo.values.filter { it -> it!!.brandName!!.contains(query!!) }
                     lstMatch?.forEach {
                         lstBrand.add(ItemsLV_Brand(it!!.brandName, null, it!!.brandIconImage))
                     }
                     root.rcvShopMenuItems!!.adapter!!.notifyDataSetChanged()
-
-
                 return false
             }
-
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 if(newText == "")
@@ -73,7 +68,6 @@ class ShopFragment : Fragment(), IAdapterOnClick {
                     lstBrand.clear()
                     lstTmpBrand.forEach{ lstBrand.add(it) }
                     root.rcvShopMenuItems!!.adapter!!.notifyDataSetChanged()
-
                 }
                 else
                 {
@@ -83,12 +77,10 @@ class ShopFragment : Fragment(), IAdapterOnClick {
                         lstBrand.add(ItemsLV_Brand(it!!.brandName, null, it!!.brandIconImage))
                     }
                     root.rcvShopMenuItems!!.adapter!!.notifyDataSetChanged()
-
                 }
                 return false
             }
         })
-
 
         root.rcvShopMenuItems!!.layoutManager =  GridLayoutManager(requireContext(), numberOfColumns)
         root.rcvShopMenuItems!!.adapter = AdapterRC_Brand( requireContext(), lstBrand , this)
@@ -105,9 +97,12 @@ class ShopFragment : Fragment(), IAdapterOnClick {
             val selectBrandCategory = radioButton.text.toString()
             val selectBrandCategoryList = mapSortedBrandInfo[selectBrandCategory]
             lstBrand.clear()
+
             selectBrandCategoryList?.forEach {
-               lstBrand.add(ItemsLV_Brand(it!!.brandName,null, it!!.brandIconImage))
+                val imageURL = it!!.imageDownloadUrl ?: ""
+               lstBrand.add(ItemsLV_Brand(it!!.brandName,null, imageURL))
             }
+
             lstTmpBrand = lstBrand.toMutableList()
             root.rcvShopMenuItems!!.adapter!!.notifyDataSetChanged()
         })
@@ -152,7 +147,7 @@ class ShopFragment : Fragment(), IAdapterOnClick {
             val bundle = Bundle()
             bundle.putString("BRAND_NAME", selectBrandItemName)
             bundle.putString("BRAND_IMAGE_URL", selectBrandItemImageURL)
-            var intent = Intent(context, ActivityDetailMenu::class.java)
+            val intent = Intent(context, ActivityDetailMenu::class.java)
             intent.putExtras(bundle)
             startActivity(intent)
         }

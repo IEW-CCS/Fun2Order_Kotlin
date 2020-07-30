@@ -1,22 +1,15 @@
 package com.iew.fun2order.ui.shop
 
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
-import com.iew.fun2order.db.dao.menuImageDAO
-import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.ui.my_setup.listen
 import kotlinx.android.synthetic.main.row_shop_branditem.view.*
@@ -44,24 +37,19 @@ class AdapterRC_Brand(var context: Context, var lstItemsGroup: List<ItemsLV_Bran
 
     // view
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val dbContext: MemoryDatabase = MemoryDatabase(context)
-        private val menuImageDB: menuImageDAO = dbContext.menuImagedao()
+        var requestOptions = RequestOptions()
+
         fun bindModel(Items: ItemsLV_Brand) {
             itemView.BrandName.text = Items.Name
             itemView.BrandView.setImageBitmap(null)
-
-            val islandRef = Firebase.storage.reference.child(Items.ImageURL)
-            var requestOptions = RequestOptions()
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(30))
-            islandRef.downloadUrl.addOnSuccessListener {
-                Glide.with(context)
-                    .load(it)
-                    .apply(requestOptions)
-                    .into(itemView.BrandView)
 
-            }.addOnFailureListener {
-                itemView.BrandView.setImageBitmap(null)
-            }
+            Glide.with(context)
+                .load(Items.ImageURL)
+                .apply(requestOptions)
+                .error(null)
+                .into(itemView.BrandView)
+
 
             /*
             if (Items.ImageURL != null) {

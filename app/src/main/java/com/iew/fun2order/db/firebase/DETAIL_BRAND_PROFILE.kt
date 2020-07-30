@@ -16,6 +16,8 @@ data class DETAIL_BRAND_PROFILE(
     @SerializedName("menuNumber")
     var menuNumber: String = "",
     @SerializedName("updateDateTime")
-    var updateDateTime  : String = ""
+    var updateDateTime  : String = "",
+    @SerializedName("imageDownloadUrl")
+    var imageDownloadUrl  : String = ""
 
 )
