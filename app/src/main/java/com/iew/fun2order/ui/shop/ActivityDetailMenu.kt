@@ -188,20 +188,15 @@ class ActivityDetailMenu : AppCompatActivity() {
 
     private fun downloadBrandImageFromFireBaseGlide(ImageURL:String?)
     {
+        brandImage.setImageBitmap(null)
         if (ImageURL != null) {
-            brandImage.setImageBitmap(null)
-            val islandRef = Firebase.storage.reference.child(ImageURL)
             var requestOptions = RequestOptions()
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(30))
-            islandRef.downloadUrl.addOnSuccessListener {
                 Glide.with(this)
-                    .load(it)
+                    .load(ImageURL)
                     .apply(requestOptions)
+                    .error(null)
                     .into(brandImage)
-
-            }.addOnFailureListener {
-                brandImage.setImageBitmap(null)
-            }
         }
     }
 
