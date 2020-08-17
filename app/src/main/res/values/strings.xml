@@ -2,10 +2,11 @@
     <string name="app_name">揪Fun</string>
 
     <string name="title_home">首頁</string>
-    <string name="title_notification">通知</string>
-    <string name="title_history">紀錄</string>
-    <string name="title_setup">設定</string>
-    <string name="title_shop">品牌</string>
+    <string name="title_native">自製菜單</string>
+    <string name="title_notification">邀請通知</string>
+    <string name="title_history">揪團紀錄</string>
+    <string name="title_setup">我的設定</string>
+    <string name="title_shop">品牌列表</string>
 
     <string name="privacy_policy">www.iew-pro.com</string>
 

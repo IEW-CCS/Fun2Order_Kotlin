@@ -3,19 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_my_shop">
 
-    <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.iew.fun2order.ui.home.HomeFragment"
-        android:label="@string/app_name"
-        tools:layout="@layout/fragment_home_main" />
 
     <fragment
         android:id="@+id/navigation_my_shop"
         android:name="com.iew.fun2order.ui.shop.ShopFragment"
         android:label="@string/title_shop"
         tools:layout="@layout/fragment_shop" />
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.iew.fun2order.ui.home.HomeFragment"
+        android:label="@string/title_native"
+        tools:layout="@layout/fragment_home_main" />
 
     <fragment
         android:id="@+id/navigation_notifications"

@@ -2,13 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/navigation_home"
-        android:icon="@drawable/tabbaritem_home"
-        android:title="@string/title_home"
-        app:actionViewClass="com.tooltip.TooltipActionView"
-        app:showAsAction="ifRoom"
-        />
+
 
     <item
         android:id="@+id/navigation_my_shop"
@@ -16,6 +10,14 @@
         android:title="@string/title_shop"
         app:actionViewClass="com.tooltip.TooltipActionView"
         app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/tabbaritem_native"
+        android:title="@string/title_native"
+        app:actionViewClass="com.tooltip.TooltipActionView"
+        app:showAsAction="ifRoom"
+        />
 
 
     <item
