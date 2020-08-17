@@ -114,13 +114,14 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
             btnAddFriend = it.findViewById<Button>(R.id.addfriend)
         }
 
-        val buttonActions = arrayOf("相機", "相簿")
+        val buttonActions = arrayOf("從相機掃描加入", "從相簿讀取加入", "從通訊錄加入")
         rcvFavorite!!.layoutManager = LinearLayoutManager(context!!)
         rcvFavorite!!.adapter = AdapterRC_Favourite(context!!, lstFavorite, this)
         btnAddFriend!!.setOnClickListener {
             AlertDialog.Builder(context!!)
-                .setTitle("選取照片來源")
-                .setItems(buttonActions, DialogInterface.OnClickListener { _, which ->
+                .setTitle("選擇加入好友的方式")
+                .setItems(buttonActions, DialogInterface.OnClickListener { dialog, which ->
+                    dialog.dismiss()
                     when (which) {
                         0 -> { QRCodeScanFromCameraWithIntent() }
                         1 -> {
@@ -133,11 +134,23 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                                 QRCodeScanFromAlbumWithIntent()
                             }
                         }
+                        2->
+                        {
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("通知訊息")
+                                .setMessage("Function Not Ready")
+                                .setPositiveButton("確定", null)
+                                .create()
+                                .show()
+                        }
                         else -> {
                             Toast.makeText(activity, "選取到取消", Toast.LENGTH_SHORT).show()
                         }
                     }
                 })
+                .setNegativeButton("取消") { dialog, _ ->
+                    dialog.dismiss()
+                }
                 .create()
                 .show()
         }

@@ -1,5 +1,6 @@
 package com.iew.fun2order.ui.shop
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -28,6 +29,8 @@ import com.google.gson.Gson
 import com.iew.fun2order.R
 import com.iew.fun2order.db.firebase.DETAIL_BRAND_PROFILE
 import com.iew.fun2order.db.firebase.DETAIL_MENU_INFORMATION
+import com.iew.fun2order.ui.my_setup.ActivityAddGroup
+import com.iew.fun2order.utility.ACTION_MODIFY_GROUP_REQUEST_CODE
 import info.hoang8f.android.segmented.SegmentedGroup
 import kotlinx.android.synthetic.main.activity_detail_menu.*
 import kotlinx.android.synthetic.main.row_detail_productitems.view.*
@@ -88,39 +91,43 @@ class ActivityDetailMenu : AppCompatActivity() {
             val selectItemCategory = radioButton.text.toString()
 
 
-            if(detailMenuInfo != null && selectItemCategory != "")
-            {
-               //----- Clear -------
+            if (detailMenuInfo != null && selectItemCategory != "") {
+                //----- Clear -------
                 productItemInfo.clear()
                 productPriceSequence.clear()
 
                 //----- Setup Title Bar ---
                 brandItemsTitle.removeAllViews()
-                val title = LayoutInflater.from(this).inflate(R.layout.row_detail_productitems, null)
+                val title =
+                    LayoutInflater.from(this).inflate(R.layout.row_detail_productitems, null)
                 title.itemName.setTextColor(Color.BLUE)
                 title.itemName.text = "品名"
                 title.itemName.textSize = 16F
 
-                val lp2:TableRow.LayoutParams = TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT);
+                val lp2: TableRow.LayoutParams = TableRow.LayoutParams(
+                    TableRow.LayoutParams.MATCH_PARENT,
+                    TableRow.LayoutParams.MATCH_PARENT
+                );
                 lp2.setMargins(20, 0, 0, 0);
 
                 val tbrow = TableRow(this)
-                val selectProductCategory = detailMenuInfo.productCategory?.firstOrNull { it -> it.categoryName == selectItemCategory}
-                if(selectProductCategory!= null)
-                {
-                    selectProductCategory.priceTemplate?.recipeList?.sortedBy { it.itemSequence }?.forEach {
+                val selectProductCategory =
+                    detailMenuInfo.productCategory?.firstOrNull { it -> it.categoryName == selectItemCategory }
+                if (selectProductCategory != null) {
+                    selectProductCategory.priceTemplate?.recipeList?.sortedBy { it.itemSequence }
+                        ?.forEach {
 
-                        val t1v = TextView(this)
-                        t1v.text =  it.itemName
-                        t1v.setTextColor(Color.BLACK)
-                        t1v.textSize = 16F
-                        t1v.width = 20
-                        t1v.gravity = Gravity.CENTER
-                        t1v.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
-                        tbrow.addView(t1v,lp2)
+                            val t1v = TextView(this)
+                            t1v.text = it.itemName
+                            t1v.setTextColor(Color.BLACK)
+                            t1v.textSize = 16F
+                            t1v.width = 20
+                            t1v.gravity = Gravity.CENTER
+                            t1v.setBackgroundResource(R.drawable.shape_rectangle_notebook_cell)
+                            tbrow.addView(t1v, lp2)
 
-                        productPriceSequence.add( it.itemName)
-                    }
+                            productPriceSequence.add(it.itemName)
+                        }
 
                     title.itemAttribute.addView(tbrow)
                     brandItemsTitle.addView(title)
@@ -130,7 +137,14 @@ class ActivityDetailMenu : AppCompatActivity() {
                     selectProductCategory.productItems?.forEach {
 
                         val productDesc = it.productDescription ?: ""
-                        productItemInfo.add(ItemsLV_Products(it.productName,it.priceList, selectProductCategory?.priceTemplate.standAloneProduct, productDesc))
+                        productItemInfo.add(
+                            ItemsLV_Products(
+                                it.productName,
+                                it.priceList,
+                                selectProductCategory?.priceTemplate.standAloneProduct,
+                                productDesc
+                            )
+                        )
                     }
                     rcv_brandItems.adapter?.notifyDataSetChanged()
                 }
@@ -141,31 +155,64 @@ class ActivityDetailMenu : AppCompatActivity() {
         downloadBrandImageFromFireBaseGlide(selectBrandImageURL)
         downloadBrandProfileInfoFromFireBase(selectBrandName)
 
-        rcv_brandItems.layoutManager =  LinearLayoutManager(this)
-        rcv_brandItems.adapter = AdapterRC_Items( this, productItemInfo,productPriceSequence)
-        rcv_brandItems.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        rcv_brandItems.layoutManager = LinearLayoutManager(this)
+        rcv_brandItems.adapter = AdapterRC_Items(this, productItemInfo, productPriceSequence)
+        rcv_brandItems.addItemDecoration(
+            DividerItemDecoration(
+                this,
+                DividerItemDecoration.VERTICAL
+            )
+        )
 
         btnGroupBuyInvite.setOnClickListener {
 
+            //----- 20200817 MBY Chris ------
+            val buttonActions = arrayOf("揪團訂購", "自己訂購")
+            AlertDialog.Builder(this!!)
+                .setTitle("請選擇訂購方式")
+                .setItems(buttonActions, DialogInterface.OnClickListener { dialog, which ->
+                    when (which) {
+                        0 -> {
+                            dialog.dismiss()
+                            //---- 團購設定 -----
+                            if (menuExist == true) {
+                                val bundle = Bundle()
+                                bundle.putString("BRAND_NAME", selectBrandName)
+                                bundle.putString("BRAND_MENU_NUMBER", selectBrandMenuNumber)
+                                var intent = Intent(this, ActivitySetupDetailOrder::class.java)
+                                intent.putExtras(bundle)
+                                startActivity(intent)
+                            } else {
+                                AlertDialog.Builder(this@ActivityDetailMenu)
+                                    .setTitle("通知訊息")
+                                    .setMessage("$selectBrandMenuNumber 資訊不存在!!\n無法揪團!!")
+                                    .setPositiveButton("確定", null)
+                                    .create()
+                                    .show()
 
-            if(menuExist == true) {
-                val bundle = Bundle()
-                bundle.putString("BRAND_NAME", selectBrandName)
-                bundle.putString("BRAND_MENU_NUMBER", selectBrandMenuNumber)
-                var intent = Intent(this, ActivitySetupDetailOrder::class.java)
-                intent.putExtras(bundle)
-                startActivity(intent)
-            }
-            else
-            {
-                AlertDialog.Builder(this@ActivityDetailMenu)
-                    .setTitle("通知訊息")
-                    .setMessage("$selectBrandMenuNumber 資訊不存在!!\n無法揪團!!")
-                    .setPositiveButton("確定",null)
-                    .create()
-                    .show()
+                            }
+                        }
+                        1 -> {
+                            dialog.dismiss()
+                            AlertDialog.Builder(this@ActivityDetailMenu)
+                                .setTitle("通知訊息")
+                                .setMessage("Function Not Ready")
+                                .setPositiveButton("確定", null)
+                                .create()
+                                .show()
+                        }
+                        else -> {
+                            dialog.dismiss()
+                        }
+                    }
+                })
+                .setNegativeButton("取消") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
 
-            }
+
         }
 
     }
