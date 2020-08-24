@@ -154,7 +154,7 @@ class ShopFragment : Fragment(), IAdapterOnClick {
                 startActivity(intent)
 
             }
-            else {*/
+            else { */
                 val selectBrandItemName = lstBrand[pos].Name
                 val selectBrandItemImageURL = lstBrand[pos].ImageURL
 
@@ -164,7 +164,7 @@ class ShopFragment : Fragment(), IAdapterOnClick {
                 val intent = Intent(context, ActivityDetailMenu::class.java)
                 intent.putExtras(bundle)
                 startActivity(intent)
-           // }
+           //}
         }
     }
 

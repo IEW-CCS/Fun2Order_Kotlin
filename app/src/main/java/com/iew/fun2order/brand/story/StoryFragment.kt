@@ -30,9 +30,6 @@ class StoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val abc = ActivityOfficalMenu.getBrandName()
-        var abcc = 123
-
-
 
         val webSettings = webView.settings
         webSettings.javaScriptEnabled = true
