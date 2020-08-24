@@ -8,6 +8,13 @@
     <string name="title_setup">我的設定</string>
     <string name="title_shop">品牌列表</string>
 
+
+    <string name="title_brand_story">品牌故事</string>
+    <string name="title_brand_news">活動訊息</string>
+    <string name="title_brand_product">產品列表</string>
+    <string name="title_brand_location">尋找據點</string>
+
+
     <string name="privacy_policy">www.iew-pro.com</string>
 
     <!-- Facebook application ID and custom URL scheme (app ID prefixed by 'fb'). -->
@@ -151,6 +158,8 @@
     <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
     <string name="interstitial_ad_unit_id">ca-app-pub-3940256099942544/8691691433</string>
     <string name="native_ad_unit_id">ca-app-pub-3940256099942544/1044960115</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
     <!-- 真正用 Unit ID

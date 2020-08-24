@@ -30,6 +30,7 @@ import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
 import com.iew.fun2order.utility.NOTIFICATION_TYPE_ACTION_JOIN_ORDER
 import kotlinx.android.synthetic.main.activity_setup_detail_order_next.*
 import kotlinx.android.synthetic.main.alert_date_time_picker.view.*
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
 
@@ -378,65 +379,111 @@ class ActivitySetupNewOrderNext : AppCompatActivity() {
             }
     }
 
+
+    private fun sendMessageNewOrderFCMWithIOS (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER, timeStamp: String, msChuGroupDetailMsg:String)
+    {
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        var title = "團購邀請"
+        var body = if (msChuGroupDetailMsg == "") {
+            "由 ${userMenuOrder.orderOwnerName} 發起的團購邀請，請點擊通知以查看詳細資訊。"
+        } else {
+            "由 ${userMenuOrder.orderOwnerName} 的團購邀請 : \n$msChuGroupDetailMsg。"
+        }
+
+        val self = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+        notificationHeader.put("title", title)
+        notificationHeader.put("body", body)   //Enter your notification message
+
+        notificationBody.put("messageID", "")      //Enter
+        notificationBody.put("messageTitle", title)   //Enter
+        notificationBody.put("messageBody", body)    //Enter
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_ACTION_JOIN_ORDER )   //Enter
+        notificationBody.put("receiveTime", timeStamp)   //Enter
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
+        notificationBody.put("dueTime",    userMenuOrder.dueTime ?: "")   //Enter  20200515 addition
+        notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())   //Enter
+        notificationBody.put("messageDetail", msChuGroupDetailMsg?: "")   //Enter
+        notificationBody.put("isRead", "N")   //Enter
+        notificationBody.put("replyStatus", "")   //Enter
+        notificationBody.put("replyTime", "")   //Enter
+
+        // your notification message
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("notification", notificationHeader)
+        notification.put("data", notificationBody)
+
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+    }
+
+    private fun sendMessageNewOrderFCMWithAndroid (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER, timeStamp: String, msChuGroupDetailMsg:String)
+    {
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        var title = "團購邀請"
+        var body = if (msChuGroupDetailMsg == "") {
+            "由 ${userMenuOrder.orderOwnerName} 發起的團購邀請，請點擊通知以查看詳細資訊。"
+        } else {
+            "由 ${userMenuOrder.orderOwnerName} 的團購邀請 : \n$msChuGroupDetailMsg。"
+        }
+
+        val self = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+        notificationHeader.put("title", title)
+        notificationHeader.put("body", body)   //Enter your notification message
+
+        notificationBody.put("messageID", "")      //Enter
+        notificationBody.put("messageTitle", title)   //Enter
+        notificationBody.put("messageBody", body)    //Enter
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_ACTION_JOIN_ORDER )   //Enter
+        notificationBody.put("receiveTime", timeStamp)   //Enter
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
+        notificationBody.put("dueTime",    userMenuOrder.dueTime ?: "")   //Enter  20200515 addition
+        notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())   //Enter
+        notificationBody.put("messageDetail", msChuGroupDetailMsg?: "")   //Enter
+        notificationBody.put("isRead", "N")   //Enter
+        notificationBody.put("replyStatus", "")   //Enter
+        notificationBody.put("replyTime", "")   //Enter
+
+        // your notification message
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("data", notificationBody)
+
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+    }
+
+
     private fun sendFcmMessage(userMenuOrder: USER_MENU_ORDER, msChuGroupDetailMsg:String ) {
         val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
 
         ProgressDialogUtil.showProgressDialog(this,"處理中");
-        userMenuOrder.contentItems!!.forEach() {
 
-            val orderMember = it as ORDER_MEMBER
-            val topic = orderMember.memberTokenID
-            val notification = JSONObject()
-            val notificationHeader = JSONObject()
-            val notificationBody = JSONObject()
+        //-------Notification List 拆開成Android and IOS -----
+        val iosType =  userMenuOrder.contentItems?.filter { it -> it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == ""}
+        val androidType =  userMenuOrder.contentItems?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" }
+        val iosTypeList = iosType?.map { it -> it.memberTokenID !!}
+        val androidTypeList = androidType?.map { it -> it.memberTokenID!! }
 
-            var title = "團購邀請"
-            var body = if (msChuGroupDetailMsg == "") {
-                "由 ${userMenuOrder.orderOwnerName} 發起的團購邀請，請點擊通知以查看詳細資訊。"
-            } else {
-                "由 ${userMenuOrder.orderOwnerName} 的團購邀請 : \n$msChuGroupDetailMsg。"
-            }
+        sendMessageNewOrderFCMWithIOS (iosTypeList!!,userMenuOrder,  timeStamp, msChuGroupDetailMsg)
+        sendMessageNewOrderFCMWithAndroid (androidTypeList!!,userMenuOrder, timeStamp, msChuGroupDetailMsg)
 
-            val self = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-
-            if(orderMember.memberID == self)
-            {
-                body = "自己並參與的團購單"
-            }
-
-            notificationHeader.put("title", title)
-            notificationHeader.put("body", body)   //Enter your notification message
-
-            notificationBody.put("messageID", "")      //Enter
-            notificationBody.put("messageTitle", title)   //Enter
-            notificationBody.put("messageBody", body)    //Enter
-            notificationBody.put("notificationType", NOTIFICATION_TYPE_ACTION_JOIN_ORDER )   //Enter
-            notificationBody.put("receiveTime", timeStamp)   //Enter
-            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
-            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
-            notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
-            notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
-            notificationBody.put("dueTime",    userMenuOrder.dueTime ?: "")   //Enter  20200515 addition
-            notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
-            notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())   //Enter
-            notificationBody.put("messageDetail", msChuGroupDetailMsg?: "")   //Enter
-            notificationBody.put("isRead", "N")   //Enter
-            notificationBody.put("replyStatus", "")   //Enter
-            notificationBody.put("replyTime", "")   //Enter
-
-            // your notification message
-            notification.put("to", topic)
-            notification.put("notification", notificationHeader)
-            notification.put("data", notificationBody)
-
-            if(orderMember.orderContent.ostype ?: "iOS" =="Android")
-            {
-                notification.remove("notification")
-            }
-
-            Thread.sleep(100)
-            com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
-        }
         ProgressDialogUtil.dismiss()
     }
 }

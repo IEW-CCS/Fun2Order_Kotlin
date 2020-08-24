@@ -53,7 +53,6 @@ class HistoryFragment : Fragment()  {
         historyViewModel = ViewModelProviders.of(this).get(HistoryViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_history, container, false)
 
-
         // adapter
         adapterHistoryFragMamager = Adapter_HistoryFragMamager(childFragmentManager,requireContext())
 

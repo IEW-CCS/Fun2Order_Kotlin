@@ -41,6 +41,7 @@ import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.db.entity.entityLocalmage
 import com.iew.fun2order.db.firebase.USER_MENU
+import com.iew.fun2order.db.firebase.USER_MENU_ORDER
 import com.iew.fun2order.db.firebase.USER_PROFILE
 import com.iew.fun2order.nativead.TemplateView
 import com.iew.fun2order.ui.home.adapter.MenuItemAdapter
@@ -672,7 +673,7 @@ class HomeFragment : Fragment(), IAdapterOnClick {
         }
 
         Thread.sleep(100)
-        com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationSingle(notification)
 
     }
 }

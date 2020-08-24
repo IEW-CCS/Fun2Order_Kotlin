@@ -19,6 +19,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -26,15 +27,23 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.google.gson.Gson
+import com.iew.fun2order.MainActivity
+import com.iew.fun2order.ProgressDialogUtil
 import com.iew.fun2order.R
 import com.iew.fun2order.db.firebase.DETAIL_BRAND_PROFILE
 import com.iew.fun2order.db.firebase.DETAIL_MENU_INFORMATION
-import com.iew.fun2order.ui.my_setup.ActivityAddGroup
-import com.iew.fun2order.utility.ACTION_MODIFY_GROUP_REQUEST_CODE
+import com.iew.fun2order.db.firebase.ORDER_MEMBER
+import com.iew.fun2order.db.firebase.USER_MENU_ORDER
+import com.iew.fun2order.utility.DATATIMEFORMAT_NORMAL
+import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
+import com.iew.fun2order.utility.NOTIFICATION_TYPE_ACTION_JOIN_ORDER
 import info.hoang8f.android.segmented.SegmentedGroup
 import kotlinx.android.synthetic.main.activity_detail_menu.*
+import kotlinx.android.synthetic.main.activity_detail_menu.brandName
 import kotlinx.android.synthetic.main.row_detail_productitems.view.*
-import kotlinx.android.synthetic.main.row_shop_branditem.view.*
+import org.json.JSONArray
+import org.json.JSONObject
+import java.util.*
 
 
 /*
@@ -194,12 +203,17 @@ class ActivityDetailMenu : AppCompatActivity() {
                         }
                         1 -> {
                             dialog.dismiss()
-                            AlertDialog.Builder(this@ActivityDetailMenu)
-                                .setTitle("通知訊息")
-                                .setMessage("Function Not Ready")
-                                .setPositiveButton("確定", null)
-                                .create()
-                                .show()
+                            if (menuExist == true) {
+                                createSelfOrder()
+                            }
+                            else {
+                                AlertDialog.Builder(this@ActivityDetailMenu)
+                                    .setTitle("通知訊息")
+                                    .setMessage("$selectBrandMenuNumber 資訊不存在!!\n無法揪團!!")
+                                    .setPositiveButton("確定", null)
+                                    .create()
+                                    .show()
+                            }
                         }
                         else -> {
                             dialog.dismiss()
@@ -215,6 +229,82 @@ class ActivityDetailMenu : AppCompatActivity() {
 
         }
 
+    }
+
+
+    private fun createSelfOrder()
+    {
+
+        val userMenuOrder: USER_MENU_ORDER = USER_MENU_ORDER()
+        val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
+
+        val dueDayTime = Calendar.getInstance()
+        //---- Default 一天的時間
+        dueDayTime.add(Calendar.DAY_OF_YEAR,1)
+
+        val dueTimeStamp = DATATIMEFORMAT_NORMAL.format(dueDayTime.time)
+
+        if (selectBrandName == null || selectBrandMenuNumber == null) {
+            val notifyAlert = AlertDialog.Builder(this).create()
+            notifyAlert.setTitle("錯誤通知")
+            notifyAlert.setMessage("品牌資訊有誤!! 無法產生訂單。")
+            notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK")
+            { _, _ -> }
+            notifyAlert.show()
+            return
+        }
+
+        //Create USER_MENU_ORDER
+        userMenuOrder.brandName = selectBrandName
+        userMenuOrder.createTime = timeStamp
+        userMenuOrder.menuNumber = selectBrandMenuNumber
+        userMenuOrder.dueTime = dueTimeStamp
+        userMenuOrder.locations = null
+        userMenuOrder.orderNumber = "M$timeStamp"
+        userMenuOrder.orderOwnerID = FirebaseAuth.getInstance().currentUser!!.uid
+        userMenuOrder.orderOwnerName = FirebaseAuth.getInstance().currentUser!!.displayName
+        userMenuOrder.orderStatus = "READY"
+        userMenuOrder.orderTotalPrice = 0
+        userMenuOrder.orderTotalQuantity = 0
+        userMenuOrder.orderType = "F"
+        userMenuOrder.needContactInfoFlag = false
+
+        //----- 自己訂購只填寫自己的資訊 -----
+        val orderMember: ORDER_MEMBER = com.iew.fun2order.db.firebase.ORDER_MEMBER()
+        orderMember.memberID = FirebaseAuth.getInstance().currentUser!!.uid
+        orderMember.memberTokenID = com.iew.fun2order.MainActivity.localtokenID
+        orderMember.orderOwnerID = FirebaseAuth.getInstance().currentUser!!.uid
+        orderMember.orderContent.createTime = timeStamp
+        orderMember.orderContent.itemFinalPrice = 0
+        orderMember.orderContent.itemOwnerID = FirebaseAuth.getInstance().currentUser!!.uid
+        orderMember.orderContent.itemOwnerName = FirebaseAuth.getInstance().currentUser!!.displayName
+        orderMember.orderContent.itemQuantity = 0
+        orderMember.orderContent.itemSinglePrice = 0
+        orderMember.orderContent.location = ""
+        orderMember.orderContent.orderNumber = userMenuOrder.orderNumber
+        orderMember.orderContent.payCheckedFlag = false
+        orderMember.orderContent.payNumber = 0
+        orderMember.orderContent.payTime = ""
+        orderMember.orderContent.replyStatus = MENU_ORDER_REPLY_STATUS_WAIT
+        orderMember.orderContent.ostype = "Android"
+
+        userMenuOrder.contentItems!!.add(orderMember)
+
+
+        Firebase.database.reference.child("USER_MENU_ORDER")
+            .child(FirebaseAuth.getInstance().currentUser!!.uid)
+            .child(userMenuOrder.orderNumber.toString()).setValue(userMenuOrder)
+            .addOnSuccessListener {
+                sendFcmMessage(userMenuOrder, "自己訂購發起的訂單")
+                val intent = Intent()
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                intent.setClass(this, MainActivity::class.java)
+                startActivity(intent)
+                this.finish()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "團購單建立失敗!", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun downloadBrandImageFromFireBase(ImageURL:String?)
@@ -333,4 +423,110 @@ class ActivityDetailMenu : AppCompatActivity() {
     }
 
 
+
+    private fun sendMessageBrandOrderFCMWithIOS (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER, timeStamp: String, msChuGroupDetailMsg:String)
+    {
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        var title = "團購邀請"
+        var body = if (msChuGroupDetailMsg == "") {
+            "由 ${userMenuOrder.orderOwnerName} 發起的團購邀請，請點擊通知以查看詳細資訊。"
+        } else {
+            "由 ${userMenuOrder.orderOwnerName} 的團購邀請 : \n$msChuGroupDetailMsg。"
+        }
+
+        val self = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+        notificationHeader.put("title", title)
+        notificationHeader.put("body", body)   //Enter your notification message
+
+        notificationBody.put("messageID", "")      //Enter
+        notificationBody.put("messageTitle", title)   //Enter
+        notificationBody.put("messageBody", body)    //Enter
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_ACTION_JOIN_ORDER )   //Enter
+        notificationBody.put("receiveTime", timeStamp)   //Enter
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
+        notificationBody.put("dueTime",    userMenuOrder.dueTime ?: "")   //Enter  20200515 addition
+        notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())   //Enter
+        notificationBody.put("messageDetail", msChuGroupDetailMsg?: "")   //Enter
+        notificationBody.put("isRead", "N")   //Enter
+        notificationBody.put("replyStatus", "")   //Enter
+        notificationBody.put("replyTime", "")   //Enter
+
+        // your notification message
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("notification", notificationHeader)
+        notification.put("data", notificationBody)
+
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+    }
+
+    private fun sendMessageBrandOrderFCMWithAndroid (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER, timeStamp: String, msChuGroupDetailMsg:String)
+    {
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        var title = "團購邀請"
+        var body = if (msChuGroupDetailMsg == "") {
+            "由 ${userMenuOrder.orderOwnerName} 發起的團購邀請，請點擊通知以查看詳細資訊。"
+        } else {
+            "由 ${userMenuOrder.orderOwnerName} 的團購邀請 : \n$msChuGroupDetailMsg。"
+        }
+
+        val self = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+        notificationHeader.put("title", title)
+        notificationHeader.put("body", body)   //Enter your notification message
+
+        notificationBody.put("messageID", "")      //Enter
+        notificationBody.put("messageTitle", title)   //Enter
+        notificationBody.put("messageBody", body)    //Enter
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_ACTION_JOIN_ORDER )   //Enter
+        notificationBody.put("receiveTime", timeStamp)   //Enter
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
+        notificationBody.put("dueTime",    userMenuOrder.dueTime ?: "")   //Enter  20200515 addition
+        notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())   //Enter
+        notificationBody.put("messageDetail", msChuGroupDetailMsg?: "")   //Enter
+        notificationBody.put("isRead", "N")   //Enter
+        notificationBody.put("replyStatus", "")   //Enter
+        notificationBody.put("replyTime", "")   //Enter
+
+        // your notification message
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("data", notificationBody)
+
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+    }
+
+    private fun sendFcmMessage(userMenuOrder: USER_MENU_ORDER, msChuGroupDetailMsg:String ) {
+        val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
+
+        ProgressDialogUtil.showProgressDialog(this,"處理中");
+
+        //-------Notification List 拆開成Android and IOS -----
+        val iosType =  userMenuOrder.contentItems?.filter { it -> it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == ""}
+        val androidType =  userMenuOrder.contentItems?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" }
+        val iosTypeList = iosType?.map { it -> it.memberTokenID !!}
+        val androidTypeList = androidType?.map { it -> it.memberTokenID!! }
+
+        sendMessageBrandOrderFCMWithIOS (iosTypeList!!,userMenuOrder,  timeStamp, msChuGroupDetailMsg)
+        sendMessageBrandOrderFCMWithAndroid (androidTypeList!!,userMenuOrder, timeStamp, msChuGroupDetailMsg)
+
+        ProgressDialogUtil.dismiss()
+    }
 }

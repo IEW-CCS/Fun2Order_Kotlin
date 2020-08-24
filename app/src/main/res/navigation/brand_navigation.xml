@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/brand_navigation"
+    app:startDestination="@+id/navigation_brand_story">
+
+
+    <fragment
+        android:id="@+id/navigation_brand_story"
+        android:name="com.iew.fun2order.brand.story.StoryFragment"
+        android:label="@string/title_brand_story"
+        tools:layout="@layout/story_fragment" />
+
+    <fragment
+        android:id="@+id/navigation_brand_news"
+        android:name="com.iew.fun2order.brand.news.NewsFragment"
+        android:label="@string/title_brand_news"
+        tools:layout="@layout/news_fragment" />
+
+    <fragment
+        android:id="@+id/navigation_brand_product"
+        android:name="com.iew.fun2order.brand.product.ProductFragment"
+        android:label="@string/title_brand_product"
+        tools:layout="@layout/product_fragment" />
+
+    <fragment
+        android:id="@+id/navigation_brand_location"
+        android:name="com.iew.fun2order.brand.location.LocationFragment"
+        android:label="@string/title_brand_location"
+        tools:layout="@layout/store_location_fragment" />
+
+</navigation>

@@ -5,8 +5,11 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="replace"/>
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:node="replace" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:name=".Fun2Order"
@@ -17,13 +20,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="LockedOrientationActivity">
+        tools:ignore="LockedOrientationActivity"
+        android:usesCleartextTraffic="true">
 
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="@string/admob_app_id" />
-
 
         <activity
             android:name=".Splash"
@@ -31,6 +34,7 @@
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -54,12 +58,12 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.home.ActivityAddMenu"
-            android:windowSoftInputMode="stateAlwaysHidden"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".ui.home.ActivityAddMenuImage"
-            android:windowSoftInputMode="stateAlwaysHidden"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".LaunchScreen"
             android:screenOrientation="portrait" />
@@ -92,8 +96,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".order.AddProductActivity"
-            android:windowSoftInputMode="stateAlwaysHidden"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".order.OrderRecipe"
             android:screenOrientation="portrait" />
@@ -102,28 +106,23 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ScalableImageViewActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".ui.notifications.ActivityTapMessage"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".OrderNoteBookActivity"
-            android:screenOrientation="portrait"/>
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".order.ActivityShowMenuImage"
-            android:screenOrientation="portrait"/>
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.home.ActivityAddShareMeunMember"
-            android:screenOrientation="portrait"/>
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.notifications.ActivityTapShipping"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".ui.shop.ActivityDetailMenu"
             android:screenOrientation="portrait" />
@@ -154,23 +153,27 @@
         <activity
             android:name=".ui.shop.ActivityShoppingCartWithLimit"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".ui.shop.ActivitySuggest"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".ui.home.ActivitySetupNewOrder"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".ui.home.ActivitySetupNewOrderNext"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.my_setup.ActivityAddFriendByContact"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.shop.ActivityOfficalMenu"
             android:screenOrientation="portrait" />
 
         <service
             android:name=".MessagingService"
-            android:exported="false"
-            android:directBootAware="true">
+            android:directBootAware="true"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

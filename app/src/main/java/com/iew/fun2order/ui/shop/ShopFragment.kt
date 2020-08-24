@@ -141,15 +141,30 @@ class ShopFragment : Fragment(), IAdapterOnClick {
 
         if(type == 0 && sender == "Brand")
         {
-            val selectBrandItemName = lstBrand[pos].Name
-            val selectBrandItemImageURL = lstBrand[pos].ImageURL
+           /* if(pos == 1)
+            {
+                val selectBrandItemName = lstBrand[pos].Name
+                val selectBrandItemImageURL = lstBrand[pos].ImageURL
 
-            val bundle = Bundle()
-            bundle.putString("BRAND_NAME", selectBrandItemName)
-            bundle.putString("BRAND_IMAGE_URL", selectBrandItemImageURL)
-            val intent = Intent(context, ActivityDetailMenu::class.java)
-            intent.putExtras(bundle)
-            startActivity(intent)
+                val bundle = Bundle()
+                bundle.putString("BRAND_NAME", selectBrandItemName)
+                bundle.putString("BRAND_IMAGE_URL", selectBrandItemImageURL)
+                val intent = Intent(context, ActivityOfficalMenu::class.java)
+                intent.putExtras(bundle)
+                startActivity(intent)
+
+            }
+            else {*/
+                val selectBrandItemName = lstBrand[pos].Name
+                val selectBrandItemImageURL = lstBrand[pos].ImageURL
+
+                val bundle = Bundle()
+                bundle.putString("BRAND_NAME", selectBrandItemName)
+                bundle.putString("BRAND_IMAGE_URL", selectBrandItemImageURL)
+                val intent = Intent(context, ActivityDetailMenu::class.java)
+                intent.putExtras(bundle)
+                startActivity(intent)
+           // }
         }
     }
 

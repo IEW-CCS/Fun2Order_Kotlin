@@ -69,6 +69,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="30dp"
                 android:layout_weight="0.6"
+                android:inputType="textAutoComplete"
                 android:textColor="@android:color/primary_text_light" />
 
         </TableRow>
@@ -95,7 +96,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="30dp"
                 android:layout_weight="0.6"
-                android:inputType="textCapSentences|textMultiLine"
+                android:inputType="textMultiLine|textCapSentences|textAutoComplete"
                 android:maxLength="2000"
                 android:maxLines="4"
                 android:textColor="@android:color/primary_text_light" />

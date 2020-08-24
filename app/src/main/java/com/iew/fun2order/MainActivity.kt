@@ -1129,7 +1129,29 @@ class MainActivity : AppCompatActivity() {
         private val requestQueue: RequestQueue by lazy { Volley.newRequestQueue(instance!!.applicationContext) }
 
 
-        public fun sendFirebaseNotification(notification: JSONObject) {
+        public fun sendFirebaseNotificationSingle(notification: JSONObject) {
+            Log.e("TAG", "sendFirebaseNotification")
+            val jsonObjectRequest = object : JsonObjectRequest(FCM_API, notification,
+                Response.Listener<JSONObject> { response ->
+                    Log.i("TAG", "onResponse: $response")
+                },
+                Response.ErrorListener {
+                    Toast.makeText(instance, "Request error", Toast.LENGTH_LONG).show()
+                    Log.i("TAG", "onErrorResponse: Didn't work")
+                }) {
+
+                override fun getHeaders(): Map<String, String> {
+                    val params = HashMap<String, String>()
+                    params["Authorization"] = serverKey
+                    params["Content-Type"] = contentType
+                    return params
+                }
+            }
+            requestQueue.add(jsonObjectRequest)
+        }
+
+
+        public fun sendFirebaseNotificationMulti(notification: JSONObject) {
             Log.e("TAG", "sendFirebaseNotification")
             val jsonObjectRequest = object : JsonObjectRequest(FCM_API, notification,
                 Response.Listener<JSONObject> { response ->

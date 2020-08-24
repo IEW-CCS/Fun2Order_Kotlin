@@ -9,3 +9,8 @@ data class ItemsLV_Canditate (var Name: String, var imageName: String, var token
 
 
 
+@Parcelize
+data class ItemsLV_ContactAddFriend (var UUID: String,  var tokenid: String, var ContactName:String, var imagePath: String,  var imageURL: String, var displayName:String, var checked:Boolean): Parcelable
+
+
+

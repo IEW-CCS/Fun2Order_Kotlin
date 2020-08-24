@@ -41,6 +41,7 @@ import kotlinx.android.synthetic.main.alert_date_time_picker.view.*
 import kotlinx.android.synthetic.main.bottom_sheet_duetime_notice.view.*
 import kotlinx.android.synthetic.main.bottom_sheet_duetime_notice.view.buttonSubmit
 import kotlinx.android.synthetic.main.bottom_sheet_shipping_notice.view.*
+import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -467,111 +468,280 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
     }
 
 
+    private fun sendMessageNotifyFCMWithIOS (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER, message: String, timeStamp: String)
+    {
+
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        val title = "團購訊息"
+        val body = "來自團購主的訂單訊息，請點擊通知以查看詳細資訊。"
+
+        notificationHeader.put("title",title )
+        notificationHeader.put("body", body )
+
+        notificationBody.put("messageID", "")
+        notificationBody.put("messageTitle", title)
+        notificationBody.put("messageBody", body )
+
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_INFORMATION)
+        notificationBody.put("receiveTime", timeStamp)
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)
+        notificationBody.put("dueTime", userMenuOrder.dueTime)
+        notificationBody.put("brandName", userMenuOrder.brandName)
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
+        notificationBody.put("messageDetail", message)
+        notificationBody.put("isRead", "N")
+        notificationBody.put("replyStatus", "N")
+        notificationBody.put("replyTime", "N")
+
+        // your notification message
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("notification", notificationHeader)
+        notification.put("data", notificationBody)
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+    }
+
+    private fun sendMessageNotifyFCMWithAndroid (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER, message: String, timeStamp: String)
+    {
+
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        val title = "團購訊息"
+        val body = "來自團購主的訂單訊息，請點擊通知以查看詳細資訊。"
+
+        notificationHeader.put("title",title )
+        notificationHeader.put("body", body )
+
+        notificationBody.put("messageID", "")
+        notificationBody.put("messageTitle", title)
+        notificationBody.put("messageBody", body )
+
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_INFORMATION)
+        notificationBody.put("receiveTime", timeStamp)
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)
+        notificationBody.put("dueTime", userMenuOrder.dueTime)
+        notificationBody.put("brandName", userMenuOrder.brandName)
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
+        notificationBody.put("messageDetail", message)
+        notificationBody.put("isRead", "N")
+        notificationBody.put("replyStatus", "N")
+        notificationBody.put("replyTime", "N")
+
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("data", notificationBody)
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+    }
 
     private fun sendMessageNotifyFcmMessage(userMenuOrder: USER_MENU_ORDER, message: String) {
 
         val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
         val notificationMsgList = userMenuOrder.contentItems?.toMutableList()
         ProgressDialogUtil.showProgressDialog(context, "處理中");
-        notificationMsgList?.forEach {it->
-            val orderMember = it as ORDER_MEMBER
 
-            val topic = orderMember.memberTokenID
-            val notification = JSONObject()
-            val notificationHeader = JSONObject()
-            val notificationBody = JSONObject()
+        //-------Notification List 拆開成Android and IOS -----
+        val iosType = notificationMsgList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == ""}
+        val androidType = notificationMsgList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" }
 
-            val title = "團購訊息"
-            val body = "來自團購主的訂單訊息，請點擊通知以查看詳細資訊。"
+        val iosTypeList = iosType?.map { it -> it.memberTokenID !!}
+        val androidTypeList = androidType?.map { it -> it.memberTokenID!! }
 
-            notificationHeader.put("title",title )
-            notificationHeader.put("body", body )
-
-            notificationBody.put("messageID", "")
-            notificationBody.put("messageTitle", title)
-            notificationBody.put("messageBody", body )
-
-            notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_INFORMATION)
-            notificationBody.put("receiveTime", timeStamp)
-            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
-            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
-            notificationBody.put("menuNumber", userMenuOrder.menuNumber)
-            notificationBody.put("orderNumber", userMenuOrder.orderNumber)
-            notificationBody.put("dueTime", userMenuOrder.dueTime)
-            notificationBody.put("brandName", userMenuOrder.brandName)
-            notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
-            notificationBody.put("messageDetail", message)
-            notificationBody.put("isRead", "N")
-            notificationBody.put("replyStatus", "N")
-            notificationBody.put("replyTime", "N")
-
-            // your notification message
-            notification.put("to", topic)
-            notification.put("notification", notificationHeader)
-            notification.put("data", notificationBody)
-
-            if(orderMember.orderContent.ostype ?: "iOS" == "Android")
-            {
-                notification.remove("notification")
-            }
-            Thread.sleep(100)
-            com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
-        }
+        sendMessageNotifyFCMWithIOS (iosTypeList!!,userMenuOrder, message, timeStamp)
+        sendMessageNotifyFCMWithAndroid (androidTypeList!!,userMenuOrder, message, timeStamp)
         ProgressDialogUtil.dismiss()
     }
+
+    private fun sendMessageShippingFCMWithIOS (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER,  timeStamp: String, shippingDateTime: String?, shippingLocation: String?, shippingNote: String?)
+    {
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        val title = "到貨通知"
+        val body = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單發出了到貨通知"
+
+        notificationHeader.put("title", title)
+        notificationHeader.put("body", body)
+
+        notificationBody.put("messageID", "")
+        notificationBody.put("messageTitle", title)
+        notificationBody.put("messageBody", body )
+
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_SHIPPING_NOTICE)
+        notificationBody.put("receiveTime", timeStamp)
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)
+        notificationBody.put("dueTime", userMenuOrder.dueTime)
+        notificationBody.put("brandName", userMenuOrder.brandName)
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
+        notificationBody.put("messageDetail", shippingNote ?: "")
+        notificationBody.put("isRead", "N")
+        notificationBody.put("replyStatus", "N")
+        notificationBody.put("replyTime", "N")
+        notificationBody.put("shippingDate", shippingDateTime)
+        notificationBody.put("shippingLocation", shippingLocation)
+
+        // your notification message
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("notification", notificationHeader)
+        notification.put("data", notificationBody)
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+
+    }
+
+    private fun sendMessageShippingFCMWithAndroid (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER,  timeStamp: String, shippingDateTime: String?, shippingLocation: String?, shippingNote: String?)
+    {
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        val title = "到貨通知"
+        val body = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單發出了到貨通知"
+
+        notificationHeader.put("title", title)
+        notificationHeader.put("body", body)
+
+        notificationBody.put("messageID", "")
+        notificationBody.put("messageTitle", title)
+        notificationBody.put("messageBody", body )
+
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_SHIPPING_NOTICE)
+        notificationBody.put("receiveTime", timeStamp)
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)
+        notificationBody.put("dueTime", userMenuOrder.dueTime)
+        notificationBody.put("brandName", userMenuOrder.brandName)
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
+        notificationBody.put("messageDetail", shippingNote ?: "")
+        notificationBody.put("isRead", "N")
+        notificationBody.put("replyStatus", "N")
+        notificationBody.put("replyTime", "N")
+        notificationBody.put("shippingDate", shippingDateTime)
+        notificationBody.put("shippingLocation", shippingLocation)
+
+        // your notification message
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("data", notificationBody)
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+
+    }
+
 
     private fun sendNotifyShippingFcmMessage(userMenuOrder: USER_MENU_ORDER, shippingDateTime: String?, shippingLocation: String?, shippingNote: String?) {
 
         val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
         val notificationShippingMsgList = userMenuOrder.contentItems?.toMutableList()
         ProgressDialogUtil.showProgressDialog(context,"處理中");
-        notificationShippingMsgList?.forEach {it->
-            val orderMember = it as ORDER_MEMBER
 
-            val topic = orderMember.memberTokenID
-            val notification = JSONObject()
-            val notificationHeader = JSONObject()
-            val notificationBody = JSONObject()
+        //-------Notification List 拆開成Android and IOS -----
+        val iosType = notificationShippingMsgList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == ""}
+        val androidType = notificationShippingMsgList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" }
 
-            val title = "到貨通知"
-            val body = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單發出了到貨通知"
+        val iosTypeList = iosType?.map { it -> it.memberTokenID !!}
+        val androidTypeList = androidType?.map { it -> it.memberTokenID!! }
 
-            notificationHeader.put("title", title)
-            notificationHeader.put("body", body)
+        sendMessageShippingFCMWithIOS (iosTypeList!!,userMenuOrder,  timeStamp,shippingDateTime, shippingLocation, shippingNote)
+        sendMessageShippingFCMWithAndroid (androidTypeList!!,userMenuOrder, timeStamp, shippingDateTime, shippingLocation, shippingNote)
 
-            notificationBody.put("messageID", "")
-            notificationBody.put("messageTitle", title)
-            notificationBody.put("messageBody", body )
-
-            notificationBody.put("notificationType", NOTIFICATION_TYPE_SHIPPING_NOTICE)
-            notificationBody.put("receiveTime", timeStamp)
-            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
-            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
-            notificationBody.put("menuNumber", userMenuOrder.menuNumber)
-            notificationBody.put("orderNumber", userMenuOrder.orderNumber)
-            notificationBody.put("dueTime", userMenuOrder.dueTime)
-            notificationBody.put("brandName", userMenuOrder.brandName)
-            notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
-            notificationBody.put("messageDetail", shippingNote ?: "")
-            notificationBody.put("isRead", "N")
-            notificationBody.put("replyStatus", "N")
-            notificationBody.put("replyTime", "N")
-            notificationBody.put("shippingDate", shippingDateTime)
-            notificationBody.put("shippingLocation", shippingLocation)
-
-            // your notification message
-            notification.put("to", topic)
-            notification.put("notification", notificationHeader)
-            notification.put("data", notificationBody)
-            if(orderMember.orderContent.ostype ?: "iOS" == "Android")
-            {
-                notification.remove("notification")
-            }
-
-            Thread.sleep(100)
-            com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
-        }
         ProgressDialogUtil.dismiss()
+    }
+
+    private fun sendMessageCallableFCMWithIOS (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER, timeStamp: String)
+    {
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        val title = "團購催訂"
+        val body = "團購訂單的訂購時間即將截止，請儘速決定是否參與團購，謝謝"
+
+        notificationHeader.put("title", title)
+        notificationHeader.put("body", body)
+
+        notificationBody.put("messageID", "")
+        notificationBody.put("messageTitle", title)
+        notificationBody.put("messageBody", body)
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_DUETIME)
+        notificationBody.put("receiveTime", timeStamp)
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)
+        notificationBody.put("dueTime", userMenuOrder.dueTime)
+        notificationBody.put("brandName", userMenuOrder.brandName)
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
+        notificationBody.put("messageDetail", "")
+        notificationBody.put("isRead", "N")
+        notificationBody.put("replyStatus", "N")
+        notificationBody.put("replyTime", "N")
+
+        // your notification message
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("notification", notificationHeader)
+        notification.put("data", notificationBody)
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+
+    }
+
+    private fun sendMessageCallableFCMWithAndroid (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER, timeStamp: String)
+    {
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        val title = "團購催訂"
+        val body = "團購訂單的訂購時間即將截止，請儘速決定是否參與團購，謝謝"
+
+        notificationHeader.put("title", title)
+        notificationHeader.put("body", body)
+
+        notificationBody.put("messageID", "")
+        notificationBody.put("messageTitle", title)
+        notificationBody.put("messageBody", body)
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_DUETIME)
+        notificationBody.put("receiveTime", timeStamp)
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)
+        notificationBody.put("dueTime", userMenuOrder.dueTime)
+        notificationBody.put("brandName", userMenuOrder.brandName)
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
+        notificationBody.put("messageDetail", "")
+        notificationBody.put("isRead", "N")
+        notificationBody.put("replyStatus", "N")
+        notificationBody.put("replyTime", "N")
+
+        // your notification message
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("data", notificationBody)
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+
     }
 
     private fun sendCallableFcmMessage(userMenuOrder: USER_MENU_ORDER) {
@@ -579,58 +749,22 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
         val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
         val callableList = userMenuOrder.contentItems?.filter { it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT }?.toMutableList()
         ProgressDialogUtil.showProgressDialog(context,"處理中");
-        callableList?.forEach {it->
 
-            val orderMember = it as ORDER_MEMBER
-            val topic = orderMember.memberTokenID
-            val notification = JSONObject()
-            val notificationHeader = JSONObject()
-            val notificationBody = JSONObject()
+        //-------Notification List 拆開成Android and IOS -----
+        val iosType = callableList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == ""}
+        val androidType = callableList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" }
+        val iosTypeList = iosType?.map { it -> it.memberTokenID !!}
+        val androidTypeList = androidType?.map { it -> it.memberTokenID!! }
 
-            val title = "團購催訂"
-            val body = "團購訂單的訂購時間即將截止，請儘速決定是否參與團購，謝謝"
+        sendMessageCallableFCMWithIOS (iosTypeList!!,userMenuOrder,  timeStamp)
+        sendMessageCallableFCMWithAndroid (androidTypeList!!,userMenuOrder, timeStamp)
 
-            notificationHeader.put("title", title)
-            notificationHeader.put("body", body)
-
-            notificationBody.put("messageID", "")
-            notificationBody.put("messageTitle", title)
-            notificationBody.put("messageBody", body)
-            notificationBody.put("notificationType", NOTIFICATION_TYPE_MESSAGE_DUETIME)
-            notificationBody.put("receiveTime", timeStamp)
-            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)
-            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)
-            notificationBody.put("menuNumber", userMenuOrder.menuNumber)
-            notificationBody.put("orderNumber", userMenuOrder.orderNumber)
-            notificationBody.put("dueTime", userMenuOrder.dueTime)
-            notificationBody.put("brandName", userMenuOrder.brandName)
-            notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())
-            notificationBody.put("messageDetail", "")
-            notificationBody.put("isRead", "N")
-            notificationBody.put("replyStatus", "N")
-            notificationBody.put("replyTime", "N")
-
-            // your notification message
-            notification.put("to", topic)
-            notification.put("notification", notificationHeader)
-            notification.put("data", notificationBody)
-
-            if(orderMember.orderContent.ostype ?:"iOS" == "Android")
-            {
-                notification.remove("notification")
-            }
-
-            Thread.sleep(100)
-            com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
-        }
         ProgressDialogUtil.dismiss()
     }
 
     private fun changeDueTimeRequest(userMenuOrder: USER_MENU_ORDER) {
 
-
         val sCrTimeStamp: String = userMenuOrder.dueTime ?: DATATIMEFORMAT_NORMAL.format(Date())
-
         val item = LayoutInflater.from(requireContext()).inflate(R.layout.alert_date_time_picker, null)
         val mTabHost = item.tab_host
         mTabHost.setup()
@@ -720,56 +854,104 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
     }
 
 
+
+    private fun sendMessageChangeDueTimeFCMWithIOS (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER, timeStamp: String, newDueTime:String)
+    {
+
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        val title = "團購相關訊息"
+        val body = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單截止時間已更動"
+        val detail = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單截止時間已更動\n按下確定後將更新相關資料"
+
+        notificationHeader.put("title", title)
+        notificationHeader.put("body", body)
+
+        notificationBody.put("messageID", "")      //Enter
+        notificationBody.put("messageTitle", title)   //Enter
+        notificationBody.put("messageBody", body)    //Enter
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_CHANGE_DUETIME)   //Enter
+        notificationBody.put("receiveTime", timeStamp)   //Enter
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
+        notificationBody.put("dueTime", newDueTime)   //Enter
+        notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())   //Enter
+        notificationBody.put("messageDetail", detail)   //Enter
+        notificationBody.put("isRead", "Y")   //Enter
+        notificationBody.put("replyStatus", "N")   //Enter
+        notificationBody.put("replyTime", "N")   //Enter
+
+        // your notification message
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("notification", notificationHeader)
+        notification.put("data", notificationBody)
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+
+    }
+
+    private fun sendMessageChangeDueTimeFCMWithAndroid (notifyList : List<String>,userMenuOrder: USER_MENU_ORDER, timeStamp: String, newDueTime:String)
+    {
+        val notification = JSONObject()
+        val notificationHeader = JSONObject()
+        val notificationBody = JSONObject()
+
+        val title = "團購相關訊息"
+        val body = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單截止時間已更動"
+        val detail = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單截止時間已更動\n按下確定後將更新相關資料"
+
+        notificationHeader.put("title", title)
+        notificationHeader.put("body", body)
+
+        notificationBody.put("messageID", "")      //Enter
+        notificationBody.put("messageTitle", title)   //Enter
+        notificationBody.put("messageBody", body)    //Enter
+        notificationBody.put("notificationType", NOTIFICATION_TYPE_CHANGE_DUETIME)   //Enter
+        notificationBody.put("receiveTime", timeStamp)   //Enter
+        notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
+        notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
+        notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
+        notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
+        notificationBody.put("dueTime", newDueTime)   //Enter
+        notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
+        notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())   //Enter
+        notificationBody.put("messageDetail", detail)   //Enter
+        notificationBody.put("isRead", "Y")   //Enter
+        notificationBody.put("replyStatus", "N")   //Enter
+        notificationBody.put("replyTime", "N")   //Enter
+
+        // your notification message
+        notification.put("registration_ids", JSONArray(notifyList))
+        notification.put("data", notificationBody)
+
+        Thread.sleep(100)
+        com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
+
+    }
+
+
     private fun sendChangeDueTimeFcmMessage(userMenuOrder: USER_MENU_ORDER, newDueTime:String ) {
 
         userMenuOrder.dueTime = newDueTime
         val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
         val notificationChangeDueTimeList = userMenuOrder.contentItems?.toMutableList()
         ProgressDialogUtil.showProgressDialog(context, "處理中");
-        notificationChangeDueTimeList?.forEach {it->
-            val orderMember = it as ORDER_MEMBER
-            val topic = orderMember.memberTokenID
-            val notification = JSONObject()
-            val notificationHeader = JSONObject()
-            val notificationBody = JSONObject()
 
-            val title = "團購相關訊息"
-            val body = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單截止時間已更動"
-            val detail = "『${userMenuOrder.orderOwnerName}』對於 『${userMenuOrder.brandName}』的訂單截止時間已更動\n按下確定後將更新相關資料"
+        //-------Notification List 拆開成Android and IOS -----
+        val iosType = notificationChangeDueTimeList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == ""}
+        val androidType = notificationChangeDueTimeList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" }
+        val iosTypeList = iosType?.map { it -> it.memberTokenID !!}
+        val androidTypeList = androidType?.map { it -> it.memberTokenID!! }
 
-            notificationHeader.put("title", title)
-            notificationHeader.put("body", body)
+        sendMessageChangeDueTimeFCMWithIOS (iosTypeList!!,userMenuOrder,  timeStamp, newDueTime)
+        sendMessageChangeDueTimeFCMWithAndroid (androidTypeList!!,userMenuOrder, timeStamp, newDueTime)
 
-            notificationBody.put("messageID", "")      //Enter
-            notificationBody.put("messageTitle", title)   //Enter
-            notificationBody.put("messageBody", body)    //Enter
-            notificationBody.put("notificationType", NOTIFICATION_TYPE_CHANGE_DUETIME)   //Enter
-            notificationBody.put("receiveTime", timeStamp)   //Enter
-            notificationBody.put("orderOwnerID", userMenuOrder.orderOwnerID)   //Enter
-            notificationBody.put("orderOwnerName", userMenuOrder.orderOwnerName)   //Enter
-            notificationBody.put("menuNumber", userMenuOrder.menuNumber)   //Enter
-            notificationBody.put("orderNumber", userMenuOrder.orderNumber)   //Enter
-            notificationBody.put("dueTime", userMenuOrder.dueTime)   //Enter
-            notificationBody.put("brandName", userMenuOrder.brandName)   //Enter
-            notificationBody.put("attendedMemberCount", userMenuOrder.contentItems!!.count().toString())   //Enter
-            notificationBody.put("messageDetail", detail)   //Enter
-            notificationBody.put("isRead", "Y")   //Enter
-            notificationBody.put("replyStatus", "N")   //Enter
-            notificationBody.put("replyTime", "N")   //Enter
-
-            // your notification message
-            notification.put("to", topic)
-            notification.put("notification", notificationHeader)
-            notification.put("data", notificationBody)
-
-            if(orderMember.orderContent.ostype ?: "iOS" == "Android")
-            {
-                notification.remove("notification")
-            }
-
-            Thread.sleep(100)
-            com.iew.fun2order.MainActivity.sendFirebaseNotification(notification)
-        }
         ProgressDialogUtil.dismiss()
     }
 
@@ -802,8 +984,6 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
             // Log.e(FragmentActivity.TAG, "Exception: $e")
         }
     }
-
-
 
     private fun showNoticeAlert(title:String, Message:String)
     {
