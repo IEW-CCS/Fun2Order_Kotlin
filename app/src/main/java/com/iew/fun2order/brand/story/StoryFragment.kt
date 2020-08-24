@@ -29,7 +29,7 @@ class StoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val abc = ActivityOfficalMenu.getBrandName()
+        val brandName = ActivityOfficalMenu.getBrandName()
 
         val webSettings = webView.settings
         webSettings.javaScriptEnabled = true

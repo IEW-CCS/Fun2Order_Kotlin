@@ -23,7 +23,7 @@ class NewsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
 
-        val abc = ActivityOfficalMenu.getBrandName()
+        val brandName = ActivityOfficalMenu.getBrandName()
         var abcc = 123
 
     }

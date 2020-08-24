@@ -23,7 +23,7 @@ class LocationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val abc = ActivityOfficalMenu.getBrandName()
+        val brandName = ActivityOfficalMenu.getBrandName()
         var abcc = 123
     }
 
