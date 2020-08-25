@@ -146,12 +146,27 @@ class ActivitySetupDetailOrder : AppCompatActivity(), IAdapterOnClick, IAdapterC
                         val friendDB      = memoryContext.frienddao()
                         //----- 新建立的群組使用全部的好友資訊進去 ----
                         val friendList = friendDB.getFriendslist()
-                        val friendArray =  ArrayList(friendList)
-                        val bundle = Bundle()
-                        bundle.putStringArrayList("FriendList", friendArray)
-                        val intent = Intent(this, ActivityAddGroup::class.java)
-                        intent.putExtras(bundle)
-                        startActivityForResult(intent, ACTION_ADD_GROUP_REQUEST_CODE)
+                        if(friendList.count() == 0) {
+                            val alert = AlertDialog.Builder(this)
+                            with(alert) {
+                                setTitle("警告")
+                                setMessage("請至少加入一個好友在進行群組功能")
+                                setPositiveButton("確定") { dialog, _ ->
+                                    dialog.dismiss()
+                                }
+                            }
+                            val dialog = alert.create()
+                            dialog.show()
+                        }
+                        else {
+                            val friendList = friendDB.getFriendslist()
+                            val friendArray = ArrayList(friendList)
+                            val bundle = Bundle()
+                            bundle.putStringArrayList("FriendList", friendArray)
+                            val intent = Intent(this, ActivityAddGroup::class.java)
+                            intent.putExtras(bundle)
+                            startActivityForResult(intent, ACTION_ADD_GROUP_REQUEST_CODE)
+                        }
                     }
                 }
             }

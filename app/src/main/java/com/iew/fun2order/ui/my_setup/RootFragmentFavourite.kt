@@ -152,6 +152,7 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
         prepareFriendListShow()
 
         swipeFavorite!!.setOnRefreshListener {
+
             downloadFriendList(context!!)
             swipeFavorite!!.isRefreshing = false;
         }
@@ -216,6 +217,8 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                         addFriendProcess(it)
                         Thread.sleep(100)
                     }
+                    //------好友加入完以後更新一下好友清單 -----
+                    downloadFriendList(requireContext())
                 }
             }
 
@@ -255,7 +258,7 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
         val alert = AlertDialog.Builder(requireContext())
         with(alert) {
             setTitle("確認刪除好友")
-            setMessage(deleteItems.displayname)
+            setMessage("${deleteItems.displayname} \n${deleteItems.Name}")
             setPositiveButton("確定") { dialog, _ ->
                 val mFriends = friendDB.getFriendByName(deleteUUID)
                 mFriends.forEach()
@@ -330,6 +333,7 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                 }
                 else {
                     addFriendProcess(uuid)
+                    downloadFriendList(requireContext())
                     dialog.dismiss()
                 }
             }
@@ -729,7 +733,6 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                                 val friend: entityFriend = entityFriend(null, uuid)
                                 friendDB.insertRow(friend)
                                 addFriendToFireBase(uuid)
-                                prepareFriendListShow()
                                 sendoutAddFriendRequest(friendInfo.userID, friendInfo.tokenID, friendInfo.ostype)
 
                             } catch (e: Exception) {

@@ -75,6 +75,21 @@ class ActivityAddGroup : AppCompatActivity(), IAdapterCheckBOXChanged {
                 }
 
                 lstCandidate.clear()
+
+                if(friendList?.count() == 0 || friendList == null)
+                {
+                    val alert = AlertDialog.Builder(this)
+                    with(alert) {
+                        setTitle("警告")
+                        setMessage("請至少加入一個好友在進行群組功能")
+                        setPositiveButton("確定") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                    }
+                    val dialog = alert.create()
+                    dialog.show()
+                }
+
                 friendList?.forEach()
                 {   it ->
                     lstCandidate.add(ItemsLV_Canditate(it, "image1","", "","",false))

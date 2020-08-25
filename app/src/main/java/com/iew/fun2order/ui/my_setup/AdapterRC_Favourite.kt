@@ -50,6 +50,7 @@ class AdapterRC_Favourite(var context: Context, var lstItemsFavourite: List<Item
             if(friendInfo !=null)
             {
                 itemView.UserName.text = friendInfo.displayname
+                ItemsLV_Favourite.displayname = friendInfo.displayname
                 var bmp = BitmapFactory.decodeByteArray(friendInfo.image, 0, friendInfo.image.size)
                 itemView.UserView.setImageBitmap(bmp)
             }
@@ -61,6 +62,8 @@ class AdapterRC_Favourite(var context: Context, var lstItemsFavourite: List<Item
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         val value = dataSnapshot.getValue(USER_PROFILE::class.java)
                         itemView.UserName.text = value?.userName
+                        ItemsLV_Favourite.displayname = value?.userName ?: ""
+
                         itemView.UserView.setImageDrawable(getImageDrawable(ItemsLV_Favourite.imageName))
                         val photoURL = value?.photoURL
                         if (photoURL != null) {

@@ -519,8 +519,8 @@ class ActivityDetailMenu : AppCompatActivity() {
         ProgressDialogUtil.showProgressDialog(this,"處理中");
 
         //-------Notification List 拆開成Android and IOS -----
-        val iosType =  userMenuOrder.contentItems?.filter { it -> it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == ""}
-        val androidType =  userMenuOrder.contentItems?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" }
+        val iosType =  userMenuOrder.contentItems?.filter { it -> (it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == "") || it.memberTokenID != ""}
+        val androidType =  userMenuOrder.contentItems?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" || it.memberTokenID != ""}
         val iosTypeList = iosType?.map { it -> it.memberTokenID !!}
         val androidTypeList = androidType?.map { it -> it.memberTokenID!! }
 
