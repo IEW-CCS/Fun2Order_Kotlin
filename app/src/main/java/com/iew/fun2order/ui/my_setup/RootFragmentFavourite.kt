@@ -214,11 +214,10 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     val addMembersList = data.extras?.get("AddMembers") as ArrayList<String> ?: arrayList()
                     addMembersList.forEach() {
-                        addFriendProcess(it)
-                        Thread.sleep(100)
+                        addFriendProcessWithContact(it)
+                        Thread.sleep(10)
                     }
-                    //------好友加入完以後更新一下好友清單 -----
-                    downloadFriendList(requireContext())
+                    addFriendToFireBaseWithContact(requireContext())
                 }
             }
 
@@ -333,7 +332,6 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                 }
                 else {
                     addFriendProcess(uuid)
-                    downloadFriendList(requireContext())
                     dialog.dismiss()
                 }
             }
@@ -463,6 +461,7 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                     userProfile.friendList?.add(friendUUID)
                 }
                 dataSnapshot.ref.setValue(userProfile)
+                downloadFriendList(requireContext())
             }
             override fun onCancelled(error: DatabaseError) {
 
@@ -553,6 +552,8 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
         val myRef = Firebase.database.getReference(queryPath)
         friendDB.deleteall()
         friendImageDB.deleteall()
+
+        ProgressDialogUtil.showProgressDialog(requireContext(),"處理中");
         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (snapshot in dataSnapshot.children) {
@@ -598,10 +599,10 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                     })
                 }
                 prepareFriendListShow()
+                ProgressDialogUtil.dismiss()
             }
             override fun onCancelled(error: DatabaseError) {
-                // Failed to read value
-                // Log.w(TAG, "Failed to read value.", error.toException())
+                ProgressDialogUtil.dismiss()
             }
         })
     }
@@ -732,6 +733,7 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
                                 // Insert DB
                                 val friend: entityFriend = entityFriend(null, uuid)
                                 friendDB.insertRow(friend)
+                                //----單筆的資料直接更新FireBase就好----
                                 addFriendToFireBase(uuid)
                                 sendoutAddFriendRequest(friendInfo.userID, friendInfo.tokenID, friendInfo.ostype)
 
@@ -749,6 +751,90 @@ class RootFragmentFavourite() : Fragment(),IAdapterOnClick {
             }
 
             override fun onCancelled(error: DatabaseError) {
+            }
+        })
+    }
+
+    private fun addFriendProcessWithContact(uuid : String)
+    {
+        //---- 確認加入好友的當下 馬上去檢查 FireBase Exist info ----
+        val queryPath = "USER_PROFILE/$uuid"
+        val database = Firebase.database
+        val myRef = database.getReference(queryPath)
+        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    val alert = AlertDialog.Builder(context!!)
+                    with(alert) {
+                        setTitle("錯誤通知")
+                        setMessage("$uuid \n資料不存在 !!")
+                        setPositiveButton("確定") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                    }
+                    val dialog = alert.create()
+                    dialog.show()
+
+                } else {
+                    val friendInfo = dataSnapshot.getValue(USER_PROFILE::class.java)
+                    if (friendInfo == null) {
+                        Toast.makeText(activity, "$uuid 好友資料格式錯誤!!", Toast.LENGTH_LONG).show()
+                    } else {
+                        val mFriends = friendDB.getFriendByName(uuid)
+                        if (mFriends.count() > 0) {
+                            val alert = AlertDialog.Builder(context!!)
+                            with(alert) {
+                                setMessage("$uuid \n好友已經存在 !!")
+                                setPositiveButton("確定") { dialog, _ ->
+                                    dialog.dismiss()
+                                }
+                            }
+                            val dialog = alert.create()
+                            dialog.show()
+                        } else {
+                            try {
+                                val friend: entityFriend = entityFriend(null, uuid)
+                                friendDB.insertRow(friend)
+                                //--- 串連的資料先更新到DB再回頭更新Firebase ---
+                                sendoutAddFriendRequest(friendInfo.userID, friendInfo.tokenID, friendInfo.ostype)
+                            } catch (e: Exception) {
+                                val errorMsg = e.localizedMessage
+                                Toast.makeText(activity, errorMsg.toString(), Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
+    }
+
+    private fun addFriendToFireBaseWithContact( context: Context) {
+        val uuid = FirebaseAuth.getInstance().currentUser!!.uid.toString()
+        val queryPath = "USER_PROFILE/$uuid"
+        val myRef = Firebase.database.getReference(queryPath)
+        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val userProfile = dataSnapshot.getValue(USER_PROFILE::class.java)
+                if (userProfile != null) {
+                    val oriFriend = userProfile.friendList ?: listOf<String>()
+                    val newFriend = friendDB.getFriendslist()
+                    if (newFriend.count() > 0) {
+                        val diff = newFriend - oriFriend
+                        diff?.forEach {
+                            userProfile.friendList?.add(it)
+                        }
+                    }
+                }
+                dataSnapshot.ref.setValue(userProfile)
+
+                //---- 更新完以後重新下載更新資料 -----
+                downloadFriendList(requireContext())
+            }
+            override fun onCancelled(error: DatabaseError) {
+
             }
         })
     }

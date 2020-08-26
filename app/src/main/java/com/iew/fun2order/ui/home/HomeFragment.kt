@@ -158,7 +158,7 @@ class HomeFragment : Fragment(), IAdapterOnClick {
         imageAboutInfo.setOnClickListener {
             // your code here
 
-            val versionInfo = "Version: ${BuildConfig.VERSION_NAME} - Beta 2"
+            val versionInfo = "Version: ${BuildConfig.VERSION_NAME}"
             val item = LayoutInflater.from(this.context).inflate(R.layout.alert_about_us, null)
             val version = item.findViewById<TextView>(R.id.textViewVersion)
             val welcome =  item.findViewById<TextView>(R.id.textViewWelcome)
