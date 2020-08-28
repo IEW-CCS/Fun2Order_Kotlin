@@ -9,6 +9,7 @@ data class BRAND_CATEGORY_ITEM(
     var brandIconImage  : String = "",
     var brandName       : String = "",
     var brandSubCategory: String = "",
+    var coworkBrandFlag : Boolean? = null,
     var updateDateTime  : String = "",
     var imageDownloadUrl: String? = null
 
@@ -20,6 +21,7 @@ data class BRAND_CATEGORY_ITEM(
             "brandIconImage" to brandIconImage,
             "brandName" to brandName,
             "brandSubCategory" to brandSubCategory,
+            "coworkBrandFlag" to coworkBrandFlag,
             "updateDateTime" to updateDateTime,
             "imageDownloadUrl" to imageDownloadUrl
         )

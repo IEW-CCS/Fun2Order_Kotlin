@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.gms.ads.AdListener
@@ -19,6 +20,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.iew.fun2order.R
 import com.iew.fun2order.db.firebase.BRAND_CATEGORY_ITEM
+import com.iew.fun2order.db.firebase.DETAIL_BRAND_PROFILE
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import info.hoang8f.android.segmented.SegmentedGroup
 import kotlinx.android.synthetic.main.fragment_shop.view.*
@@ -56,7 +58,9 @@ class ShopFragment : Fragment(), IAdapterOnClick {
                     lstBrand.clear()
                     val lstMatch = mapBrandInfo.values.filter { it -> it!!.brandName!!.contains(query!!) }
                     lstMatch?.forEach {
-                        lstBrand.add(ItemsLV_Brand(it!!.brandName, null, it!!.brandIconImage))
+                        val imageURL = it!!.imageDownloadUrl ?: ""
+                        val coWorkFlg = it!!.coworkBrandFlag ?: false
+                        lstBrand.add(ItemsLV_Brand(it!!.brandName, null, imageURL, coWorkFlg))
                     }
                     root.rcvShopMenuItems!!.adapter!!.notifyDataSetChanged()
                 return false
@@ -74,7 +78,9 @@ class ShopFragment : Fragment(), IAdapterOnClick {
                     lstBrand.clear()
                     val lstMatch = mapBrandInfo.values.filter { it -> it!!.brandName!!.contains(newText!!) }
                     lstMatch?.forEach {
-                        lstBrand.add(ItemsLV_Brand(it!!.brandName, null, it!!.brandIconImage))
+                        val imageURL = it!!.imageDownloadUrl ?: ""
+                        val coWorkFlg = it!!.coworkBrandFlag ?: false
+                        lstBrand.add(ItemsLV_Brand(it!!.brandName, null, imageURL, coWorkFlg))
                     }
                     root.rcvShopMenuItems!!.adapter!!.notifyDataSetChanged()
                 }
@@ -100,7 +106,8 @@ class ShopFragment : Fragment(), IAdapterOnClick {
 
             selectBrandCategoryList?.forEach {
                 val imageURL = it!!.imageDownloadUrl ?: ""
-               lstBrand.add(ItemsLV_Brand(it!!.brandName,null, imageURL))
+                val coWorkFlg = it!!.coworkBrandFlag ?: false
+                lstBrand.add(ItemsLV_Brand(it!!.brandName,null, imageURL, coWorkFlg))
             }
 
             lstTmpBrand = lstBrand.toMutableList()
@@ -141,20 +148,46 @@ class ShopFragment : Fragment(), IAdapterOnClick {
 
         if(type == 0 && sender == "Brand")
         {
-           /* if(pos == 1)
+            if(lstBrand[pos].CoWorkFlag == true)
             {
                 val selectBrandItemName = lstBrand[pos].Name
-                val selectBrandItemImageURL = lstBrand[pos].ImageURL
+                if (selectBrandItemName != null) {
+                    val detailProfileURL = "/DETAIL_BRAND_PROFILE/$selectBrandItemName"
+                    val database = Firebase.database
+                    val myRef = database.getReference(detailProfileURL)
+                    myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onCancelled(p0: DatabaseError) {
 
-                val bundle = Bundle()
-                bundle.putString("BRAND_NAME", selectBrandItemName)
-                bundle.putString("BRAND_IMAGE_URL", selectBrandItemImageURL)
-                val intent = Intent(context, ActivityOfficalMenu::class.java)
-                intent.putExtras(bundle)
-                startActivity(intent)
+                            val notifyAlert = AlertDialog.Builder(requireContext()).create()
+                            notifyAlert.setTitle("錯誤")
+                            notifyAlert.setMessage("品牌資訊${selectBrandItemName}下載失敗!!")
+                            notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _, _ -> }
+                            notifyAlert.show()
+                        }
+                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+                            val brandProfile = dataSnapshot.getValue(DETAIL_BRAND_PROFILE::class.java)
+                            if(brandProfile!= null) {
+                                val bundle = Bundle()
+                                bundle.putString("BRAND_NAME", selectBrandItemName)
+                                bundle.putParcelable("BRAND_PROFILE", brandProfile)
+                                val intent = Intent(context, ActivityOfficalMenu::class.java)
+                                intent.putExtras(bundle)
+                                startActivity(intent)
 
+                            }
+                            else
+                            {
+                                val notifyAlert = AlertDialog.Builder(requireContext()).create()
+                                notifyAlert.setTitle("錯誤")
+                                notifyAlert.setMessage("品牌資訊${selectBrandItemName}不存在!!")
+                                notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _, _ -> }
+                                notifyAlert.show()
+                            }
+                        }
+                    })
+                }
             }
-            else { */
+            else {
                 val selectBrandItemName = lstBrand[pos].Name
                 val selectBrandItemImageURL = lstBrand[pos].ImageURL
 
@@ -164,7 +197,7 @@ class ShopFragment : Fragment(), IAdapterOnClick {
                 val intent = Intent(context, ActivityDetailMenu::class.java)
                 intent.putExtras(bundle)
                 startActivity(intent)
-           //}
+           }
         }
     }
 

@@ -16,6 +16,8 @@ data class DETAIL_MENU_INFO_PRODUCT_ITEM(
     var productCategory:   String = "",
     @SerializedName("productName")
     var productName:   String = "",
+    @SerializedName("productWebURL")
+    var productWebURL:   String? = null,
     @SerializedName("recipeRelation")
     var recipeRelation:List<DETAIL_MENU_INFO_RECIPE_RELATION>? = listOf<DETAIL_MENU_INFO_RECIPE_RELATION>(),
     @SerializedName("productDescription")

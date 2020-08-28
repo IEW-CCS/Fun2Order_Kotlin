@@ -4,9 +4,9 @@ import android.annotation.SuppressLint
 import java.text.SimpleDateFormat
 
 const val ACTION_CAMERA_REQUEST_CODE = 100
-const val ACTION_ALBUM_REQUEST_CODE  = 200
-const val ACTION_CONTACT_REQUEST_CODE  = 300
-
+const val ACTION_ALBUM_REQUEST_CODE  = 101
+const val ACTION_CONTACT_REQUEST_CODE  = 102
+const val ACTION_LOCATION_REQUEST_CODE  = 103
 
 const val ACTION_ADD_GROUP_REQUEST_CODE = 300
 const val ACTION_MODIFY_GROUP_REQUEST_CODE = 301

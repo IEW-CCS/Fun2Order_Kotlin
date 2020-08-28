@@ -3,6 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.iew.fun2order">
 
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the "MyLocation" functionality.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission
@@ -20,9 +26,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="LockedOrientationActivity"
-        android:usesCleartextTraffic="true">
-
+        android:usesCleartextTraffic="true"
+        tools:ignore="LockedOrientationActivity">
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
@@ -165,9 +170,14 @@
         <activity
             android:name=".ui.my_setup.ActivityAddFriendByContact"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".ui.shop.ActivityOfficalMenu"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".brand.news.ActivityNewsDetail"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".brand.product.ActivityProductDetailInfo"
             android:screenOrientation="portrait" />
 
         <service

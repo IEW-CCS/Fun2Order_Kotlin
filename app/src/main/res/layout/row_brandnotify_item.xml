@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal" android:layout_width="fill_parent"
+    android:descendantFocusability="blocksDescendants"
+    android:focusable="false"
+    android:focusableInTouchMode="false"
+    android:layout_height="120dp"
+    android:padding="8dp"
+    tools:ignore="MissingDefaultResource">
+
+    <ImageView
+        android:id="@+id/imageBrandNotify"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="5dp"
+        />
+
+    <LinearLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:gravity="center"
+        android:weightSum="1.0"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textNotifyTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0.4"
+            android:gravity="center_vertical"
+            android:textColor="@android:color/primary_text_light"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/textNotifySubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0.3"
+            android:gravity="center_vertical"
+            android:textColor="@android:color/secondary_text_light"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textSize="18dp" />
+
+        <TextView
+            android:id="@+id/textUpdateTime"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0.3"
+            android:gravity="center_vertical"
+            android:textColor="@android:color/tertiary_text_light"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textSize="18dp" />
+    </LinearLayout>
+
+</LinearLayout>

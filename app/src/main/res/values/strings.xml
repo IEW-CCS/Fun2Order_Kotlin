@@ -11,8 +11,8 @@
 
     <string name="title_brand_story">品牌故事</string>
     <string name="title_brand_news">活動訊息</string>
-    <string name="title_brand_product">產品列表</string>
-    <string name="title_brand_location">尋找據點</string>
+    <string name="title_brand_product">產品訊息</string>
+    <string name="title_brand_location">分店資訊及訂購</string>
 
 
     <string name="privacy_policy">www.iew-pro.com</string>
@@ -158,7 +158,7 @@
     <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
     <string name="interstitial_ad_unit_id">ca-app-pub-3940256099942544/8691691433</string>
     <string name="native_ad_unit_id">ca-app-pub-3940256099942544/1044960115</string>
-
+    <string name="title_activity_maps">Map</string>
 
 
     <!-- 真正用 Unit ID

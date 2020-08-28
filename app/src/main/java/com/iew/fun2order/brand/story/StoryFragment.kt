@@ -28,14 +28,14 @@ class StoryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val brandName = ActivityOfficalMenu.getBrandName()
-
-        val webSettings = webView.settings
-        webSettings.javaScriptEnabled = true
-       // setContentView (webView)
-        webView.webViewClient = WebViewClient()
-        webView.loadUrl("http://www.shangyulin.com.tw/about.php")
-
+        if(ActivityOfficalMenu.getBrandProfile() != null) {
+            val brandStoryURL = ActivityOfficalMenu.getBrandProfile()!!.brandStoryURL ?: ""
+            if(brandStoryURL != "") {
+                val webSettings = webView.settings
+                webSettings.javaScriptEnabled = true
+                webView.webViewClient = WebViewClient()
+                webView.loadUrl(brandStoryURL)
+            }
+        }
     }
 }

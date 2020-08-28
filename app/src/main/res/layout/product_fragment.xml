@@ -1,13 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     tools:context=".brand.product.ProductFragment">
 
-    <TextView
+    <ImageView
+        android:id="@+id/eventMenuBannerImageView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Product" />
+        android:layout_height="120dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:scaleType="center" />
 
-</FrameLayout>
+    <HorizontalScrollView
+        android:id="@+id/menuHoriScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start|center_vertical"
+        android:layout_margin="10dp"
+        app:layout_constraintTop_toBottomOf="@id/eventMenuBannerImageView"
+        app:layout_constraintBottom_toTopOf="@+id/menuBrandItemsTitle" >
+
+        <info.hoang8f.android.segmented.SegmentedGroup
+            android:id="@+id/segmentedItemCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:orientation="horizontal"
+            ads:sc_border_width="2dp"
+            ads:sc_corner_radius="5dp">
+
+        </info.hoang8f.android.segmented.SegmentedGroup>
+
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:id="@+id/menuBrandItemsTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/menuHoriScroll"
+        app:layout_constraintBottom_toTopOf="@+id/rcv_menuBrandItems">
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcv_menuBrandItems"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintTop_toBottomOf="@id/menuBrandItemsTitle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
