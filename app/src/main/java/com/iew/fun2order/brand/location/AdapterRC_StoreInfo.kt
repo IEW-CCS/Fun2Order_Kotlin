@@ -47,7 +47,7 @@ class AdapterRC_StoreInfo(var context: Context, var lstStoreInfo : List<DETAIL_B
             itemView.textBrandStoreAddress.text = ItemStore.storeAddress ?: ""
             itemView.imageBrandStore.setOnClickListener {
 
-
+                IAdapterOnClick.onClick("MAP",adapterPosition,0)
 
             }
             if ( ItemStore.storeImageURL != null) {

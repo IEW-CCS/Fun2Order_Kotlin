@@ -2,6 +2,7 @@ package com.iew.fun2order.brand.location
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.*
 import android.os.Build
@@ -23,6 +24,7 @@ import com.google.firebase.ktx.Firebase
 import com.iew.fun2order.ProgressDialogUtil
 import com.iew.fun2order.R
 import com.iew.fun2order.db.firebase.DETAIL_BRAND_STORE
+import com.iew.fun2order.ui.home.ActivityItemList
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.ui.shop.ActivityOfficalMenu
 import com.iew.fun2order.utility.ACTION_LOCATION_REQUEST_CODE
@@ -96,12 +98,26 @@ class LocationFragment : Fragment(), IAdapterOnClick {
         }
 
         rcv_StoreInfo.layoutManager = LinearLayoutManager(requireContext())
-        rcv_StoreInfo.adapter = AdapterRC_StoreInfo(requireContext(), storeInfoSortedlist,oriLocation,  this)
+        rcv_StoreInfo.adapter = AdapterRC_StoreInfo(requireContext(), storeInfoSortedlist, oriLocation,  this)
         rcv_StoreInfo.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
     }
 
     override fun onClick(sender: String, pos: Int, type: Int) {
 
+        if(type == 0) {
+            when (sender) {
+                "MAP" -> {
+                    val bound = Bundle();
+                    bound.putParcelable("STORE_INFO", storeInfoSortedlist[pos])
+                    val I = Intent(context, MapsActivity::class.java)
+                    I.putExtras(bound);
+                    startActivity(I)
+                }
+                "全部項目" -> {
+
+                }
+            }
+        }
     }
 
     private fun getLocationFromAddress( strAddress : String) : GeoPoint?{
