@@ -116,7 +116,7 @@ class ProductFragment : Fragment(), IAdapterOnClick {
                 //----- Setup Title Bar ---
                 menuBrandItemsTitle.removeAllViews()
                 val title =
-                    LayoutInflater.from(context).inflate(R.layout.row_detail_productitems, null)
+                    LayoutInflater.from(context).inflate(R.layout.row_detail_producttitle, null)
                 title.itemName.setTextColor(Color.BLUE)
                 title.itemName.text = "品名"
                 title.itemName.textSize = 16F

@@ -143,7 +143,7 @@ class ActivityJoinOrderDetail : AppCompatActivity(), IAdapterOnClick {
 
                 //----- Setup Title Bar ---
                 brandItemsTitle.removeAllViews()
-                val title = LayoutInflater.from(this).inflate(R.layout.row_detail_productitems_with_carts, null)
+                val title = LayoutInflater.from(this).inflate(R.layout.row_detail_producttitle_with_carts, null)
                 title.itemName.setTextColor(Color.BLUE)
                 title.itemName.text = "品名"
                 title.itemName.textSize = 16F
