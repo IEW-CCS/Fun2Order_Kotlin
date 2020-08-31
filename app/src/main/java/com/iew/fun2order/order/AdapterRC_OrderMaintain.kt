@@ -82,7 +82,7 @@ class AdapterRC_OrderMaintain(
                 myRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                        itemView.orderMaintain_UserName.text = value?.userName
+                        itemView.orderMaintain_UserName.text = value?.userName ?: ""
                         itemView.orderMaintain_UserView.setImageDrawable(getImageDrawable("image_default_member"))
                         val photoURL = value?.photoURL
                         if(photoURL!= null)

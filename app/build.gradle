@@ -18,8 +18,8 @@ android {
         applicationId "com.iew.fun2order"
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 9
-        versionName "1.3.0"
+        versionCode 10
+        versionName "1.4.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }

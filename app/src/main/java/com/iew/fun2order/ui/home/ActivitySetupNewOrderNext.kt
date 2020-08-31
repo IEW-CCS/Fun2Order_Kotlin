@@ -12,7 +12,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -20,10 +19,8 @@ import com.iew.fun2order.MainActivity
 import com.iew.fun2order.ProgressDialogUtil
 import com.iew.fun2order.R
 import com.iew.fun2order.db.firebase.ORDER_MEMBER
-import com.iew.fun2order.db.firebase.RECIPE
 import com.iew.fun2order.db.firebase.USER_MENU
 import com.iew.fun2order.db.firebase.USER_MENU_ORDER
-import com.iew.fun2order.ui.home.ActivityItemList
 import com.iew.fun2order.ui.my_setup.ItemsLV_Canditate
 import com.iew.fun2order.utility.DATATIMEFORMAT_NORMAL
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
@@ -365,7 +362,7 @@ class ActivitySetupNewOrderNext : AppCompatActivity() {
 
         Firebase.database.reference.child("USER_MENU_ORDER").child(FirebaseAuth.getInstance().currentUser!!.uid).child(userMenuOrder.orderNumber.toString()).setValue(userMenuOrder)
             .addOnSuccessListener {
-                sendFcmMessage(userMenuOrder, detailMessage)
+                sendOrderReqFcmMessage(userMenuOrder, detailMessage)
 
                 val intent = Intent()
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
@@ -470,7 +467,7 @@ class ActivitySetupNewOrderNext : AppCompatActivity() {
     }
 
 
-    private fun sendFcmMessage(userMenuOrder: USER_MENU_ORDER, msChuGroupDetailMsg:String ) {
+    private fun sendOrderReqFcmMessage(userMenuOrder: USER_MENU_ORDER, msChuGroupDetailMsg:String ) {
         val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
 
         ProgressDialogUtil.showProgressDialog(this,"處理中");

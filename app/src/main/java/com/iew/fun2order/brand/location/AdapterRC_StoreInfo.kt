@@ -46,10 +46,13 @@ class AdapterRC_StoreInfo(var context: Context, var lstStoreInfo : List<DETAIL_B
             itemView.textBrandStorePhoneNumber.text = ItemStore.storePhoneNumber ?: ""
             itemView.textBrandStoreAddress.text = ItemStore.storeAddress ?: ""
             itemView.imageBrandStore.setOnClickListener {
-
                 IAdapterOnClick.onClick("MAP",adapterPosition,0)
-
             }
+
+            itemView.btnOrderAction.setOnClickListener {
+                IAdapterOnClick.onClick("ACTION",adapterPosition,0)
+            }
+
             if ( ItemStore.storeImageURL != null) {
                 var requestOptions = RequestOptions()
                 requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(30))

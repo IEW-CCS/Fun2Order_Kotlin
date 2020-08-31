@@ -180,7 +180,6 @@ class RootFragmentGroup() : Fragment(),IAdapterOnClick {
                         recycleViewRefresh()
 
                     } else {
-
                         //----- 新建立的群組使用全部的好友資訊進去 ----
                         val friendList = friendDB.getFriendslist()
                         if(friendList.count() == 0) {

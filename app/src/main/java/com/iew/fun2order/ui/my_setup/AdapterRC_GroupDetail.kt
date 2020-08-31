@@ -96,7 +96,7 @@ class AdapterRC_GroupDetail(var context: Context, var lstItemsGroupDetail: List<
                 myRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                        itemView.UserName.text = value?.userName
+                        itemView.UserName.text = value?.userName ?: ""
                         itemView.UserView.setImageDrawable(getImageDrawable(ItemsLV_Favourite.imageName))
                         val photoURL = value?.photoURL
                         if (photoURL != null) {

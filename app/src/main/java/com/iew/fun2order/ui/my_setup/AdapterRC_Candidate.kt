@@ -65,7 +65,7 @@ class AdapterRC_Candidate(
                 myRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                        itemView.SelectFriendName.text = value?.userName
+                        itemView.SelectFriendName.text = value?.userName ?: ""
                         itemView.SelectFriendView.setImageDrawable(getImageDrawable(ItemsLV_AddMember.imageName))
 
                         ItemsLV_AddMember.tokenid = value?.tokenID.toString()

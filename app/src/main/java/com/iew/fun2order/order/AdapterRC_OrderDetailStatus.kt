@@ -108,7 +108,7 @@ class AdapterRC_OrderDetailStatus(
                 myRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                        itemView.orderDetail_Accept_UserName.text = value?.userName
+                        itemView.orderDetail_Accept_UserName.text = value?.userName ?: ""
                         itemView.orderDetail_Accept_UserView.setImageDrawable(getImageDrawable("image_default_member"))
                         val photoURL = value?.photoURL
                         if(photoURL!= null) {
@@ -213,7 +213,7 @@ class AdapterRC_OrderDetailStatus(
                 myRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                        itemView.orderDetail_Others_UserName.text = value?.userName
+                        itemView.orderDetail_Others_UserName.text = value?.userName ?: ""
                         itemView.orderDetail_Others_UserView.setImageDrawable(getImageDrawable("image_default_member"))
                         val photoURL = value?.photoURL
                         if(photoURL!= null) {

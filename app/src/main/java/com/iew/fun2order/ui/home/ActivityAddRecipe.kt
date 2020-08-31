@@ -537,7 +537,7 @@ class ActivityAddRecipe: AppCompatActivity() {
                 mItemList.clear()
                 mRecyclerViewRecipeItems!!.adapter!!.notifyDataSetChanged()
 
-                value!!.menuRecipes!!.forEach {
+                value?.menuRecipes?.forEach {
                     var item_data_list :MutableList<String> = mutableListOf()
                     var item_data_select_list :MutableList<Boolean> = mutableListOf()
                     it.recipeItems!!.forEach {
@@ -577,16 +577,15 @@ class ActivityAddRecipe: AppCompatActivity() {
                 mItemList.clear()
                 mRecyclerViewRecipeItems!!.adapter!!.notifyDataSetChanged()
 
-                value!!.menuRecipes!!.forEach {
-                    var item_data_list :MutableList<String> = mutableListOf()
-                    var item_data_select_list :MutableList<Boolean> = mutableListOf()
+                value?.menuRecipes?.forEach {
+                    val item_data_list :MutableList<String> = mutableListOf()
+                    val item_data_select_list :MutableList<Boolean> = mutableListOf()
                     it.recipeItems!!.forEach {
                         item_data_list.add(it.recipeName.toString())
                         item_data_select_list.add(true)
                     }
-                    var recipeItemListData = RecipeItemListData(it.recipeCategory,item_data_list, item_data_select_list,it.allowedMultiFlag)
+                    val recipeItemListData = RecipeItemListData(it.recipeCategory,item_data_list, item_data_select_list,it.allowedMultiFlag)
                     mItemList.add(recipeItemListData)
-
                     mRecyclerViewRecipeItems!!.adapter!!.notifyDataSetChanged()
                 }
 

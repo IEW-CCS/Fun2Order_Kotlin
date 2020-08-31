@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.iew.fun2order.R
+import com.iew.fun2order.db.dao.friendDAO
 import com.iew.fun2order.db.dao.groupDAO
 import com.iew.fun2order.db.dao.group_detailDAO
 import com.iew.fun2order.db.database.AppDatabase
@@ -34,7 +35,7 @@ class ActivitySetupNewOrder : AppCompatActivity(), IAdapterOnClick, IAdapterChec
     private lateinit var addGroupICON : Bitmap
     private lateinit var groupDB : groupDAO
     private lateinit var groupdetailDB : group_detailDAO
-
+    private lateinit var friendDB : friendDAO
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +71,25 @@ class ActivitySetupNewOrder : AppCompatActivity(), IAdapterOnClick, IAdapterChec
         val DBContext = AppDatabase(this)
         groupDB = DBContext.groupdao()
         groupdetailDB = DBContext.groupdetaildao()
+
+        val memoryContext = MemoryDatabase(this)
+        friendDB      = memoryContext.frienddao()
+        val friendList = friendDB.getFriendslist()
+        if(friendList.count() == 0)
+        {
+            val alert = androidx.appcompat.app.AlertDialog.Builder(this)
+            with(alert) {
+                setTitle("警告")
+                setMessage("目前好友清單中沒有任何好友\n請至我的設定->我的好友中加入好友\n再進行揪團功能")
+                setPositiveButton("確定") { dialog, _ ->
+                    dialog.dismiss()
+                }
+            }
+            val dialog = alert.create()
+            dialog.show()
+        }
+
+
 
         groupDB.getAllGroup().observe(this, Observer {
             val list = it as ArrayList<entityGroup>
@@ -134,34 +154,15 @@ class ActivitySetupNewOrder : AppCompatActivity(), IAdapterOnClick, IAdapterChec
                             listCandidate.add(ItemsLV_Canditate(it, "image_default_member","","","",true))
                         }
                         recycleViewRefresh()
-                    }
-                    else
-                    {
-                        val memoryContext = MemoryDatabase(this)
-                        val friendDB      = memoryContext.frienddao()
-                        //----- 新建立的群組使用全部的好友資訊進去 ----
+                    } else {
+
                         val friendList = friendDB.getFriendslist()
-                        if(friendList.count() == 0) {
-                            val alert = AlertDialog.Builder(this)
-                            with(alert) {
-                                setTitle("警告")
-                                setMessage("請至少加入一個好友在進行群組功能")
-                                setPositiveButton("確定") { dialog, _ ->
-                                    dialog.dismiss()
-                                }
-                            }
-                            val dialog = alert.create()
-                            dialog.show()
-                        }
-                        else {
-                            val friendList = friendDB.getFriendslist()
-                            val friendArray = ArrayList(friendList)
-                            val bundle = Bundle()
-                            bundle.putStringArrayList("FriendList", friendArray)
-                            val intent = Intent(this, ActivityAddGroup::class.java)
-                            intent.putExtras(bundle)
-                            startActivityForResult(intent, ACTION_ADD_GROUP_REQUEST_CODE)
-                        }
+                        val friendArray = ArrayList(friendList)
+                        val bundle = Bundle()
+                        bundle.putStringArrayList("FriendList", friendArray)
+                        val intent = Intent(this, ActivityAddGroup::class.java)
+                        intent.putExtras(bundle)
+                        startActivityForResult(intent, ACTION_ADD_GROUP_REQUEST_CODE)
                     }
                 }
             }

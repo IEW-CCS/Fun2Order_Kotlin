@@ -61,7 +61,7 @@ class AdapterRC_Favourite(var context: Context, var lstItemsFavourite: List<Item
                 myRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         val value = dataSnapshot.getValue(USER_PROFILE::class.java)
-                        itemView.UserName.text = value?.userName
+                        itemView.UserName.text = value?.userName ?: ""
                         ItemsLV_Favourite.displayname = value?.userName ?: ""
 
                         itemView.UserView.setImageDrawable(getImageDrawable(ItemsLV_Favourite.imageName))

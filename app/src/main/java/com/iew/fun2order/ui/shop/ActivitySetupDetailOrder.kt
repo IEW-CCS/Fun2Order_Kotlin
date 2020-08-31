@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.iew.fun2order.R
+import com.iew.fun2order.db.dao.friendDAO
 import com.iew.fun2order.db.dao.groupDAO
 import com.iew.fun2order.db.dao.group_detailDAO
 import com.iew.fun2order.db.database.AppDatabase
@@ -35,6 +36,7 @@ class ActivitySetupDetailOrder : AppCompatActivity(), IAdapterOnClick, IAdapterC
 
     private lateinit var groupDB : groupDAO
     private lateinit var groupdetailDB : group_detailDAO
+    private lateinit var friendDB : friendDAO
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +49,11 @@ class ActivitySetupDetailOrder : AppCompatActivity(), IAdapterOnClick, IAdapterC
         val selectBrandName = intent.extras?.getString("BRAND_NAME")
         val selectBrandMenuNumber = intent.extras?.getString("BRAND_MENU_NUMBER")
 
+        val storeName = intent.extras?.getString("STORE_NAME") ?: ""
+        val storeAddress = intent.extras?.getString("STORE_ADDRESS") ?: ""
+        val storePhoneNumber = intent.extras?.getString("STORE_PHONE_NUMBER") ?: ""
+
+
         brandName.text = selectBrandName
 
         recyclerViewGroupList!!.layoutManager =  LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL ,false)
@@ -54,7 +61,6 @@ class ActivitySetupDetailOrder : AppCompatActivity(), IAdapterOnClick, IAdapterC
 
         recyclerViewGroupMemberList!!.layoutManager =  LinearLayoutManager(this, LinearLayoutManager.VERTICAL ,false)
         recyclerViewGroupMemberList!!.adapter = AdapterRC_Candidate(this, listCandidate, this)
-
 
         btnNext.setOnClickListener {
 
@@ -64,6 +70,9 @@ class ActivitySetupDetailOrder : AppCompatActivity(), IAdapterOnClick, IAdapterC
             val bundle = Bundle()
             bundle.putString("BRAND_NAME", selectBrandName)
             bundle.putString("BRAND_MENU_NUMBER", selectBrandMenuNumber)
+            bundle.putString("STORE_NAME", storeName)
+            bundle.putString("STORE_ADDRESS", storeAddress)
+            bundle.putString("STORE_PHONE_NUMBER", storePhoneNumber)
             bundle.putParcelableArrayList("INVITE_TOKEN_ID", ArrayList(checkedList))
 
             val intent = Intent(this, ActivitySetupDetailOrderNext::class.java)
@@ -71,9 +80,28 @@ class ActivitySetupDetailOrder : AppCompatActivity(), IAdapterOnClick, IAdapterC
             startActivity(intent)
 
         }
+
         val DBContext = AppDatabase(this)
         groupDB = DBContext.groupdao()
         groupdetailDB = DBContext.groupdetaildao()
+
+        val memoryContext = MemoryDatabase(this)
+        friendDB      = memoryContext.frienddao()
+
+        val friendList = friendDB.getFriendslist()
+        if(friendList.count() == 0)
+        {
+            val alert = AlertDialog.Builder(this)
+            with(alert) {
+                setTitle("警告")
+                setMessage("目前好友清單中沒有任何好友\n請至我的設定->我的好友中加入好友\n再進行揪團功能")
+                setPositiveButton("確定") { dialog, _ ->
+                    dialog.dismiss()
+                }
+            }
+            val dialog = alert.create()
+            dialog.show()
+        }
 
         groupDB.getAllGroup().observe(this, Observer {
             val list = it as ArrayList<entityGroup>
@@ -136,37 +164,20 @@ class ActivitySetupDetailOrder : AppCompatActivity(), IAdapterOnClick, IAdapterC
 
                         val groupMemberList = groupdetailDB.getMemberByGroupID(selectGroupID)
                         groupMemberList.forEach() {
-                            listCandidate.add(ItemsLV_Canditate(it, "image_default_member","","","",true))
+                            listCandidate.add(
+                                ItemsLV_Canditate(it, "image_default_member", "", "", "", true)
+                            )
                         }
                         recycleViewRefresh()
-                    }
-                    else
-                    {
-                        val memoryContext = MemoryDatabase(this)
-                        val friendDB      = memoryContext.frienddao()
-                        //----- 新建立的群組使用全部的好友資訊進去 ----
+                    } else {
+
                         val friendList = friendDB.getFriendslist()
-                        if(friendList.count() == 0) {
-                            val alert = AlertDialog.Builder(this)
-                            with(alert) {
-                                setTitle("警告")
-                                setMessage("請至少加入一個好友在進行群組功能")
-                                setPositiveButton("確定") { dialog, _ ->
-                                    dialog.dismiss()
-                                }
-                            }
-                            val dialog = alert.create()
-                            dialog.show()
-                        }
-                        else {
-                            val friendList = friendDB.getFriendslist()
-                            val friendArray = ArrayList(friendList)
-                            val bundle = Bundle()
-                            bundle.putStringArrayList("FriendList", friendArray)
-                            val intent = Intent(this, ActivityAddGroup::class.java)
-                            intent.putExtras(bundle)
-                            startActivityForResult(intent, ACTION_ADD_GROUP_REQUEST_CODE)
-                        }
+                        val friendArray = ArrayList(friendList)
+                        val bundle = Bundle()
+                        bundle.putStringArrayList("FriendList", friendArray)
+                        val intent = Intent(this, ActivityAddGroup::class.java)
+                        intent.putExtras(bundle)
+                        startActivityForResult(intent, ACTION_ADD_GROUP_REQUEST_CODE)
                     }
                 }
             }
@@ -175,11 +186,9 @@ class ActivitySetupDetailOrder : AppCompatActivity(), IAdapterOnClick, IAdapterC
     }
 
     override fun onChanged(SelectPosition: Int, checked: Boolean) {
-
         listCandidate[SelectPosition].checked = checked
         recyclerViewGroupMemberList.adapter?.notifyDataSetChanged()
     }
-
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

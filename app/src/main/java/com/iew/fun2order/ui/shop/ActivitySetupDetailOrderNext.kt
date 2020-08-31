@@ -12,7 +12,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -20,7 +19,7 @@ import com.iew.fun2order.MainActivity
 import com.iew.fun2order.ProgressDialogUtil
 import com.iew.fun2order.R
 import com.iew.fun2order.db.firebase.ORDER_MEMBER
-import com.iew.fun2order.db.firebase.RECIPE
+import com.iew.fun2order.db.firebase.STORE_INFO
 import com.iew.fun2order.db.firebase.USER_MENU_ORDER
 import com.iew.fun2order.ui.home.ActivityItemList
 import com.iew.fun2order.ui.my_setup.ItemsLV_Canditate
@@ -41,6 +40,9 @@ class ActivitySetupDetailOrderNext : AppCompatActivity() {
 
     private  var selectBrandName: String? = null
     private  var selectBrandMenuNumber:String? = null
+    private  var storeName: String? = null
+    private  var storeAddress:String? = null
+    private  var storePhoneNumber:String? = null
     private  var inviteTokenList: ArrayList<ItemsLV_Canditate>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +53,9 @@ class ActivitySetupDetailOrderNext : AppCompatActivity() {
         locations.clear()
         selectBrandName = intent.extras?.getString("BRAND_NAME")
         selectBrandMenuNumber = intent.extras?.getString("BRAND_MENU_NUMBER")
+        storeName = intent.extras?.getString("STORE_NAME") ?: ""
+        storeAddress = intent.extras?.getString("STORE_ADDRESS") ?: ""
+        storePhoneNumber = intent.extras?.getString("STORE_PHONE_NUMBER") ?: ""
         inviteTokenList = intent.extras?.getParcelableArrayList<ItemsLV_Canditate>("INVITE_TOKEN_ID")
 
         brandName.text = selectBrandName
@@ -302,6 +307,12 @@ class ActivitySetupDetailOrderNext : AppCompatActivity() {
         userMenuOrder.orderType="F"
         userMenuOrder.needContactInfoFlag = checkContactInfo.isChecked
 
+        val storeInfo : STORE_INFO = STORE_INFO()
+        storeInfo.storeName = storeName ?: ""
+        storeInfo.storeAddress = storeAddress ?: ""
+        storeInfo.storePhoneNumber = storePhoneNumber ?: ""
+        userMenuOrder.storeInfo= storeInfo
+
 
         //Create
         //--- 如果自己也要參加 把自己加進去 -------
@@ -357,7 +368,7 @@ class ActivitySetupDetailOrderNext : AppCompatActivity() {
 
         Firebase.database.reference.child("USER_MENU_ORDER").child(FirebaseAuth.getInstance().currentUser!!.uid).child(userMenuOrder.orderNumber.toString()).setValue(userMenuOrder)
             .addOnSuccessListener {
-                sendFcmMessage(userMenuOrder, detailMessage)
+                sendOrderReqFcmMessage(userMenuOrder, detailMessage)
 
                 val intent = Intent()
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
@@ -460,7 +471,7 @@ class ActivitySetupDetailOrderNext : AppCompatActivity() {
         com.iew.fun2order.MainActivity.sendFirebaseNotificationMulti(notification)
     }
 
-    private fun sendFcmMessage(userMenuOrder: USER_MENU_ORDER, msChuGroupDetailMsg:String ) {
+    private fun sendOrderReqFcmMessage(userMenuOrder: USER_MENU_ORDER, msChuGroupDetailMsg:String ) {
         val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
 
         ProgressDialogUtil.showProgressDialog(this,"處理中");
@@ -474,4 +485,5 @@ class ActivitySetupDetailOrderNext : AppCompatActivity() {
         sendMessageDetailOrderFCMWithAndroid (androidTypeList!!,userMenuOrder, timeStamp, msChuGroupDetailMsg)
         ProgressDialogUtil.dismiss()
     }
+
 }
