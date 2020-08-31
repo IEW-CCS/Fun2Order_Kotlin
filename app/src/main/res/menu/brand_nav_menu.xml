@@ -4,14 +4,14 @@
 
     <item
         android:id="@+id/navigation_brand_story"
-        android:icon="@drawable/tabbaritem_shop"
+        android:icon="@drawable/tabbaritem_brandstory"
         android:title="@string/title_brand_story"
         app:actionViewClass="com.tooltip.TooltipActionView"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/navigation_brand_news"
-        android:icon="@drawable/tabbaritem_native"
+        android:icon="@drawable/tabbaritem_brandevent"
         android:title="@string/title_brand_news"
         app:actionViewClass="com.tooltip.TooltipActionView"
         app:showAsAction="ifRoom"
@@ -20,7 +20,7 @@
 
     <item
         android:id="@+id/navigation_brand_product"
-        android:icon="@drawable/tabbaritem_notify"
+        android:icon="@drawable/tabbaritem_brandmenu"
         android:title="@string/title_brand_product"
         app:actionViewClass="com.tooltip.TooltipActionView"
         app:showAsAction="ifRoom"
@@ -28,7 +28,7 @@
 
     <item
         android:id="@+id/navigation_brand_location"
-        android:icon="@drawable/tabbaritem_history"
+        android:icon="@drawable/tabbaritem_brandstore"
         android:title="@string/title_brand_location"
         app:actionViewClass="com.tooltip.TooltipActionView"
         app:showAsAction="ifRoom"
