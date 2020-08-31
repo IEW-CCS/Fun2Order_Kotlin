@@ -657,8 +657,8 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
         ProgressDialogUtil.showProgressDialog(context,"處理中");
 
         //-------Notification List 拆開成Android and IOS -----
-        val iosType = notificationShippingMsgList?.filter { it -> (it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == "") || it.memberTokenID != ""}
-        val androidType = notificationShippingMsgList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" || it.memberTokenID != ""}
+        val iosType = notificationShippingMsgList?.filter { it -> (it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == "") && it.memberTokenID != ""}
+        val androidType = notificationShippingMsgList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" && it.memberTokenID != ""}
 
         val iosTypeList = iosType?.map { it -> it.memberTokenID !!}
         val androidTypeList = androidType?.map { it -> it.memberTokenID!! }
@@ -753,8 +753,8 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
         ProgressDialogUtil.showProgressDialog(context,"處理中");
 
         //-------Notification List 拆開成Android and IOS -----
-        val iosType = callableList?.filter { it -> (it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == "") || it.memberTokenID != ""}
-        val androidType = callableList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" || it.memberTokenID != "" }
+        val iosType = callableList?.filter { it -> (it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == "") && it.memberTokenID != ""}
+        val androidType = callableList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" && it.memberTokenID != "" }
         val iosTypeList = iosType?.map { it -> it.memberTokenID !!}
         val androidTypeList = androidType?.map { it -> it.memberTokenID!! }
 
@@ -946,8 +946,8 @@ class RootFragmentOrderStatus(var _menuorder: USER_MENU_ORDER) : Fragment() {
         ProgressDialogUtil.showProgressDialog(context, "處理中");
 
         //-------Notification List 拆開成Android and IOS -----
-        val iosType = notificationChangeDueTimeList?.filter { it -> (it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == "") || it.memberTokenID != ""}
-        val androidType = notificationChangeDueTimeList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" || it.memberTokenID != "" }
+        val iosType = notificationChangeDueTimeList?.filter { it -> (it.orderContent.ostype ?: "iOS"  == "iOS" || it.orderContent.ostype ?: "iOS"  == "") && it.memberTokenID != ""}
+        val androidType = notificationChangeDueTimeList?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" && it.memberTokenID != "" }
         val iosTypeList = iosType?.map { it -> it.memberTokenID !!}
         val androidTypeList = androidType?.map { it -> it.memberTokenID!! }
 

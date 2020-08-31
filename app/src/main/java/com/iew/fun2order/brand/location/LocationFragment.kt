@@ -438,7 +438,7 @@ class LocationFragment : Fragment(), IAdapterOnClick {
     private fun sendOrderReqFcmMessage(userMenuOrder: USER_MENU_ORDER, msChuGroupDetailMsg:String ) {
         val timeStamp: String = DATATIMEFORMAT_NORMAL.format(Date())
         ProgressDialogUtil.showProgressDialog(requireContext(),"處理中");
-        val androidType =  userMenuOrder.contentItems?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" || it.memberTokenID != ""}
+        val androidType =  userMenuOrder.contentItems?.filter { it -> it.orderContent.ostype ?: "iOS"  == "Android" && it.memberTokenID != ""}
         val androidTypeList = androidType?.map { it -> it.memberTokenID!! }
         sendMessageDetailOrderFCMWithAndroid (androidTypeList!!,userMenuOrder, timeStamp, msChuGroupDetailMsg)
         ProgressDialogUtil.dismiss()
