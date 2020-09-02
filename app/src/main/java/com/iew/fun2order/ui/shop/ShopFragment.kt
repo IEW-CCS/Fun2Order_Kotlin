@@ -148,19 +148,6 @@ class ShopFragment : Fragment(), IAdapterOnClick {
 
         if(type == 0 && sender == "Brand")
         {
-
-            val selectBrandItemName = lstBrand[pos].Name
-            val selectBrandItemImageURL = lstBrand[pos].ImageURL
-
-            val bundle = Bundle()
-            bundle.putString("BRAND_NAME", selectBrandItemName)
-            bundle.putString("BRAND_IMAGE_URL", selectBrandItemImageURL)
-            val intent = Intent(context, ActivityDetailMenu::class.java)
-            intent.putExtras(bundle)
-            startActivity(intent)
-
-
-            /*  remark for Version 1.4.0 Used
             if(lstBrand[pos].CoWorkFlag == true)
             {
                 val selectBrandItemName = lstBrand[pos].Name
@@ -210,7 +197,7 @@ class ShopFragment : Fragment(), IAdapterOnClick {
                 val intent = Intent(context, ActivityDetailMenu::class.java)
                 intent.putExtras(bundle)
                 startActivity(intent)
-           }*/
+           }
         }
     }
 
