@@ -338,6 +338,7 @@ class ActivityJoinOrderStandard : AppCompatActivity(), IAdapterOnClick {
                     bundle.putParcelableArrayList("SELECT_PRODUCT_LIST", ArrayList(lstSelectedProduct))
                     bundle.putParcelableArrayList("BEFORE_PRODUCT_LIST", ArrayList(lstoldProduct))
 
+
                     val intent = Intent(this, ActivityShoppingCartWithLimit::class.java)
                     intent.putExtras(bundle)
                     startActivityForResult(intent, ACTION_SHIPPING_CAR_CODE)

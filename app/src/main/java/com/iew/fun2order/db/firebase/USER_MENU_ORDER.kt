@@ -23,7 +23,14 @@ data class USER_MENU_ORDER(
     var orderTotalQuantity: Int = 0,
     var orderType: String? = "",
     var needContactInfoFlag: Boolean? = null,
-    var storeInfo: STORE_INFO? = STORE_INFO()
+    var storeInfo: STORE_INFO? = STORE_INFO(),
+
+    var deliveryInfo: MenuOrderDeliveryInformation? = null,
+    var orderHistory: MutableMap<String,OrderHistoryRecord>? = null,
+    var coworkBrandFlag: Boolean? = false,
+    var groupOrderFlag: Boolean? = false
+
+
 
 ): Parcelable {
     @Exclude
@@ -44,7 +51,11 @@ data class USER_MENU_ORDER(
             "orderTotalQuantity" to orderTotalQuantity,
             "orderType" to orderType,
             "needContactInfoFlag" to needContactInfoFlag,
-            "storeInfo" to storeInfo
+            "storeInfo" to storeInfo,
+            "deliveryInfo" to deliveryInfo,
+            "orderHistory" to orderHistory,
+            "coworkBrandFlag" to coworkBrandFlag,
+            "groupOrderFlag" to groupOrderFlag
         )
     }
 }

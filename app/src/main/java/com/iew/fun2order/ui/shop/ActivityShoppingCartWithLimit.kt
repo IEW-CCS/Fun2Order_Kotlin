@@ -20,10 +20,12 @@ import com.iew.fun2order.MainActivity
 import com.iew.fun2order.R
 import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.firebase.*
+import com.iew.fun2order.firebase.getFBMenuOrder
+import com.iew.fun2order.firebase.getFBStoreToken
+import com.iew.fun2order.firebase.sendMsgToBrandStore
 import com.iew.fun2order.order.AdapterRC_SelectedProduct
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
-import com.iew.fun2order.utility.DATATIMEFORMAT_NORMAL
-import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_ACCEPT
+import com.iew.fun2order.utility.*
 import kotlinx.android.synthetic.main.activity_shopping_cart.*
 import kotlinx.android.synthetic.main.alert_input_customproduct.view.*
 import java.text.SimpleDateFormat
@@ -118,8 +120,9 @@ class ActivityShoppingCartWithLimit : AppCompatActivity() , IAdapterOnClick {
         val menuOrderMessageID = intent.extras?.getString("NOTIFY_MESSAGE_ID","") ?: ""
         val selectLocation = intent.extras?.getString("SELECT_LOCATION","") ?: ""
         val beforeProductList = intent.extras?.get("BEFORE_PRODUCT_LIST") as ArrayList<MENU_PRODUCT>
-        mFirebaseUserMenuOrderPath = intent.extras?.getString("MENU_ORDER_PATH","") ?: ""
 
+
+        mFirebaseUserMenuOrderPath = intent.extras?.getString("MENU_ORDER_PATH","") ?: ""
 
         lstSelectedProduct = productList.toMutableList()
 
@@ -135,10 +138,11 @@ class ActivityShoppingCartWithLimit : AppCompatActivity() , IAdapterOnClick {
             val overLimit = limitProduct.filter { it.itemQuantity!!  < 0 }
             if(overLimit.count() == 0) {
                 val notifyAlert = AlertDialog.Builder(this).create()
-                notifyAlert.setTitle("提示訊息")
-                notifyAlert.setTitle("確定要完成訂單嗎？")
-                notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "確定") { _, i ->
 
+                notifyAlert.setTitle("確定要完成訂單嗎？")
+                notifyAlert.setButton(AlertDialog.BUTTON_POSITIVE, "確定") { dialog, i ->
+
+                    dialog.dismiss()
                     updateLimit(limitProduct)
                     upOrderToFireBase(menuOrderMessageID, selectLocation,provideContactInfo )
 
@@ -171,7 +175,7 @@ class ActivityShoppingCartWithLimit : AppCompatActivity() , IAdapterOnClick {
                 var overLimitList :String = ""
                 overLimit.forEach()
                 {
-                    overLimitProduct ->
+                        overLimitProduct ->
                     overLimitList += "[${overLimitProduct.itemName}]\n"
                 }
                 val Alert = AlertDialog.Builder(this).create()
@@ -218,6 +222,17 @@ class ActivityShoppingCartWithLimit : AppCompatActivity() , IAdapterOnClick {
         }
     }
 
+    private fun sendOrderNotifyToStore(brand:String, store:String, notifydata: SOTRE_NOTIFY_DATA)
+    {
+        getFBStoreToken(brand,store)
+        {
+            if(it != null)
+            {
+                sendMsgToBrandStore(it,notifydata)
+            }
+        }
+    }
+
     private fun CheckLimited( oldProductItems: MutableList<MENU_PRODUCT>?, newProductItems: MutableList<MENU_PRODUCT>?) : MutableList<MENU_PRODUCT>
     {
         var replyProductItems: MutableList<MENU_PRODUCT> = mutableListOf()
@@ -259,6 +274,115 @@ class ActivityShoppingCartWithLimit : AppCompatActivity() , IAdapterOnClick {
         return replyProductItems
     }
 
+
+    private fun sendOrderToBrandStore( tmpMenuOrderMessageID:String, callback: (Any?)->Unit )
+    {
+
+        val notificationDB = AppDatabase(this).notificationdao()
+        val currentNotify = notificationDB.getNotifybyMsgID(tmpMenuOrderMessageID)
+        if (currentNotify != null) {
+            getFBMenuOrder(currentNotify.orderOwnerID,currentNotify.orderNumber)
+            {  it ->
+                if(it != null)
+                {
+                    val mFirebaseUserMenuOrder = it as USER_MENU_ORDER
+                    val coWorkBrand  = mFirebaseUserMenuOrder.coworkBrandFlag ?: false
+                    val groupOrder  = mFirebaseUserMenuOrder.groupOrderFlag ?: true
+                    if(coWorkBrand && !groupOrder) {
+                        mFirebaseUserMenuOrder.orderStatus = ORDER_STATUS_NEW
+                        val brandName = mFirebaseUserMenuOrder.brandName ?: ""
+                        val storeName = mFirebaseUserMenuOrder.storeInfo?.storeName ?: ""
+                        val orderNumber = mFirebaseUserMenuOrder.orderNumber ?: ""
+                        if (brandName != "" && storeName != "" && orderNumber != "") {
+                            try {
+                                val currentDay = SimpleDateFormat("yyyy-MM-dd").format(Date()).toString()
+                                val storeOrderPath = "STORE_MENU_ORDER/${brandName}/${storeName}/${currentDay}/${orderNumber}"
+
+                                val alert = AlertDialog.Builder(this).create()
+                                alert.setCancelable(false)
+                                alert.setTitle("訂單直送店家")
+                                alert.setMessage(
+                                    "請問需要將此訂單直接傳送給店家嗎?\n按下確定則將購物車內容傳送給店家\n按下暫不傳送則可於" +
+                                            "可於稍後購物車內容確定後再至揪團紀錄中傳送訂單資訊給店家"
+                                )
+                                alert.setButton(AlertDialog.BUTTON_POSITIVE, "確定") { _, _ ->
+                                    Firebase.database.reference.child(storeOrderPath)
+                                        .setValue(mFirebaseUserMenuOrder)
+
+                                    //------- Send Notify -----
+
+                                    var orderOwnerID = mFirebaseUserMenuOrder.orderOwnerID ?: ""
+                                    var orderOwnerName = mFirebaseUserMenuOrder.orderOwnerName ?: ""
+                                    var orderOwnerToken = com.iew.fun2order.MainActivity.localtokenID
+                                    var orderNumber = mFirebaseUserMenuOrder.orderNumber ?: ""
+                                    var notificationType = STORE_NOTIFICATION_TYPE_NEW_ORDER
+                                    var createTime = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+                                    val storeNotifyData = SOTRE_NOTIFY_DATA(
+                                        orderOwnerID,
+                                        orderOwnerName,
+                                        orderOwnerToken,
+                                        orderNumber,
+                                        notificationType,
+                                        createTime
+                                    )
+
+                                    sendOrderNotifyToStore(brandName, storeName, storeNotifyData)
+
+
+                                    callback(null)
+                                }
+                                alert.setButton(AlertDialog.BUTTON_NEGATIVE, "暫不傳送") { _, _ ->
+                                    callback(null)
+                                }
+                                alert.show()
+                            }
+                            catch(ex : Exception) {
+
+                                val alert = AlertDialog.Builder(this).create()
+                                alert.setTitle("錯誤")
+                                alert.setCancelable(false)
+                                alert.setMessage("訂單資訊錯誤,無法直送店家,請自行打電話至店家訂購, 謝謝!!")
+                                alert.setButton(AlertDialog.BUTTON_POSITIVE, "確定"){ _, _ ->
+                                    callback(null)
+                                }
+                                alert.show()
+                            }
+
+                        }
+                        else {
+
+                            val alert = AlertDialog.Builder(this).create()
+                            alert.setTitle("錯誤")
+                            alert.setCancelable(false)
+                            alert.setMessage("訂單資訊錯誤,無法直送店家,請自行打電話至店家訂購, 謝謝!!")
+                            alert.setButton(AlertDialog.BUTTON_POSITIVE, "確定"){ _, _ ->
+                                callback(null)
+                            }
+                            alert.show()
+
+                        }
+
+                    }
+
+                    else
+                    {
+                        callback(null)
+                    }
+                }
+
+                else
+                {
+                    callback(null)
+                }
+
+            }
+        }
+        else
+        {
+            callback(null)
+        }
+    }
+
     private fun updateLimit(  updateLimitProductItems: MutableList<MENU_PRODUCT>?)
     {
         if(mFirebaseUserMenuOrderPath != "") {
@@ -290,13 +414,17 @@ class ActivityShoppingCartWithLimit : AppCompatActivity() , IAdapterOnClick {
         }
     }
 
-    private fun finishOrder()
+    private fun sendOrderToFBandFinish(tmpMenuOrderMessageID:String)
     {
-        val intent = Intent()
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.setClass(this, MainActivity::class.java)
-        startActivity(intent)
-        this.finish()
+
+        sendOrderToBrandStore( tmpMenuOrderMessageID)
+        {
+            val intent = Intent()
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.setClass(this, MainActivity::class.java)
+            startActivity(intent)
+            this.finish()
+        }
 
     }
 
@@ -322,18 +450,18 @@ class ActivityShoppingCartWithLimit : AppCompatActivity() , IAdapterOnClick {
     }
 
 
-   private fun updateOrderStatusToLocalDB(orderNumber: String, replyStatus: String) {
-    val notificationDB = AppDatabase(this ).notificationdao()
-    if (orderNumber != "") {
-        val orderMessages = notificationDB.getNotifybyOrderNo(orderNumber)
-        orderMessages.forEach()
-        {
-            it.replyStatus = replyStatus
-            it.replyTime = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
-            notificationDB.update(it)
+    private fun updateOrderStatusToLocalDB(orderNumber: String, replyStatus: String) {
+        val notificationDB = AppDatabase(this ).notificationdao()
+        if (orderNumber != "") {
+            val orderMessages = notificationDB.getNotifybyOrderNo(orderNumber)
+            orderMessages.forEach()
+            {
+                it.replyStatus = replyStatus
+                it.replyTime = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+                notificationDB.update(it)
+            }
         }
     }
-   }
 
 
     private fun upOrderToFireBase(tmpMenuOrderMessageID:String, tmpSelectLocation:String, tmpProvideContactInfo : Boolean)
@@ -357,9 +485,9 @@ class ActivityShoppingCartWithLimit : AppCompatActivity() , IAdapterOnClick {
 
                             val finalProduct = lstSelectedProduct.toMutableList()
                             finalProduct.forEach {
-                                product ->
+                                    product ->
                                 product.menuRecipes?.forEach {
-                                    recipe ->
+                                        recipe ->
                                     recipe.recipeItems?.removeIf { it -> it.checkedFlag == false }
                                 }
 
@@ -417,13 +545,13 @@ class ActivityShoppingCartWithLimit : AppCompatActivity() , IAdapterOnClick {
                                         users.orderContent.userContactInfo = contactInfo
 
                                         it.ref.setValue(users)
-                                        finishOrder()
+                                        sendOrderToFBandFinish(tmpMenuOrderMessageID)
                                         dialog.dismiss()
                                     }
                                     .setNegativeButton("暫不提供") { dialog, _ ->
                                         users.orderContent.userContactInfo = null
                                         it.ref.setValue(users)
-                                        finishOrder()
+                                        sendOrderToFBandFinish(tmpMenuOrderMessageID)
                                         dialog.dismiss()
                                     }
                                     .create()
@@ -431,7 +559,7 @@ class ActivityShoppingCartWithLimit : AppCompatActivity() , IAdapterOnClick {
                             }
                             else
                             {
-                                finishOrder()
+                                sendOrderToFBandFinish(tmpMenuOrderMessageID)
                             }
                         }
                     }

@@ -48,8 +48,26 @@ const val  LOCALBROADCASE_SHAREMENU:String ="SHARE_MENU"
 const val  LOCALBROADCASE_CHANGEDUETIME:String ="CHANGE_DUETIME"
 
 
+const val DELIVERY_TYPE_TAKEOUT: String = "TAKEOUT"
+const val DELIVERY_TYPE_DELIVERY: String = "DELIVERY"
+
+
 @SuppressLint("SimpleDateFormat")
 val DATATIMEFORMAT_NORMAL = SimpleDateFormat("yyyyMMddHHmmssSSS")
 @SuppressLint("SimpleDateFormat")
 val DATATIMEFORMAT_CHINESE_TYPE1 = SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss")
 
+
+
+const val ORDER_STATUS_INIT: String = "INIT"          // Initial and editing state of the order
+const val ORDER_STATUS_NEW: String = "NEW"            // User create the real order and send to store
+const val ORDER_STATUS_ACCEPT: String = "ACCEPT"      // Store manager confirms to receive the real order
+const val ORDER_STATUS_REJECT: String = "REJECT"      // Store manager rejects the real order
+const val ORDER_STATUS_INPROCESS: String = "INPR"     // Store starts making the content of the order
+const val ORDER_STATUS_PROCESSEND: String = "PREN"        // Store gets the order ready to take out or deliver
+const val ORDER_STATUS_DELIVERY: String = "DELIVERY"  // Products in delivery
+const val ORDER_STATUS_CLOSE: String = "CLOSE"        // Customer receives products and
+
+
+const val STORE_NOTIFICATION_TYPE_NEW_ORDER = "NEW_ORDER"
+const val STORE_NOTIFICATION_TYPE_BRAND_MESSAGE = "BRAND_MESSAGE"

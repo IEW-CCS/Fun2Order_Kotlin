@@ -25,6 +25,7 @@ import com.iew.fun2order.ui.my_setup.ItemsLV_Canditate
 import com.iew.fun2order.utility.DATATIMEFORMAT_NORMAL
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
 import com.iew.fun2order.utility.NOTIFICATION_TYPE_ACTION_JOIN_ORDER
+import com.iew.fun2order.utility.ORDER_STATUS_INIT
 import kotlinx.android.synthetic.main.activity_setup_detail_order_next.*
 import kotlinx.android.synthetic.main.alert_date_time_picker.view.*
 import org.json.JSONArray
@@ -301,7 +302,7 @@ class ActivitySetupNewOrderNext : AppCompatActivity() {
         userMenuOrder.orderNumber  = "M$timeStamp"
         userMenuOrder.orderOwnerID = FirebaseAuth.getInstance().currentUser!!.uid
         userMenuOrder.orderOwnerName = FirebaseAuth.getInstance().currentUser!!.displayName
-        userMenuOrder.orderStatus="READY"
+        userMenuOrder.orderStatus = ORDER_STATUS_INIT
         userMenuOrder.orderTotalPrice= 0
         userMenuOrder.orderTotalQuantity= 0
         userMenuOrder.orderType="M"

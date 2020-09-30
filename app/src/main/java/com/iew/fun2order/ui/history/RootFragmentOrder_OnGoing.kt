@@ -18,14 +18,22 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.iew.fun2order.MainActivity
 import com.iew.fun2order.ProgressDialogUtil
 import com.iew.fun2order.order.OrderDetailActivity
 import com.iew.fun2order.R
+import com.iew.fun2order.db.database.AppDatabase
+import com.iew.fun2order.db.firebase.SOTRE_NOTIFY_DATA
 import com.iew.fun2order.db.firebase.USER_MENU_ORDER
+import com.iew.fun2order.firebase.getFBMenuOrder
+import com.iew.fun2order.firebase.getFBStoreToken
+import com.iew.fun2order.firebase.sendMsgToBrandStore
 import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.ui.notifications.ItemsLV_Ads
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_EXPIRE
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
+import com.iew.fun2order.utility.ORDER_STATUS_NEW
+import com.iew.fun2order.utility.STORE_NOTIFICATION_TYPE_NEW_ORDER
 import kotlinx.android.synthetic.main.row_history_order.view.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -89,7 +97,7 @@ class RootFragmentOrder_OnGoing() : Fragment(), IAdapterOnClick {
                             }
                             if(!expired)
                             {
-                                listOrders.add(ItemsLV_Order(userOrder.orderNumber!!, userOrder.brandName!!, startTime, dueTime, joinCount, expired))
+                                listOrders.add(ItemsLV_Order(userOrder.orderNumber!!, userOrder.brandName!!, startTime, dueTime, joinCount, expired, userOrder.orderStatus!!))
                             }
                         } catch (ex: Exception) {
                         }
@@ -110,51 +118,75 @@ class RootFragmentOrder_OnGoing() : Fragment(), IAdapterOnClick {
 
     override fun onClick(sender: String, pos: Int, type: Int) {
 
-        if (type == 0) {
+        if(sender == "sendOutOrder")
+        {
+            if (type == 0)
+            {
+                var _menuorder = (listOrders[pos] as ItemsLV_Order).copy()
+                sendOrderToBrandStore(_menuorder.orderNumber)
+            }
 
-            //------ 點擊的當下馬上去更新狀態 --------
-            ProgressDialogUtil.showProgressDialog(context);
-            var _menuorder = (listOrders[pos] as ItemsLV_Order).copy()
+        }
+        else {
+            if (type == 0) {
 
-            val userMenuOrderPath = "USER_MENU_ORDER/${FirebaseAuth.getInstance().currentUser!!.uid.toString()}/${_menuorder.orderNumber}"
-            val database = Firebase.database
-            val myRef = database.getReference(userMenuOrderPath)
-            myRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val menuOrder = dataSnapshot.getValue(USER_MENU_ORDER::class.java)
-                    if(menuOrder!= null) {
-                        if (menuOrder.dueTime != null) {
-                            var timeExpired = false
-                            if(menuOrder.dueTime!! != "") {
-                                timeExpired = timeCompare(menuOrder.dueTime!!)
-                            }
-                            if (timeExpired) {
-                                var needUpdate = false
-                                menuOrder.contentItems?.forEach {
-                                    if (it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT) {
-                                        it.orderContent.replyStatus = MENU_ORDER_REPLY_STATUS_EXPIRE
-                                        needUpdate = true
+                //------ 點擊的當下馬上去更新狀態 --------
+                ProgressDialogUtil.showProgressDialog(context);
+                var _menuorder = (listOrders[pos] as ItemsLV_Order).copy()
+
+                val userMenuOrderPath =
+                    "USER_MENU_ORDER/${FirebaseAuth.getInstance().currentUser!!.uid.toString()}/${_menuorder.orderNumber}"
+                val database = Firebase.database
+                val myRef = database.getReference(userMenuOrderPath)
+                myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        val menuOrder = dataSnapshot.getValue(USER_MENU_ORDER::class.java)
+                        if (menuOrder != null) {
+                            if (menuOrder.dueTime != null) {
+                                var timeExpired = false
+                                if (menuOrder.dueTime!! != "") {
+                                    timeExpired = timeCompare(menuOrder.dueTime!!)
+                                }
+                                if (timeExpired) {
+                                    var needUpdate = false
+                                    menuOrder.contentItems?.forEach {
+                                        if (it.orderContent.replyStatus == MENU_ORDER_REPLY_STATUS_WAIT) {
+                                            it.orderContent.replyStatus =
+                                                MENU_ORDER_REPLY_STATUS_EXPIRE
+                                            needUpdate = true
+                                        }
+                                    }
+                                    if (needUpdate) {
+                                        myRef.setValue(menuOrder)
                                     }
                                 }
-                                if(needUpdate) {
-                                    myRef.setValue(menuOrder)
+                            }
+                            ProgressDialogUtil.dismiss();
+                            //----- 更新完以後轉換畫面 ------
+                            val bundle = Bundle()
+                            bundle.putParcelable("menuOrder", menuOrder.copy())
+                            val intent = Intent(context, OrderDetailActivity::class.java)
+                            intent.putExtras(bundle)
+                            startActivity(intent)
+                        } else {
+                            ProgressDialogUtil.dismiss();
+                            val alert = AlertDialog.Builder(context!!)
+                            with(alert) {
+                                setTitle("訂單資料不存在")
+                                setMessage("訂單編號 : ${_menuorder.orderNumber}")
+                                setPositiveButton("確定") { dialog, _ ->
                                 }
                             }
+                            val dialog = alert.create()
+                            dialog.show()
                         }
-                        ProgressDialogUtil.dismiss();
-                        //----- 更新完以後轉換畫面 ------
-                        val bundle = Bundle()
-                        bundle.putParcelable("menuOrder", menuOrder.copy())
-                        val intent = Intent(context, OrderDetailActivity::class.java)
-                        intent.putExtras(bundle)
-                        startActivity(intent)
                     }
-                    else
-                    {
+
+                    override fun onCancelled(error: DatabaseError) {
                         ProgressDialogUtil.dismiss();
                         val alert = AlertDialog.Builder(context!!)
                         with(alert) {
-                            setTitle("訂單資料不存在")
+                            setTitle("訂單資料讀取異常")
                             setMessage("訂單編號 : ${_menuorder.orderNumber}")
                             setPositiveButton("確定") { dialog, _ ->
                             }
@@ -162,32 +194,18 @@ class RootFragmentOrder_OnGoing() : Fragment(), IAdapterOnClick {
                         val dialog = alert.create()
                         dialog.show()
                     }
-                }
-                override fun onCancelled(error: DatabaseError) {
-                    ProgressDialogUtil.dismiss();
-                    val alert = AlertDialog.Builder(context!!)
-                    with(alert) {
-                        setTitle("訂單資料讀取異常")
-                        setMessage("訂單編號 : ${_menuorder.orderNumber}")
-                        setPositiveButton("確定") { dialog, _ ->
-                        }
-                    }
-                    val dialog = alert.create()
-                    dialog.show()
-                }
-            })
-        }
-        else if (type == 1)
-        {
-            val removeOrderNumber = (listOrders[pos]as ItemsLV_Order).orderNumber
-            val removeOrderBrand = (listOrders[pos]as ItemsLV_Order).brandName
-            checkRemoveOrderInfo(removeOrderBrand!!, removeOrderNumber!!, pos)
+                })
+            } else if (type == 1) {
+                val removeOrderNumber = (listOrders[pos] as ItemsLV_Order).orderNumber
+                val removeOrderBrand = (listOrders[pos] as ItemsLV_Order).brandName
+                checkRemoveOrderInfo(removeOrderBrand!!, removeOrderNumber!!, pos)
+            }
         }
 
     }
 
     private fun checkRemoveOrderInfo(OrderBrand: String, OrderNumber: String, Position: Int) {
-        val alert = AlertDialog.Builder(context!!)
+        val alert = AlertDialog.Builder(requireContext())
         with(alert) {
             setTitle("確認刪除訂單 : $OrderBrand")
             setMessage("訂單編號 : $OrderNumber")
@@ -224,6 +242,99 @@ class RootFragmentOrder_OnGoing() : Fragment(), IAdapterOnClick {
         } catch (e: ParseException) {
             false
         }
+    }
+
+
+    private fun sendOrderNotifyToStore(brand:String, store:String, notifydata: SOTRE_NOTIFY_DATA)
+    {
+        getFBStoreToken(brand,store)
+        {
+            if(it != null)
+            {
+                sendMsgToBrandStore(it,notifydata)
+            }
+        }
+    }
+
+    private fun sendOrderToBrandStore(tmpMenuOrderMessageID: String) {
+
+        val notificationDB = AppDatabase(requireContext()).notificationdao()
+        val currentNotify = notificationDB.getNotifybyMsgID(tmpMenuOrderMessageID)
+        if (currentNotify != null) {
+            getFBMenuOrder(currentNotify.orderOwnerID, currentNotify.orderNumber)
+            { it ->
+                if (it != null) {
+                    val mFirebaseUserMenuOrder = it as USER_MENU_ORDER
+                    val coWorkBrand = mFirebaseUserMenuOrder.coworkBrandFlag ?: false
+                    val groupOrder = mFirebaseUserMenuOrder.groupOrderFlag ?: true
+                    if (coWorkBrand && !groupOrder) {
+                        mFirebaseUserMenuOrder.orderStatus = ORDER_STATUS_NEW
+                        //------計算杯數跟金額  ------
+                        var totalPrice = 0
+                        var totalQuantity = 0
+                        mFirebaseUserMenuOrder.contentItems?.forEach {
+                            it.orderContent.menuProductItems?.forEach { items ->
+                                totalPrice += items.itemPrice ?: 0
+                                totalQuantity += items.itemQuantity ?: 0
+                            }
+                        }
+
+                        mFirebaseUserMenuOrder.orderTotalPrice = totalPrice
+                        mFirebaseUserMenuOrder.orderTotalQuantity = totalQuantity
+
+                        val brandName = mFirebaseUserMenuOrder.brandName ?: ""
+                        val storeName = mFirebaseUserMenuOrder.storeInfo?.storeName ?: ""
+                        val orderNumber = mFirebaseUserMenuOrder.orderNumber ?: ""
+                        if (brandName != "" && storeName != "" && orderNumber != "") {
+
+                            try {
+                                val currentDay =
+                                    SimpleDateFormat("yyyy-MM-dd").format(Date()).toString()
+                                val storeOrderPath =
+                                    "STORE_MENU_ORDER/${brandName}/${storeName}/${currentDay}/${orderNumber}"
+                                Firebase.database.reference.child(storeOrderPath).setValue(mFirebaseUserMenuOrder)
+
+                                //------- Send Notify -----
+                                var orderOwnerID = mFirebaseUserMenuOrder.orderOwnerID ?: ""
+                                var orderOwnerName = mFirebaseUserMenuOrder.orderOwnerName ?: ""
+                                var orderOwnerToken = MainActivity.localtokenID
+                                var orderNumber = mFirebaseUserMenuOrder.orderNumber ?: ""
+                                var notificationType = STORE_NOTIFICATION_TYPE_NEW_ORDER
+                                var createTime = SimpleDateFormat("yyyyMMddHHmmssSSS").format(Date())
+                                val storeNotifyData = SOTRE_NOTIFY_DATA(
+                                    orderOwnerID,
+                                    orderOwnerName,
+                                    orderOwnerToken,
+                                    orderNumber,
+                                    notificationType,
+                                    createTime
+                                )
+                                sendOrderNotifyToStore(brandName, storeName, storeNotifyData)
+                            } catch (ex: Exception) {
+                                val alert = AlertDialog.Builder(requireContext()).create()
+                                alert.setTitle("錯誤")
+                                alert.setCancelable(false)
+                                alert.setMessage("訂單資訊錯誤,無法直送店家,請自行打電話至店家訂購, 謝謝!!")
+                                alert.setButton(AlertDialog.BUTTON_POSITIVE, "確定") { _, _ ->
+                                }
+                                alert.show()
+                            }
+
+                        } else {
+                            val alert = AlertDialog.Builder(requireContext()).create()
+                            alert.setTitle("錯誤")
+                            alert.setCancelable(false)
+                            alert.setMessage("訂單資訊錯誤,無法直送店家,請自行打電話至店家訂購, 謝謝!!")
+                            alert.setButton(AlertDialog.BUTTON_POSITIVE, "確定") { _, _ ->
+                            }
+                            alert.show()
+
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }
 

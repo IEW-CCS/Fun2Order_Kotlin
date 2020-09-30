@@ -68,7 +68,7 @@ class RootFragmentOrder() : Fragment(), IAdapterOnClick {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 dataSnapshot.children.forEach()
                 {
-                    it->
+                        it->
                     val userOrder =  it.getValue(USER_MENU_ORDER::class.java)
                     if (userOrder != null) {
                         try {
@@ -88,7 +88,7 @@ class RootFragmentOrder() : Fragment(), IAdapterOnClick {
                             }
 
                             listOrders.add(
-                                ItemsLV_Order(userOrder.orderNumber!!, userOrder.brandName!!, startTime, dueTime, joinCount, expired)
+                                ItemsLV_Order(userOrder.orderNumber!!, userOrder.brandName!!, startTime, dueTime, joinCount, expired,userOrder.orderStatus!! )
                             )
                         } catch (ex: Exception) {
                         }

@@ -2,7 +2,9 @@ package com.iew.fun2order.brand.location
 
 import android.R.attr.x
 import android.R.string
+import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
@@ -45,6 +47,23 @@ class AdapterRC_StoreInfo(var context: Context, var lstStoreInfo : List<DETAIL_B
             itemView.textBrandStoreName.text = ItemStore.storeName ?: ""
             itemView.textBrandStorePhoneNumber.text = ItemStore.storePhoneNumber ?: ""
             itemView.textBrandStoreAddress.text = ItemStore.storeAddress ?: ""
+
+            if(ItemStore.businessTime!= null)
+            {
+                if(!ItemStore.businessTime!!.dayOffFlag)
+                {
+                    itemView.textBrandBusinssesTime.text = "今日公休"
+                    itemView.textBrandBusinssesTime.setTextColor(Color.RED)
+                }
+                else
+                {
+                    val openTime = ItemStore.businessTime!!.openTime ?: ""
+                    val closeTime = ItemStore.businessTime!!.closeTime ?: ""
+                    itemView.textBrandBusinssesTime.text = "今日營業時間 : ${openTime} 至 ${closeTime}"
+                }
+            }
+
+
             itemView.imageBrandStore.setOnClickListener {
                 IAdapterOnClick.onClick("MAP",adapterPosition,0)
             }
@@ -67,19 +86,19 @@ class AdapterRC_StoreInfo(var context: Context, var lstStoreInfo : List<DETAIL_B
                 val storeLatitude = ItemStore.storeLatitude?.toDoubleOrNull()
                 val storeLongitude = ItemStore.storeLongitude?.toDoubleOrNull()
 
-                    if (storeLatitude != null && storeLongitude != null) {
-                        val results = FloatArray(1)
-                        Location.distanceBetween(
-                            location.latitude,
-                            location.longitude,
-                            storeLatitude,
-                            storeLongitude,
-                            results
-                        )
-                        val distance = results[0] / 1000.0
-                        val disString: String = String.format("%.1f", distance)
-                        itemView.textBrandStoreDistance.text = "${disString} 公里"
-                    }
+                if (storeLatitude != null && storeLongitude != null) {
+                    val results = FloatArray(1)
+                    Location.distanceBetween(
+                        location.latitude,
+                        location.longitude,
+                        storeLatitude,
+                        storeLongitude,
+                        results
+                    )
+                    val distance = results[0] / 1000.0
+                    val disString: String = String.format("%.1f", distance)
+                    itemView.textBrandStoreDistance.text = "${disString} 公里"
+                }
 
             }
 
@@ -105,14 +124,3 @@ class AdapterRC_StoreInfo(var context: Context, var lstStoreInfo : List<DETAIL_B
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-

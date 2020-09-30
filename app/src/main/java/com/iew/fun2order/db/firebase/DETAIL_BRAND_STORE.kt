@@ -8,6 +8,8 @@ import kotlinx.android.parcel.Parcelize
 data class DETAIL_BRAND_STORE(
     @SerializedName("storeID")
     var storeID   : Int = 0,
+    @SerializedName("brandName")
+    var brandName  : String = "",
     @SerializedName("storeName")
     var storeName  : String = "",
     @SerializedName("storeMenuNumber")
@@ -35,6 +37,21 @@ data class DETAIL_BRAND_STORE(
     @SerializedName("storePhoneNumber")
     var storePhoneNumber  : String?  = null,
     @SerializedName("deliveryServiceFlag")
-    var deliveryServiceFlag  : Boolean = false
+    var deliveryServiceFlag  : Boolean = false,
+    @SerializedName("businessTime")
+    var businessTime  : DETAIL_BRAND_BUSINESS_TIME? = null
+
+) : Parcelable
+
+
+
+@Parcelize
+data class DETAIL_BRAND_BUSINESS_TIME(
+    @SerializedName("closeTime")
+    var closeTime  : String = "",
+    @SerializedName("openTime")
+    var openTime : String = "",
+    @SerializedName("dayOffFlag")
+    var dayOffFlag  : Boolean = false
 
 ) : Parcelable

@@ -85,7 +85,7 @@ class RootFragmentOrder_Expired() : Fragment(), IAdapterOnClick {
                             }
                             if(expired)
                             {
-                                listOrders.add(ItemsLV_Order(userOrder.orderNumber!!, userOrder.brandName!!, startTime, dueTime, joinCount, expired))
+                                listOrders.add(ItemsLV_Order(userOrder.orderNumber!!, userOrder.brandName!!, startTime, dueTime, joinCount, expired, userOrder.orderStatus!!))
                             }
                         } catch (ex: Exception) {
                         }

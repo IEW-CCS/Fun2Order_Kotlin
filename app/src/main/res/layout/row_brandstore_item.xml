@@ -44,25 +44,37 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="center_vertical"
-                android:layout_weight="0.5"
+                android:layout_weight="0.4"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
                 android:singleLine="true"
                 android:textColor="@android:color/primary_text_light"
-                android:textSize="18dp" />
+                android:textSize="16dp" />
 
             <TextView
                 android:id="@+id/textBrandStorePhoneNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_gravity="center_vertical"
-                android:layout_weight="0.5"
+                android:layout_weight="0.3"
                 android:autoLink="phone"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
                 android:singleLine="true"
                 android:textColor="@android:color/secondary_text_light"
-                android:textSize="16dp" />
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/textBrandStoreAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="0.3"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:textColor="@android:color/secondary_text_light"
+                android:textSize="14dp" />
 
         </LinearLayout>
 
@@ -101,23 +113,24 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf= "parent"
             android:layout_marginStart="10dp"
-            app:layout_constraintEnd_toStartOf="@+id/textBrandStoreAddress"/>
+            app:layout_constraintEnd_toStartOf="@+id/textBrandBusinssesTime"/>
 
         <TextView
-            android:id="@+id/textBrandStoreAddress"
+            android:id="@+id/textBrandBusinssesTime"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:gravity="center_horizontal|left"
             android:layout_gravity="center_horizontal|left"
+            android:layout_marginStart="10dp"
             android:ellipsize="end"
+            android:gravity="center_horizontal|left"
             android:singleLine="true"
+            android:textColor="@android:color/secondary_text_light"
+            android:textSize="14dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/textBrandStoreDistance"
             app:layout_constraintStart_toEndOf="@+id/txtTitle"
             app:layout_constraintTop_toTopOf="parent"
-            android:textColor="@android:color/secondary_text_light"
-            android:textSize="14dp" />
+            />
 
         <TextView
             android:id="@+id/textBrandStoreDistance"
@@ -130,7 +143,7 @@
             android:singleLine="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/textBrandStoreAddress"
+            app:layout_constraintStart_toEndOf="@+id/textBrandBusinssesTime"
             app:layout_constraintTop_toTopOf="parent"
             android:textColor="@android:color/secondary_text_light"
             android:textSize="14dp" />

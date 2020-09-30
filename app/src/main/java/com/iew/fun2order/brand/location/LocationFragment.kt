@@ -36,10 +36,7 @@ import com.iew.fun2order.ui.my_setup.IAdapterOnClick
 import com.iew.fun2order.ui.shop.ActivityOfficalMenu
 import com.iew.fun2order.ui.shop.ActivitySetupDetailOrder
 import com.iew.fun2order.ui.shop.ActivitySetupDetailOrderNext
-import com.iew.fun2order.utility.ACTION_LOCATION_REQUEST_CODE
-import com.iew.fun2order.utility.DATATIMEFORMAT_NORMAL
-import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
-import com.iew.fun2order.utility.NOTIFICATION_TYPE_ACTION_JOIN_ORDER
+import com.iew.fun2order.utility.*
 import kotlinx.android.synthetic.main.store_location_fragment.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -132,6 +129,7 @@ class LocationFragment : Fragment(), IAdapterOnClick {
                     val storeName = storeInfoSortedlist[pos].storeName ?: ""
                     val storeAddress = storeInfoSortedlist[pos].storeAddress?: ""
                     val storePhoneNumber = storeInfoSortedlist[pos].storePhoneNumber?: ""
+                    val deliveryService =  storeInfoSortedlist[pos].deliveryServiceFlag  ?: false
                     val menuNumber =  storeInfoSortedlist[pos].storeMenuNumber
                     val brandName = ActivityOfficalMenu.getBrandName()
 
@@ -147,52 +145,46 @@ class LocationFragment : Fragment(), IAdapterOnClick {
                     }
                     else
                     {
+
                         val buttonActions = arrayOf("揪團訂購", "自己訂購")
                         AlertDialog.Builder(requireContext())
                             .setTitle("請選擇訂購方式")
                             .setItems(buttonActions, DialogInterface.OnClickListener { dialog, which ->
+                                var selfOrderFlag = false
+                                dialog.dismiss()
                                 when (which) {
                                     0 -> {
-                                        dialog.dismiss()
-                                        if (menuNumber != "") {
-                                            val bundle = Bundle()
-                                            bundle.putString("BRAND_NAME", brandName)
-                                            bundle.putString("BRAND_MENU_NUMBER", menuNumber)
-                                            bundle.putString("STORE_NAME", storeName)
-                                            bundle.putString("STORE_ADDRESS", storeAddress)
-                                            bundle.putString("STORE_PHONE_NUMBER", storePhoneNumber)
-                                            var intent = Intent(requireContext(), ActivitySetupDetailOrder::class.java)
-                                            intent.putExtras(bundle)
-                                            startActivity(intent)
-                                        }
-                                        else {
-                                            AlertDialog.Builder(requireContext())
-                                                .setTitle("通知訊息")
-                                                .setMessage("品牌菜單資訊不存在!!\n無法揪團!!")
-                                                .setPositiveButton("確定", null)
-                                                .create()
-                                                .show()
-                                        }
+                                        selfOrderFlag = false
                                     }
-
                                     1 -> {
-                                        dialog.dismiss()
-                                        if (menuNumber != "") {
-                                            createSelfOrder(brandName, menuNumber, storeName,storeAddress,storePhoneNumber)
-                                        }
-                                        else {
-                                            AlertDialog.Builder(requireContext())
-                                                .setTitle("通知訊息")
-                                                .setMessage("品牌菜單資訊不存在!!\n無法揪團!!")
-                                                .setPositiveButton("確定", null)
-                                                .create()
-                                                .show()
-                                        }
-                                    }
-                                    else -> {
-                                        dialog.dismiss()
+                                        selfOrderFlag = true
                                     }
                                 }
+
+                                if (menuNumber != "") {
+                                    val bundle = Bundle()
+                                    bundle.putString("BRAND_NAME", brandName)
+                                    bundle.putString("BRAND_MENU_NUMBER", menuNumber)
+                                    bundle.putString("STORE_NAME", storeName)
+                                    bundle.putString("STORE_ADDRESS", storeAddress)
+                                    bundle.putString("STORE_PHONE_NUMBER", storePhoneNumber)
+                                    bundle.putBoolean("SELF_ORDER", selfOrderFlag)
+                                    bundle.putBoolean("DELIVERY_SERVICE", deliveryService)
+
+                                    var intent = Intent(requireContext(), ActivityCoworkOrderInfo::class.java)
+                                    intent.putExtras(bundle)
+                                    startActivity(intent)
+
+                                }
+                                else {
+                                    AlertDialog.Builder(requireContext())
+                                        .setTitle("通知訊息")
+                                        .setMessage("品牌菜單資訊不存在!!\n無法揪團!!")
+                                        .setPositiveButton("確定", null)
+                                        .create()
+                                        .show()
+                                }
+
                             })
                             .setNegativeButton("取消") { dialog, _ ->
                                 dialog.dismiss()
@@ -345,7 +337,7 @@ class LocationFragment : Fragment(), IAdapterOnClick {
         userMenuOrder.orderNumber = "M$timeStamp"
         userMenuOrder.orderOwnerID = FirebaseAuth.getInstance().currentUser!!.uid
         userMenuOrder.orderOwnerName = FirebaseAuth.getInstance().currentUser!!.displayName
-        userMenuOrder.orderStatus = "READY"
+        userMenuOrder.orderStatus = ORDER_STATUS_INIT
         userMenuOrder.orderTotalPrice = 0
         userMenuOrder.orderTotalQuantity = 0
         userMenuOrder.orderType = "F"

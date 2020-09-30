@@ -18,6 +18,7 @@ import com.google.firebase.ktx.Firebase
 import com.iew.fun2order.MainActivity
 import com.iew.fun2order.ProgressDialogUtil
 import com.iew.fun2order.R
+import com.iew.fun2order.db.firebase.MenuOrderDeliveryInformation
 import com.iew.fun2order.db.firebase.ORDER_MEMBER
 import com.iew.fun2order.db.firebase.STORE_INFO
 import com.iew.fun2order.db.firebase.USER_MENU_ORDER
@@ -26,6 +27,7 @@ import com.iew.fun2order.ui.my_setup.ItemsLV_Canditate
 import com.iew.fun2order.utility.DATATIMEFORMAT_NORMAL
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
 import com.iew.fun2order.utility.NOTIFICATION_TYPE_ACTION_JOIN_ORDER
+import com.iew.fun2order.utility.ORDER_STATUS_INIT
 import kotlinx.android.synthetic.main.activity_setup_detail_order_next.*
 import kotlinx.android.synthetic.main.alert_date_time_picker.view.*
 import org.json.JSONArray
@@ -44,6 +46,9 @@ class ActivitySetupDetailOrderNext : AppCompatActivity() {
     private  var storeAddress:String? = null
     private  var storePhoneNumber:String? = null
     private  var inviteTokenList: ArrayList<ItemsLV_Canditate>? = null
+    private  var coworkFlag:Boolean? = null
+    private  var groupOrderFlag:Boolean? = null
+    private  var deliveryInfo:MenuOrderDeliveryInformation? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,8 +62,20 @@ class ActivitySetupDetailOrderNext : AppCompatActivity() {
         storeAddress = intent.extras?.getString("STORE_ADDRESS") ?: ""
         storePhoneNumber = intent.extras?.getString("STORE_PHONE_NUMBER") ?: ""
         inviteTokenList = intent.extras?.getParcelableArrayList<ItemsLV_Canditate>("INVITE_TOKEN_ID")
+        coworkFlag = intent.extras?.getBoolean("COWORK") ?: false
+        groupOrderFlag = intent.extras?.getBoolean("GROUP_ORDER") ?: true
+        deliveryInfo = intent.extras?.getParcelable<MenuOrderDeliveryInformation>("MENU_DELIVERY_INFO") ?: null
 
         brandName.text = selectBrandName
+
+        if(coworkFlag == true)
+        {
+            layoutPackWithLocation.visibility = View.VISIBLE
+        }
+        else
+        {
+            layoutPackWithLocation.visibility = View.GONE
+        }
 
         //----  設定團購截止時間 ------
         textViewSetupDueDate.setOnClickListener {
@@ -205,7 +222,6 @@ class ActivitySetupDetailOrderNext : AppCompatActivity() {
         //---- SubMit 送出邀請------
         btnSubmit.setOnClickListener {
 
-
             createNewOrder()
 
             /* //------ 測試用
@@ -301,18 +317,24 @@ class ActivitySetupDetailOrderNext : AppCompatActivity() {
         userMenuOrder.orderNumber  = "M$timeStamp"
         userMenuOrder.orderOwnerID = FirebaseAuth.getInstance().currentUser!!.uid
         userMenuOrder.orderOwnerName = FirebaseAuth.getInstance().currentUser!!.displayName
-        userMenuOrder.orderStatus="READY"
+        userMenuOrder.orderStatus = ORDER_STATUS_INIT
         userMenuOrder.orderTotalPrice= 0
         userMenuOrder.orderTotalQuantity= 0
         userMenuOrder.orderType="F"
         userMenuOrder.needContactInfoFlag = checkContactInfo.isChecked
+
+
+        //-------組合BrandInfo資訊 ------
+        userMenuOrder.deliveryInfo    = deliveryInfo
+        userMenuOrder.coworkBrandFlag = coworkFlag
+        userMenuOrder.groupOrderFlag  = groupOrderFlag
+        userMenuOrder.deliveryInfo?.separatePackageFlag = checkPackWithLocation.isChecked
 
         val storeInfo : STORE_INFO = STORE_INFO()
         storeInfo.storeName = storeName ?: ""
         storeInfo.storeAddress = storeAddress ?: ""
         storeInfo.storePhoneNumber = storePhoneNumber ?: ""
         userMenuOrder.storeInfo= storeInfo
-
 
         //Create
         //--- 如果自己也要參加 把自己加進去 -------
@@ -337,6 +359,13 @@ class ActivitySetupDetailOrderNext : AppCompatActivity() {
             orderMember.orderContent.replyStatus = MENU_ORDER_REPLY_STATUS_WAIT
             orderMember.orderContent.ostype = "Android"
             userMenuOrder.contentItems!!.add(orderMember)
+
+            //--- chcek OrderStatus ----
+            val inviteMemberCount = inviteTokenList?.count() ?: 0
+            if(inviteMemberCount == 0)
+            {
+                userMenuOrder.groupOrderFlag = false
+            }
         }
 
         inviteTokenList?.forEach {

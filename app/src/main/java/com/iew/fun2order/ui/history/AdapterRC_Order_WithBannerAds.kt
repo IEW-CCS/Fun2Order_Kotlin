@@ -23,6 +23,7 @@ import com.iew.fun2order.ui.notifications.ItemsLV_Ads
 import com.iew.fun2order.ui.notifications.ItemsLV_Notify
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_EXPIRE
 import com.iew.fun2order.utility.MENU_ORDER_REPLY_STATUS_WAIT
+import com.iew.fun2order.utility.*
 import kotlinx.android.synthetic.main.activity_tap_message.*
 import kotlinx.android.synthetic.main.row_history_order.view.*
 import java.text.SimpleDateFormat
@@ -100,6 +101,24 @@ class RCAdapter_Order_WithBannerAds(var context: Context, var ItemsLV_Order: Lis
             itemView.orderDueTime.text = order.dueTime
             itemView.orderNumber.text = order.orderNumber
             itemView.orderJoinCount.text = order.joinCount
+            itemView.orderStatus.text = orderStatus(order.status)
+
+            if(order.status == ORDER_STATUS_INIT)
+            {
+                itemView.orderSendout.visibility = View.VISIBLE
+                itemView.orderSendout.setOnClickListener {
+
+                    IAdapterOnClick.onClick("sendOutOrder", adapterPosition,0)
+                }
+            }
+            else
+            {
+                itemView.orderSendout.visibility = View.GONE
+            }
+
+
+
+
             if(order.expired)
             {
                 itemView.orderDueTime.setTextColor(Color.RED)
@@ -108,6 +127,43 @@ class RCAdapter_Order_WithBannerAds(var context: Context, var ItemsLV_Order: Lis
             {
                 itemView.orderDueTime.setTextColor(Color.BLACK)
             }
+        }
+
+        fun orderStatus (status : String ) : String
+        {
+
+            when (status) {
+                ORDER_STATUS_INIT -> {
+                    return "訂單建立"
+                }
+                ORDER_STATUS_NEW -> {
+                    return "新進訂單"
+                }
+                ORDER_STATUS_ACCEPT -> {
+                    return "接受訂單"
+                }
+                ORDER_STATUS_REJECT -> {
+                    return "拒絕訂單"
+                }
+                ORDER_STATUS_INPROCESS -> {
+                    return "製作中"
+                }
+                ORDER_STATUS_PROCESSEND -> {
+                    return "製作完成"
+                }
+                ORDER_STATUS_DELIVERY -> {
+                    return "外送中"
+                }
+                ORDER_STATUS_CLOSE -> {
+                    return "訂單完成"
+                }
+                else -> {
+                    return ""
+                }
+
+
+            }
+
         }
     }
 
@@ -119,11 +175,5 @@ class RCAdapter_Order_WithBannerAds(var context: Context, var ItemsLV_Order: Lis
         }
     }
 }
-
-
-
-
-
-
 
 

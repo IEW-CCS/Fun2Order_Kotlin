@@ -18,6 +18,8 @@ import com.iew.fun2order.db.database.AppDatabase
 import com.iew.fun2order.db.database.MemoryDatabase
 import com.iew.fun2order.db.entity.entityGroup
 import com.iew.fun2order.db.entity.entityGroup_detail
+import com.iew.fun2order.db.entity.entityNotification
+import com.iew.fun2order.db.firebase.MenuOrderDeliveryInformation
 import com.iew.fun2order.ui.my_setup.*
 import com.iew.fun2order.utility.ACTION_ADD_GROUP_REQUEST_CODE
 import com.iew.fun2order.utility.ACTION_ADD_MEMBER_REQUEST_CODE
@@ -52,6 +54,9 @@ class ActivitySetupDetailOrder : AppCompatActivity(), IAdapterOnClick, IAdapterC
         val storeName = intent.extras?.getString("STORE_NAME") ?: ""
         val storeAddress = intent.extras?.getString("STORE_ADDRESS") ?: ""
         val storePhoneNumber = intent.extras?.getString("STORE_PHONE_NUMBER") ?: ""
+        val coworkFlag = intent.extras?.getBoolean("COWORK") ?: false
+        val groupOrderFlag = intent.extras?.getBoolean("GROUP_ORDER") ?: true
+        val deliveryInfo = intent.extras?.getParcelable<MenuOrderDeliveryInformation>("MENU_DELIVERY_INFO") ?: null
 
 
         brandName.text = selectBrandName
@@ -73,7 +78,12 @@ class ActivitySetupDetailOrder : AppCompatActivity(), IAdapterOnClick, IAdapterC
             bundle.putString("STORE_NAME", storeName)
             bundle.putString("STORE_ADDRESS", storeAddress)
             bundle.putString("STORE_PHONE_NUMBER", storePhoneNumber)
+            bundle.putBoolean("COWORK", coworkFlag)
             bundle.putParcelableArrayList("INVITE_TOKEN_ID", ArrayList(checkedList))
+
+            bundle.putParcelable("MENU_DELIVERY_INFO", deliveryInfo)
+            bundle.putBoolean("GROUP_ORDER", groupOrderFlag)
+
 
             val intent = Intent(this, ActivitySetupDetailOrderNext::class.java)
             intent.putExtras(bundle)
